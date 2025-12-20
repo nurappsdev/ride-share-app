@@ -1,0 +1,14 @@
+// export 'auth_controller.dart';
+// export 'chat_controller.dart';
+// export 'customer_support_controller.dart';
+// export 'notifications_controller.dart';
+// export 'privacy_policy_controller.dart';
+// export 'profile_controller.dart';
+// export 'nurse/nurse_appointment_controller.dart';
+// export 'doctor/doctor_registration_controller.dart';
+// export 'patient_reg_controller.dart';
+// export 'nurse/nurse_reg_controller.dart';
+// export 'pharmacy/pharmacy_reg_controller.dart';
+// export 'pharmacy/pharmacy_home_controller.dart';
+// export 'nurse/nurse_home_controller.dart';
+// export 'review_controller.dart';
