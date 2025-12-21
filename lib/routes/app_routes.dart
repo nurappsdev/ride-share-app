@@ -4,15 +4,17 @@ import '../view/screen/screens.dart';
 class AppRoutes {
   static const String splashScreen = "/SplashScreen.dart";
   static const String roleScreen = "/roleScreen.dart";
-
-  static const String onBoardScreen = "/onBoardScreen";
-  static const String signInUpScreen = "/signInUpScreen.dart";
-  static const String providerRoleScreen = "/providerRoleScreen.dart";
-  static const String signUpScreen = "/signUpScreen.dart";
-
+  static const String roleScreen1 = "/roleScreen1.dart";
   static const String signInScreen = "/signInScreen.dart";
+  static const String signUpScreen = "/signUpScreen.dart";
+  static const String OTPVerifyScreen = "/OTPVerifyScreen.dart";
+  static const String allBottomBar = "/allBottomBar";
+  static const String splitRideHomeScreen = "/splitRideHomeScreen";
+
+
+
+
   static const String forgotPassScreen = "/forgotPassScreen.dart";
-  static const String verifyScreen = "/verifyScreen.dart";
   static const String resetPassScreen = "/resetPassScreen.dart";
   static const String privacyPolicyAllScreen = "/privacyPolicyAllScreen.dart";
 
@@ -20,11 +22,18 @@ class AppRoutes {
   static List<GetPage> get routes => [
     GetPage(name: splashScreen, page: () =>  SplashScreen()),
     GetPage(name: roleScreen, page: () => RoleScreen()),
+    GetPage(name: roleScreen1, page: () => RoleScreen1()),
+    GetPage(name: signInScreen, page: () => SignInScreen()),
+    GetPage(name: signUpScreen, page: () => SignUpScreen()),
+    GetPage(name: OTPVerifyScreen, page: () => OTPVerificationScreen()),
+    GetPage(name: allBottomBar, page: () => AllBottomBar()),
+    GetPage(name: splitRideHomeScreen, page: () => SplitRideHomeScreen()),
+
     // GetPage(name: onBoardScreen, page: () => OnboardingScreen()),
-    // GetPage(name: signInUpScreen, page: () => SignSignupScreen()),
+    //GetPage(name: signInUpScreen, page: () => SignSignupScreen()),
     // GetPage(name: roleScreen, page: () => RoleScreen()),
     // GetPage(name: providerRoleScreen, page: () => ProviderRoleScreen()),
-    // GetPage(name: signUpScreen, page: () => SignUpScreen()),
+
     // GetPage(name: verifyScreen, page: () => VerifyScreen()),
     // GetPage(name: signInScreen, page: () => SignInScreen()),
     // GetPage(name: forgotPassScreen, page: () => ForgotScreen()),

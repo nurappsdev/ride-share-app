@@ -44,6 +44,7 @@ class CustomTextButton extends StatelessWidget {
           style: TextStyle(
               color: Colors.white,
               fontSize: sizeH * .021,
+              fontFamily: "Outfit-VariableFont_wght",
               fontWeight: FontWeight.w500),
         ));
   }

@@ -9,8 +9,10 @@ class AppImages {
 
  // static const String appLogo = "$path/appLogo.png";
   static const String appLogo = "$path/applogo.png";
+  static const String appLogo2 = "$path/applogo2.png";
   static const String roleScreenImg = "$path/2.png";
   static const String vihicle1 = "$path/vihicle1.png";
+  static const String vihicle2 = "$path/vihicle2.png";
   static const String serviceRoleIcon = "$path/serviceRoleIcon.png";
   static const String callImg = "$path/callImg.png";
 
