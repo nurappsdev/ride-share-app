@@ -1,2 +1,16 @@
 export 'spalsh_screen.dart';
 export 'role_screen.dart';
+export 'role_screen1.dart';
+export 'auth/sign_in_screen.dart';
+export 'auth/sign_up_screen.dart';
+export 'auth/otp_screen.dart';
+export 'all_bottom_bar.dart';
+export 'user/split_ride_home_screen.dart';
+export 'user/over_view_screen.dart';
+export 'user/drwer_screen.dart';
+export 'user/home/booking_payment_screen.dart';
+export 'user/home/booking_details_screen.dart';
+export 'user/rides/my_ride_screen.dart';
+export 'user/rides/track_driver_screen.dart';
+export 'user/rides/driver_details_screen.dart';
+export 'user/rides/chating_driver.dart';

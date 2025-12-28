@@ -56,7 +56,9 @@ class CustomTextField extends StatefulWidget {
     this.borderRadio,
     this.onTap,
     this.onFieldSubmit,
-    this.onChanged, this.validationHeight, this.autofillHints
+    this.onChanged,
+    this.validationHeight,
+    this.autofillHints,
   });
 
   @override
@@ -78,12 +80,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
       onFieldSubmitted: widget.onFieldSubmit,
       textInputAction: TextInputAction.next,
       autovalidateMode: AutovalidateMode.onUserInteraction,
-      onChanged: (value) {
-        // Prevent null errors when text is empty
-        if (widget.onChanged != null) {
-          widget.onChanged!(value.isEmpty ? '' : value);
-        }
-      },
+      onChanged: widget.onChanged,
       autofillHints: widget.autofillHints,
       onTap: widget.onTap,
       readOnly: widget.readOnly ?? false,
@@ -91,62 +88,40 @@ class _CustomTextFieldState extends State<CustomTextField> {
       keyboardType: widget.keyboardType,
       obscuringCharacter: widget.obscure ?? '*',
       maxLines: widget.maxLine ?? 1,
-      validator: widget.validator ??
-              (value) {
-            if (value == null || value.isEmpty) {
-              return "Please ${widget.hintText?.toLowerCase() ?? ' enter this field'}";
-            }
-
-            if (widget.isPassword) {
-              bool isValidPassword = AppConstants.validatePassword(value);
-              if (!isValidPassword) {
-                return "Insecure password detected.";
-              }
-            }
-
-            if (widget.isEmail ?? false) {
-              bool isValidEmail = AppConstants.emailValidate.hasMatch(value);
-              if (!isValidEmail) {
-                return "Please enter a valid email address.";
-              }
-            }
-            return null;
-          },
+      validator: widget.validator,
       cursorColor: Colors.black,
       obscureText: widget.isPassword ? obscureText : false,
       style: TextStyle(
-          color: widget.hinTextColor ?? Colors.black,
-          fontSize: widget.hinTextSize ?? 12.sp,
-          fontFamily: "Montserrat-Light"
+        color: Colors.black,
+        fontSize: widget.hinTextSize ?? 14,
+        fontFamily: "Outfit",
       ),
       decoration: InputDecoration(
         hintMaxLines: 1,
         contentPadding: EdgeInsets.symmetric(
-          horizontal: widget.contentPaddingHorizontal ?? 20.w,
-          vertical: widget.contentPaddingVertical ?? 14.h,
+          horizontal: widget.contentPaddingHorizontal ?? 20,
+          vertical: widget.contentPaddingVertical ?? 14,
         ),
-        fillColor: widget.filColor ?? AppColors.whiteColor,
+        fillColor: widget.filColor ?? Colors.white,
         filled: true,
         prefixIcon: widget.prefixIcon,
         suffixIcon: widget.isPassword
             ? GestureDetector(
           onTap: toggle,
-          child: _suffixIcon(
-            obscureText
-                ? Icons.visibility_off_outlined
-                : Icons.visibility_outlined,
+          child: Icon(
+            obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+            color: Colors.grey,
           ),
         )
             : widget.suffixIcon,
-        prefixIconConstraints:
-        BoxConstraints(minHeight: 20.w, minWidth: 20.w),
+        prefixIconConstraints: const BoxConstraints(minHeight: 20, minWidth: 20),
         labelText: widget.labelText,
         hintText: widget.hintText,
         hintStyle: TextStyle(
-            color: widget.hinTextColor ?? Colors.black,
-            fontSize: widget.hinTextSize ?? 11.sp,
-            fontWeight: FontWeight.w400,
-            fontFamily: "Poppins"
+          color: widget.hinTextColor ?? Colors.grey,
+          fontSize: widget.hinTextSize ?? 14,
+          fontWeight: FontWeight.w400,
+          fontFamily: "Outfit",
         ),
         focusedBorder: _focusedBorder(),
         enabledBorder: _enabledBorder(),
@@ -155,30 +130,20 @@ class _CustomTextFieldState extends State<CustomTextField> {
         border: _focusedBorder(),
         errorMaxLines: 10,
         errorStyle: TextStyle(
-          fontSize: 12.sp,
+          fontSize: 12,
           fontWeight: FontWeight.w400,
           height: widget.validationHeight,
+          fontFamily: "Outfit"
         ),
-      ),
-
-    );
-  }
-
-  Widget _suffixIcon(IconData icon) {
-    return Padding(
-      padding: EdgeInsets.all(12.r),
-      child: Icon(
-        icon,
-        color: AppColors.iconColor,
       ),
     );
   }
 
   OutlineInputBorder _focusedBorder() {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(widget.borderRadio?.r ?? 14.r),
+      borderRadius: BorderRadius.circular(widget.borderRadio ?? 14),
       borderSide: BorderSide(
-        color: widget.borderColor ?? AppColors.primaryColor,
+        color: widget.borderColor ?? const Color(0xFF6B7FEC),
         width: 1.5,
       ),
     );
@@ -186,9 +151,9 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   OutlineInputBorder _enabledBorder() {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(widget.borderRadio?.r ?? 14.r),
+      borderRadius: BorderRadius.circular(widget.borderRadio ?? 14),
       borderSide: BorderSide(
-        color: widget.borderColor ?? Color(0xffA1A1A1),
+        color: widget.borderColor ?? const Color(0xFFE2E8F0),
         width: 0.8,
       ),
     );
@@ -196,7 +161,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   OutlineInputBorder _errorBorder() {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(widget.borderRadio?.r ?? 14.r),
+      borderRadius: BorderRadius.circular(widget.borderRadio ?? 14),
       borderSide: const BorderSide(
         color: Colors.red,
         width: 0.8,
@@ -206,7 +171,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   OutlineInputBorder _focusedErrorBorder() {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(widget.borderRadio?.r ?? 14.r),
+      borderRadius: BorderRadius.circular(widget.borderRadio ?? 14),
       borderSide: const BorderSide(
         color: Colors.red,
       ),
