@@ -10,6 +10,14 @@ class AppRoutes {
   static const String OTPVerifyScreen = "/OTPVerifyScreen.dart";
   static const String allBottomBar = "/allBottomBar";
   static const String splitRideHomeScreen = "/splitRideHomeScreen";
+  static const String overViewScreen = "/overViewScreen";
+  static const String drawerScreen = "/drawerScreen";
+  static const String bookingPaymentScreen = "/bookingPaymentScreen";
+  static const String bookingDetailsScreen = "/bookingDetailsScreen";
+  static const String myRidesScreen = "/myRidesScreen";
+  static const String trackDriversScreen = "/trackDriversScreen";
+  static const String driverDetailsScreen = "/driverDetailsScreen";
+  static const String driverChatingScreen = "/driverChatingScreen";
 
 
 
@@ -28,6 +36,14 @@ class AppRoutes {
     GetPage(name: OTPVerifyScreen, page: () => OTPVerificationScreen()),
     GetPage(name: allBottomBar, page: () => AllBottomBar()),
     GetPage(name: splitRideHomeScreen, page: () => SplitRideHomeScreen()),
+    GetPage(name: drawerScreen, page: () => CustomDrawer()),
+    GetPage(name: bookingPaymentScreen, page: () => PaymentBookingScreen()),
+    GetPage(name: bookingDetailsScreen, page: () => BookingDetailsScreen()),
+    GetPage(name: myRidesScreen, page: () => MyRidesScreen()),
+    GetPage(name: trackDriversScreen, page: () => TrackDriverScreen()),
+    GetPage(name: driverDetailsScreen, page: () => DriverDetailsScreen()),
+    GetPage(name: driverChatingScreen, page: () => ChatDriverScreen()),
+    // GetPage(name: overViewScreen, page: () => OverViewScreen()),
 
     // GetPage(name: onBoardScreen, page: () => OnboardingScreen()),
     //GetPage(name: signInUpScreen, page: () => SignSignupScreen()),

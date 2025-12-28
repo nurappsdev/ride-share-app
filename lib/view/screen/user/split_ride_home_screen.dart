@@ -2,6 +2,13 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:split_ride/routes/app_routes.dart';
+import 'package:split_ride/utils/app_colors.dart';
+import 'package:split_ride/utils/app_image.dart';
+
+import 'drwer_screen.dart';
+import 'over_view_screen.dart';
 
 class SplitRideHomeScreen extends StatefulWidget {
   const SplitRideHomeScreen({Key? key}) : super(key: key);
@@ -15,7 +22,11 @@ class _SplitRideHomeScreenState extends State<SplitRideHomeScreen> {
   String selectedCarType = 'Sedan';
   String selectedLuggageType = 'Suitcase';
   int luggageCount = 2;
-  String? selectedRideType; // null means unselected, 'Split Your Ride' or 'Private Ride'
+  String selectedRideType = 'Split Your Ride'; // Default to 'Split Your Ride'
+  DateTime? selectedDateTime;
+  String selectedSeatOption = '4 Seats'; // Default seat option
+  String selectedLuggageTypeOption = 'Suitcase'; // Default luggage type for the main item
+  List<String> selectedLuggageItems = []; // List to store selected luggage items
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +38,8 @@ class _SplitRideHomeScreenState extends State<SplitRideHomeScreen> {
             decoration: BoxDecoration(
               color: const Color(0xFFF5F5F5),
               image: DecorationImage(
-                image: NetworkImage(
-                  'https://api.mapbox.com/styles/v1/mapbox/light-v10/static/-73.9857,40.7484,12,0/400x800@2x?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw',
+                image: AssetImage(
+                  "${AppImages.mapImg}"
                 ),
                 fit: BoxFit.cover,
               ),
@@ -49,7 +60,7 @@ class _SplitRideHomeScreenState extends State<SplitRideHomeScreen> {
                     // Menu Button
                     GestureDetector(
                       onTap: () {
-                        Scaffold.of(context).openDrawer();
+                     Get.toNamed(AppRoutes.drawerScreen);
                       },
                       child: Container(
                         width: 44.w,
@@ -205,15 +216,15 @@ class _SplitRideHomeScreenState extends State<SplitRideHomeScreen> {
                     RichText(
                       text: TextSpan(
                         style: TextStyle(
-                          fontSize: 13.sp,
+                          fontSize: 17.sp,
                           fontFamily: "Outfit",
                           color: const Color(0xFF6B6B6B),
                           height: 1.5,
                         ),
                         children: [
-                          const TextSpan(text: 'Save up-to '),
+
                           TextSpan(
-                            text: '50%',
+                            text: 'Save up-to  50%',
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               color: const Color(0xFF6B7FEC),
@@ -237,14 +248,14 @@ class _SplitRideHomeScreenState extends State<SplitRideHomeScreen> {
                     ),
                     SizedBox(height: 16.h),
 
-                    // Car Type
-                    _buildSectionTitle('Type Of Car'),
+                    // Car Type and Seat Options
+                    _buildSectionTitle('Type Of Car & Seats'),
                     SizedBox(height: 12.h),
                     Row(
                       children: [
-                        Expanded(child: _buildCarTypeOption('Sedan', Icons.directions_car)),
+                        Expanded(child: _buildCarTypeDropdown()),
                         SizedBox(width: 12.w),
-                        Expanded(child: _buildCarTypeOption('4 Seater', Icons.airline_seat_recline_normal)),
+                        Expanded(child: _buildSeatOptionDropdown()),
                       ],
                     ),
                     SizedBox(height: 16.h),
@@ -252,56 +263,274 @@ class _SplitRideHomeScreenState extends State<SplitRideHomeScreen> {
                     // Luggage Type
                     _buildSectionTitle('Luggage Type'),
                     SizedBox(height: 12.h),
+                    _buildLuggageTypeDropdown(),
+                    SizedBox(height: 12.h),
+
+                    // Show items when luggage type is selected
+                    Visibility(
+                      visible: selectedLuggageItems.isNotEmpty,
+                      child: _buildLuggageItemsContainer(),
+                    ),
+                    SizedBox(height: 8.h),
+
+
+
+                    // Add More Luggage
+                    Text(
+                      'Add More Luggage',
+                      style: TextStyle(
+                        fontSize: 16.sp,
+                        fontFamily: "Outfit",
+                        color: Color(0xFF5C58EB),
+                      ),
+                    ),
+                    SizedBox(height: 16.h),
+
+                    // F
+                    // Star button row
                     Row(
                       children: [
-                        Expanded(child: _buildLuggageOption('Suitcase', Icons.luggage)),
-                        SizedBox(width: 12.w),
-                        Expanded(
+                        Text(
+                          'Form',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Outfit",
+                            color: const Color(0xFF2D3748),
+                          ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: EdgeInsets.all(8.w),
+                          decoration: BoxDecoration(
+                            // color: const Color(0xFFFFF9DB), // Light yellow background
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
-                              Expanded(child: _buildLuggageCounter()),
-                              SizedBox(width: 8.w),
-                              _buildAddButton(),
+                              Icon(
+                                Icons.star,
+                                color: const Color(0xFF5C58EB), // Amber color for star
+                                size: 16.sp,
+                              ),
+                              SizedBox(width: 4.w),
+                              Text(
+                                'Save this place',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: "Outfit",
+                                  color: const Color(0xFF5C58EB),
+                                ),
+                              ),
                             ],
                           ),
                         ),
                       ],
                     ),
-                    SizedBox(height: 12.h),
+                    SizedBox(height: 8.h),
 
-                    // Add More Luggage
-                    TextButton.icon(
-                      onPressed: () {},
-                      icon: const Icon(Icons.add, size: 18),
-                      label: Text(
-                        'Add More Luggage',
+                    // Location Dropdown Field
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF7FAFC),
+                        borderRadius: BorderRadius.circular(34.r),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            color: const Color(0xFF6B7FEC),
+                            size: 20.sp,
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: DropdownButton<String>(
+                              value: null, // No default value
+                              isExpanded: true,
+                              underline: Container(), // Remove the default underline
+                              hint: Text(
+                                'Select Location',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: const Color(0xFF2D3748),
+                                  fontFamily: "Outfit",
+                                ),
+                              ),
+                              items: <String>['Home', 'Office', 'Airport', 'University', 'Shopping Mall', 'Other']
+                                  .map<DropdownMenuItem<String>>((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(
+                                    value,
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontFamily: "Outfit",
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                // Handle location selection
+                                setState(() {
+                                  // You can add logic here to handle the selected location
+                                });
+                              },
+                              icon: Icon(
+                                Icons.arrow_drop_down,
+                                color: const Color(0xFF6B7FEC),
+                                size: 24.sp,
+                              ),
+                              iconSize: 24,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
+
+                    // Choose from Saved Places
+                    InkWell(
+                      onTap:(){
+                        showModalBottomSheet(
+                          context: context,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => const SavedPlacesBottomSheet(),
+                        );
+
+                      },
+                      child: Text(
+                        'Choose from Saved Places',
                         style: TextStyle(
                           fontSize: 14.sp,
                           fontFamily: "Outfit",
+                          color: Color(0xFF5C58EB),
                         ),
-                      ),
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF6B7FEC),
-                        alignment: Alignment.centerLeft,
-                        padding: EdgeInsets.zero,
                       ),
                     ),
                     SizedBox(height: 16.h),
+                    Row(
+                      children: [
+                        Text(
+                          'To',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Outfit",
+                            color: const Color(0xFF2D3748),
+                          ),
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: EdgeInsets.all(8.w),
+                          decoration: BoxDecoration(
+                            // color: const Color(0xFFFFF9DB), // Light yellow background
+                            borderRadius: BorderRadius.circular(20.r),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                Icons.star,
+                                color: const Color(0xFF5C58EB), // Amber color for star
+                                size: 16.sp,
+                              ),
+                              SizedBox(width: 4.w),
+                              Text(
+                                'Save this place',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: "Outfit",
+                                  color: const Color(0xFF5C58EB),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8.h),
 
-                    // From Location
-                    _buildLocationField('From', 'F2 Square', true),
-                    SizedBox(height: 12.h),
-
+                    // Location Dropdown Field
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF7FAFC),
+                        borderRadius: BorderRadius.circular(34.r),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.location_on_outlined,
+                            color: const Color(0xFF6B7FEC),
+                            size: 20.sp,
+                          ),
+                          SizedBox(width: 12.w),
+                          Expanded(
+                            child: DropdownButton<String>(
+                              value: null, // No default value
+                              isExpanded: true,
+                              underline: Container(), // Remove the default underline
+                              hint: Text(
+                                'Select Location',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  color: const Color(0xFF2D3748),
+                                  fontFamily: "Outfit",
+                                ),
+                              ),
+                              items: <String>['Home', 'Office', 'Airport', 'University', 'Shopping Mall', 'Other']
+                                  .map<DropdownMenuItem<String>>((String value) {
+                                return DropdownMenuItem<String>(
+                                  value: value,
+                                  child: Text(
+                                    value,
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontFamily: "Outfit",
+                                    ),
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (String? newValue) {
+                                // Handle location selection
+                                setState(() {
+                                  // You can add logic here to handle the selected location
+                                });
+                              },
+                              icon: Icon(
+                                Icons.arrow_drop_down,
+                                color: const Color(0xFF6B7FEC),
+                                size: 24.sp,
+                              ),
+                              iconSize: 24,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 8.h),
                     // Choose from Saved Places
-                    _buildSavedPlacesButton(),
-                    SizedBox(height: 16.h),
-
-                    // To Location
-                    _buildLocationField('To', 'Ride Destination', false),
-                    SizedBox(height: 12.h),
-
-                    // Choose from Saved Places
-                    _buildSavedPlacesButton(),
+                    InkWell(
+                      onTap:(){
+                        showModalBottomSheet(
+                          context: context,
+                          backgroundColor: Colors.transparent,
+                          builder: (_) => const SavedPlacesBottomSheet(),
+                        );
+                      },
+                      child: Text(
+                        'Choose from Saved Places',
+                        style: TextStyle(
+                          fontSize: 14.sp,
+                          fontFamily: "Outfit",
+                          color: Color(0xFF5C58EB),
+                        ),
+                      ),
+                    ),
                     SizedBox(height: 16.h),
 
                     // Note for Driver
@@ -350,7 +579,9 @@ class _SplitRideHomeScreenState extends State<SplitRideHomeScreen> {
                         ],
                       ),
                       child: ElevatedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          showRideOverview(context);
+                        },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.transparent,
                           shadowColor: Colors.transparent,
@@ -385,13 +616,8 @@ class _SplitRideHomeScreenState extends State<SplitRideHomeScreen> {
     return GestureDetector(
       onTap: () {
         setState(() {
-          // If the button is already selected, deselect it (toggle off)
-          // If the button is not selected, select it (toggle on)
-          if (selectedRideType == label) {
-            selectedRideType = null;
-          } else {
-            selectedRideType = label;
-          }
+          // Select the clicked option, switching from the other one
+          selectedRideType = label;
         });
       },
       child: Container(
@@ -415,7 +641,7 @@ class _SplitRideHomeScreenState extends State<SplitRideHomeScreen> {
             style: TextStyle(
               fontSize: 14.sp,
               fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : const Color(0xFF6B6B6B),
+              color: isSelected ? Colors.white :  AppColors.primary3rdColor,
               fontFamily: "Outfit",
             ),
           ),
@@ -487,23 +713,28 @@ class _SplitRideHomeScreenState extends State<SplitRideHomeScreen> {
             ),
           ),
           SizedBox(height: 8.h),
-          Row(
-            children: [
-              Icon(
-                Icons.calendar_today_outlined,
-                size: 20.sp,
-                color: const Color(0xFF6B7FEC),
-              ),
-              SizedBox(width: 8.w),
-              Text(
-                'Date & Time',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  fontFamily: "Outfit",
+          GestureDetector(
+            onTap: _selectDateTime,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.calendar_today_outlined,
+                  size: 20.sp,
+                  color: const Color(0xFF6B7FEC),
                 ),
-              ),
-            ],
+                SizedBox(width: 8.w),
+                Text(
+                  selectedDateTime != null
+                      ? '${selectedDateTime!.day}/${selectedDateTime!.month}/${selectedDateTime!.year} ${selectedDateTime!.hour.toString().padLeft(2, '0')}:${selectedDateTime!.minute.toString().padLeft(2, '0')}'
+                      : 'Date & Time',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: "Outfit",
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -579,6 +810,192 @@ class _SplitRideHomeScreenState extends State<SplitRideHomeScreen> {
     );
   }
 
+  Widget _buildCarTypeDropdown() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 16.w),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7FAFC),
+        borderRadius: BorderRadius.circular(30.r),
+        border: Border.all(
+          color: Colors.transparent,
+          width: 1.5,
+        ),
+      ),
+      child: DropdownButton<String>(
+        value: selectedCarType,
+        isExpanded: true,
+        underline: Container(), // Remove the default underline
+        hint: Text(
+          'Select Car Type',
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            fontFamily: "Outfit",
+            color: const Color(0xFF6B6B6B),
+          ),
+        ),
+        items: <String>['Sedan', '4 Seater', 'SUV', 'Luxury', 'Van']
+            .map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Row(
+              children: [
+                Icon(
+                  value == 'Sedan' || value == '4 Seater' ? Icons.directions_car :
+                        value == 'SUV' ? Icons.local_shipping :
+                        value == 'Luxury' ? Icons.star : Icons.airline_seat_recline_normal,
+                  color: const Color(0xFF6B7FEC),
+                  size: 20.sp,
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: "Outfit",
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+        onChanged: (String? newValue) {
+          if (newValue != null) {
+            setState(() {
+              selectedCarType = newValue;
+            });
+          }
+        },
+        icon: Icon(
+          Icons.arrow_drop_down,
+          color: const Color(0xFF6B7FEC),
+          size: 24.sp,
+        ),
+        iconSize: 24,
+      ),
+    );
+  }
+
+  Widget _buildSeatOptionDropdown() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 16.w),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7FAFC),
+        borderRadius: BorderRadius.circular(34.r),
+        border: Border.all(
+          color: Colors.transparent,
+          width: 1.5,
+        ),
+      ),
+      child: DropdownButton<String>(
+        value: selectedSeatOption,
+        isExpanded: true,
+        underline: Container(), // Remove the default underline
+        hint: Text(
+          'Seats',
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            fontFamily: "Outfit",
+            color: const Color(0xFF6B6B6B),
+          ),
+        ),
+        items: <String>['4 Seats', '6 Seats', '7 Seats', 'More than 7']
+            .map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Row(
+              children: [
+                Icon(
+                  Icons.airline_seat_recline_normal,
+                  color: const Color(0xFF6B7FEC),
+                  size: 20.sp,
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  value,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: "Outfit",
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+        onChanged: (String? newValue) {
+          if (newValue != null) {
+            setState(() {
+              selectedSeatOption = newValue;
+            });
+          }
+        },
+        icon: Icon(
+          Icons.arrow_drop_down,
+          color: const Color(0xFF6B7FEC),
+          size: 24.sp,
+        ),
+        iconSize: 24,
+      ),
+    );
+  }
+
+  Widget _buildLuggageTypeDropdown() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 4.h, horizontal: 16.w),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7FAFC),
+        borderRadius: BorderRadius.circular(34.r),
+      ),
+      child: DropdownButton<String>(
+        value: selectedLuggageTypeOption,
+        isExpanded: true,
+        underline: const SizedBox(),
+        hint: Text(
+          'Select Luggage Type',
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+            fontFamily: "Outfit",
+            color: const Color(0xFF6B6B6B),
+          ),
+        ),
+        items: ['Suitcase', 'Handcarry', 'Backpack', 'Box', 'Bag']
+            .map((value) {
+          return DropdownMenuItem(
+            value: value,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                fontFamily: "Outfit",
+              ),
+            ),
+          );
+        }).toList(),
+        onChanged: (value) {
+          if (value == null) return;
+          setState(() {
+            selectedLuggageTypeOption = value;
+            if (!selectedLuggageItems.contains(value)) {
+              selectedLuggageItems.add(value);
+            }
+          });
+        },
+        icon: Icon(
+          Icons.arrow_drop_down,
+          color: const Color(0xFF6B7FEC),
+          size: 24.sp,
+        ),
+      ),
+    );
+  }
+
+
+
   Widget _buildLuggageOption(String label, IconData icon) {
     final isSelected = selectedLuggageType == label;
     return GestureDetector(
@@ -615,28 +1032,6 @@ class _SplitRideHomeScreenState extends State<SplitRideHomeScreen> {
     );
   }
 
-  Widget _buildLuggageCounter() {
-    return Container(
-      padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF7FAFC),
-        borderRadius: BorderRadius.circular(12.r),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            '$luggageCount',
-            style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.bold,
-              fontFamily: "Outfit",
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildAddButton() {
     return Container(
@@ -654,71 +1049,367 @@ class _SplitRideHomeScreenState extends State<SplitRideHomeScreen> {
     );
   }
 
-  Widget _buildLocationField(String label, String placeholder, bool isFrom) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.w600,
-            color: const Color(0xFF2D3748),
-            fontFamily: "Outfit",
+
+  Widget _buildVerticalItem(String title, IconData icon) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      child: Row(
+        children: [
+          Icon(
+            icon,
+            color: const Color(0xFF6B7FEC),
+            size: 20.sp,
           ),
-        ),
-        SizedBox(height: 8.h),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
-          decoration: BoxDecoration(
-            color: const Color(0xFFF7FAFC),
-            borderRadius: BorderRadius.circular(12.r),
+          SizedBox(width: 12.w),
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w500,
+              fontFamily: "Outfit",
+              color: const Color(0xFF2D3748),
+            ),
           ),
-          child: Row(
-            children: [
-              Icon(
-                Icons.location_on_outlined,
-                color: const Color(0xFF6B7FEC),
-                size: 20.sp,
-              ),
-              SizedBox(width: 12.w),
-              Expanded(
-                child: Text(
-                  placeholder,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: const Color(0xFF2D3748),
-                    fontFamily: "Outfit",
-                  ),
-                ),
-              ),
-              Icon(
-                Icons.bookmark_outline,
-                color: const Color(0xFF6B7FEC),
-                size: 20.sp,
-              ),
-            ],
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildSavedPlacesButton() {
-    return TextButton.icon(
-      onPressed: () {},
-      icon: const Icon(Icons.bookmark_outline, size: 18),
-      label: Text(
-        'Choose from Saved Places',
-        style: TextStyle(
-          fontSize: 14.sp,
-          fontFamily: "Outfit",
+  Widget _buildVerticalDivider() {
+    return Container(
+      height: 1.h,
+      width: double.infinity,
+      color: const Color(0xFFE2E8F0),
+    );
+  }
+
+  Widget _buildLuggageItemsContainer() {
+    return Wrap(
+      spacing: 8.w,
+      runSpacing: 8.h,
+      children: selectedLuggageItems.map((item) {
+        return Container(
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+          decoration: BoxDecoration(
+            color: const Color(0xFFEFF1FF),
+            borderRadius: BorderRadius.circular(20.r),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                item,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  fontWeight: FontWeight.w500,
+                  fontFamily: "Outfit",
+                  color: const Color(0xFF2D2F7F),
+                ),
+              ),
+              SizedBox(width: 6.w),
+              GestureDetector(
+                onTap: () {
+                  setState(() {
+                    selectedLuggageItems.remove(item);
+                  });
+                },
+                child: Icon(
+                  Icons.close,
+                  size: 16.sp,
+                  color: const Color(0xFF2D2F7F),
+                ),
+              ),
+            ],
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+
+  Widget _buildLuggageItemWithClose(String item, int index) {
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      child: Row(
+        children: [
+          Icon(
+            item == 'Suitcase' ? Icons.luggage :
+            item == 'Backpack' ? Icons.backpack :
+            item == 'Box' ? Icons.inventory :
+            item == 'Bag' ? Icons.shopping_bag : Icons.help_outline,
+            color: const Color(0xFF6B7FEC),
+            size: 20.sp,
+          ),
+          SizedBox(width: 12.w),
+          Expanded(
+            child: Text(
+              item,
+              style: TextStyle(
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w500,
+                fontFamily: "Outfit",
+                color: const Color(0xFF2D3748),
+              ),
+            ),
+          ),
+          IconButton(
+            icon: Icon(
+              Icons.close,
+              size: 16.sp,
+              color: const Color(0xFF6B7FEC),
+            ),
+            onPressed: () => _removeLuggageItem(index),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _removeLuggageItem(int index) {
+    setState(() {
+      selectedLuggageItems.removeAt(index);
+    });
+  }
+
+
+  Future<void> _selectDateTime() async {
+    // Get the current date or use today if no date is selected
+    DateTime currentDate = selectedDateTime ?? DateTime.now();
+
+    // Show date picker
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: currentDate,
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)), // Allow selecting dates up to 1 year ahead
+      builder: (BuildContext context, Widget? child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: Color(0xFF6B7FEC), // Primary color for selected date
+              onPrimary: Colors.white, // Text color for selected date
+              surface: Colors.white, // Background color for the dialog
+              onSurface: Colors.black, // Text color for the dialog
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedDate != null) {
+      TimeOfDay? pickedTime;
+
+      // If the selected date is today, use the current time as initial time
+      if (pickedDate.day == DateTime.now().day &&
+          pickedDate.month == DateTime.now().month &&
+          pickedDate.year == DateTime.now().year) {
+        pickedTime = await showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.fromDateTime(DateTime.now()),
+          builder: (BuildContext context, Widget? child) {
+            return Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: const ColorScheme.light(
+                  primary: Color(0xFF6B7FEC), // Primary color for selected time
+                  onPrimary: Colors.white, // Text color for selected time
+                  surface: Colors.white, // Background color for the dialog
+                  onSurface: Colors.black, // Text color for the dialog
+                ),
+              ),
+              child: child!,
+            );
+          },
+        );
+      } else {
+        // For future dates, allow selecting any time
+        pickedTime = await showTimePicker(
+          context: context,
+          initialTime: const TimeOfDay(hour: 9, minute: 0), // Default to 9 AM
+          builder: (BuildContext context, Widget? child) {
+            return Theme(
+              data: Theme.of(context).copyWith(
+                colorScheme: const ColorScheme.light(
+                  primary: Color(0xFF6B7FEC), // Primary color for selected time
+                  onPrimary: Colors.white, // Text color for selected time
+                  surface: Colors.white, // Background color for the dialog
+                  onSurface: Colors.black, // Text color for the dialog
+                ),
+              ),
+              child: child!,
+            );
+          },
+        );
+      }
+
+      if (pickedTime != null) {
+        // Combine the selected date and time
+        DateTime combinedDateTime = DateTime(
+          pickedDate.year,
+          pickedDate.month,
+          pickedDate.day,
+          pickedTime.hour,
+          pickedTime.minute,
+        );
+
+        setState(() {
+          selectedDateTime = combinedDateTime;
+        });
+      }
+    }
+  }
+}
+
+
+
+
+
+
+
+
+
+class SavedPlacesBottomSheet extends StatefulWidget {
+  const SavedPlacesBottomSheet({super.key});
+
+  @override
+  State<SavedPlacesBottomSheet> createState() => _SavedPlacesBottomSheetState();
+}
+
+class _SavedPlacesBottomSheetState extends State<SavedPlacesBottomSheet> {
+  int selectedIndex = 0;
+
+  final List<String> locations = [
+    'F2 Square',
+    'Location 2',
+    'Location 3',
+    'Location 4',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Container(
+        margin:
+        EdgeInsets.all(16.r),
+        padding:  EdgeInsets.all(16.r),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24.r),
+        ),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return ConstrainedBox(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.7,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+
+                    /// Header
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Choose from Saved Places',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Outfit"
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close),
+                          onPressed: () => Navigator.pop(context),
+                        )
+                      ],
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    /// Locations Container with scroll
+                    Container(
+                      padding:  EdgeInsets.symmetric(vertical: 8.w),
+                      decoration: BoxDecoration(
+                        color: const Color(0xffEAF4FF),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: ListView(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: List.generate(
+                          locations.length,
+                              (index) => RadioListTile<int>(
+                            value: index,
+                            groupValue: selectedIndex,
+                            activeColor: Colors.blue,
+                            title: Text(
+                              locations[index],
+                              style:  TextStyle(fontSize: 14.sp),
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                selectedIndex = value!;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+
+                     SizedBox(height: 20.h),
+
+                    /// Buttons
+                    _gradientButton(
+                      text: 'Choose as start address',
+                      onTap: () {},
+                    ),
+                     SizedBox(height: 12.h),
+                    _gradientButton(
+                      text: 'Choose as ride destination',
+                      onTap: () {},
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       ),
-      style: TextButton.styleFrom(
-        foregroundColor: const Color(0xFF6B7FEC),
-        alignment: Alignment.centerLeft,
-        padding: EdgeInsets.zero,
+    );
+  }
+
+  /// Gradient Button Widget
+  Widget _gradientButton({
+    required String text,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 48,
+        width: double.infinity,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(24),
+          gradient: const LinearGradient(
+            colors: [
+              Color(0xFF45C4D9),
+              Color(0xFF6B7FEC),
+              Color(0xFFB565D8),
+            ],
+          ),
+        ),
+        child: Text(
+          text,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+              fontFamily: "Outfit"
+          ),
+        ),
       ),
     );
   }

@@ -115,7 +115,10 @@ class SignInScreen extends StatelessWidget {
                         // Login Button
                       CustomButtonCommon(
                           title: "Login",
-                          onpress: () {},
+                          onpress: () {
+
+                            Get.toNamed(AppRoutes.allBottomBar,preventDuplicates: false);
+                          },
                           useGradient: true,
                         ),
                          SizedBox(height: 24.h),

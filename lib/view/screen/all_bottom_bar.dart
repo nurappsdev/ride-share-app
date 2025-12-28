@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:split_ride/view/screen/user/rides/my_ride_screen.dart';
 
 import 'user/split_ride_home_screen.dart';
 
@@ -15,7 +16,7 @@ class _AllBottomBarState extends State<AllBottomBar> {
 
   static final List _screens = [
     const SplitRideHomeScreen(),
-    const RidesScreen(),
+    const MyRidesScreen(),
     const AccountScreen(),
   ];
 
@@ -27,55 +28,57 @@ class _AllBottomBarState extends State<AllBottomBar> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
-        children: [
-          Expanded(
-            child: _screens.elementAt(_selectedIndex),
-          ),
-          // Custom Bottom Navigation Bar
-          Container(
-            margin: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 20.h),
-            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(30.r),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 20,
-                  offset: const Offset(0, 4),
-                ),
-              ],
+    return SafeArea(
+      child: Scaffold(
+        body: Column(
+          children: [
+            Expanded(
+              child: _screens.elementAt(_selectedIndex),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                // Home Tab
-                _buildNavItem(
-                  index: 0,
-                  label: 'Home',
-                  icon: Icons.home_outlined,
-                  selectedIcon: Icons.home,
-                ),
-                // Rides Tab
-                _buildNavItem(
-                  index: 1,
-                  label: 'Rides',
-                  icon: Icons.directions_car_outlined,
-                  selectedIcon: Icons.directions_car,
-                ),
-                // Account Tab
-                _buildNavItem(
-                  index: 2,
-                  label: 'Account',
-                  icon: Icons.person_outline,
-                  selectedIcon: Icons.person,
-                ),
-              ],
+            // Custom Bottom Navigation Bar
+            Container(
+              margin: EdgeInsets.only(left: 20.w, right: 20.w, bottom: 20.h),
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 20,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // Home Tab
+                  _buildNavItem(
+                    index: 0,
+                    label: 'Home',
+                    icon: Icons.home_outlined,
+                    selectedIcon: Icons.home,
+                  ),
+                  // Rides Tab
+                  _buildNavItem(
+                    index: 1,
+                    label: 'Rides',
+                    icon: Icons.directions_car_outlined,
+                    selectedIcon: Icons.directions_car,
+                  ),
+                  // Account Tab
+                  _buildNavItem(
+                    index: 2,
+                    label: 'Account',
+                    icon: Icons.person_outline,
+                    selectedIcon: Icons.person,
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -168,26 +171,7 @@ class HomeScreen extends StatelessWidget {
   }
 }
 
-class RidesScreen extends StatelessWidget {
-  const RidesScreen({Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.white,
-      child: const Center(
-        child: Text(
-          'Rides Screen',
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Color(0xFF2D3748),
-          ),
-        ),
-      ),
-    );
-  }
-}
 
 class AccountScreen extends StatelessWidget {
   const AccountScreen({Key? key}) : super(key: key);
