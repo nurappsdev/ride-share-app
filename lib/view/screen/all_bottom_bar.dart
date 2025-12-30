@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:split_ride/view/screen/user/rides/my_ride_screen.dart';
 
+import 'user/home/personal_info_screen.dart';
 import 'user/split_ride_home_screen.dart';
 
 class AllBottomBar extends StatefulWidget {
@@ -17,7 +18,7 @@ class _AllBottomBarState extends State<AllBottomBar> {
   static final List _screens = [
     const SplitRideHomeScreen(),
     const MyRidesScreen(),
-    const AccountScreen(),
+    const PersonalInfoScreen(),
   ];
 
   void _itemIndex(int index) {
@@ -108,6 +109,7 @@ class _AllBottomBarState extends State<AllBottomBar> {
             colors: [
               Color(0xFF45C4D9),
               Color(0xFF6B7FEC),
+              Color(0xFF725bf0),
               Color(0xFFB565D8),
             ],
           )

@@ -14,3 +14,8 @@ export 'user/rides/my_ride_screen.dart';
 export 'user/rides/track_driver_screen.dart';
 export 'user/rides/driver_details_screen.dart';
 export 'user/rides/chating_driver.dart';
+export 'user/rides/get_review_screen.dart';
+export 'user/rides/create_review_screen.dart';
+export 'user/home/personal_info_screen.dart';
+export 'all_privacy_policy_screen.dart';
+export 'user/help_support_screen.dart';

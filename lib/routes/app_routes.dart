@@ -18,13 +18,17 @@ class AppRoutes {
   static const String trackDriversScreen = "/trackDriversScreen";
   static const String driverDetailsScreen = "/driverDetailsScreen";
   static const String driverChatingScreen = "/driverChatingScreen";
+  static const String driverReviewScreen = "/driverReviewScreen";
+  static const String createReviewScreen = "/createReviewScreen";
+  static const String personalInfoScreen = "/personalInfoScreen";
+  static const String privacyPolicyAllScreen = "/privacyPolicyAllScreen.dart";
+  static const String helpAndSupportScreen = "/helpAndSupportScreen.dart";
 
 
 
 
   static const String forgotPassScreen = "/forgotPassScreen.dart";
   static const String resetPassScreen = "/resetPassScreen.dart";
-  static const String privacyPolicyAllScreen = "/privacyPolicyAllScreen.dart";
 
 
   static List<GetPage> get routes => [
@@ -43,6 +47,11 @@ class AppRoutes {
     GetPage(name: trackDriversScreen, page: () => TrackDriverScreen()),
     GetPage(name: driverDetailsScreen, page: () => DriverDetailsScreen()),
     GetPage(name: driverChatingScreen, page: () => ChatDriverScreen()),
+    GetPage(name: driverReviewScreen, page: () => GetReviewScreen()),
+    GetPage(name: createReviewScreen, page: () => CreateReviewScreen()),
+    GetPage(name: personalInfoScreen, page: () => PersonalInfoScreen()),
+    GetPage(name: privacyPolicyAllScreen, page: () => PrivacyPolicyAllScreen()),
+    GetPage(name: helpAndSupportScreen, page: () => HelpSupportScreen()),
     // GetPage(name: overViewScreen, page: () => OverViewScreen()),
 
     // GetPage(name: onBoardScreen, page: () => OnboardingScreen()),

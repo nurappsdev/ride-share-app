@@ -3,6 +3,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:split_ride/routes/app_routes.dart';
 
 class CustomDrawer extends StatefulWidget {
   const CustomDrawer({Key? key}) : super(key: key);
@@ -125,7 +127,9 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           _buildMenuItem(
                             icon: Icons.person_outline,
                             title: 'Personal Info',
-                            onTap: () {},
+                            onTap: () {
+                              Get.toNamed(AppRoutes.personalInfoScreen,preventDuplicates: false);
+                            },
                           ),
                           _buildMenuItem(
                             icon: Icons.lock_outline,
@@ -135,17 +139,25 @@ class _CustomDrawerState extends State<CustomDrawer> {
                           _buildMenuItem(
                             icon: Icons.description_outlined,
                             title: 'Terms & Conditions',
-                            onTap: () {},
+                            onTap: () {
+                              Get.toNamed(AppRoutes.privacyPolicyAllScreen,preventDuplicates: false);
+                            },
                           ),
                           _buildMenuItem(
                             icon: Icons.shield_outlined,
                             title: 'Privacy',
-                            onTap: () {},
+                            onTap: () {
+                              Get.toNamed(AppRoutes.privacyPolicyAllScreen,preventDuplicates: false);
+
+                            },
                           ),
                           _buildMenuItem(
                             icon: Icons.help_outline,
                             title: 'Help & Support',
-                            onTap: () {},
+                            onTap: () {
+                              Get.toNamed(AppRoutes.helpAndSupportScreen,preventDuplicates: false);
+
+                            },
                           ),
                           _buildMenuItem(
                             icon: Icons.bookmark_outline,
