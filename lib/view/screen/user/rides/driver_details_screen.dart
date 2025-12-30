@@ -219,12 +219,17 @@ class DriverDetailsScreen extends StatelessWidget {
       
       
                           // Review Item 1
-                          _buildReviewItem(
-                            name: 'Devon Lane',
-                            role: 'Passenger',
-                            rating: 5.0,
-                            review: '"Expedited service was requested and pickup from the driver was very fast and earlier than expected"',
-                            avatarColor: Color(0xFF00BFA5),
+                          InkWell(
+                            onTap: (){
+                              Get.toNamed(AppRoutes.driverReviewScreen,preventDuplicates: false);
+                            },
+                            child: _buildReviewItem(
+                              name: 'Devon Lane',
+                              role: 'Passenger',
+                              rating: 5.0,
+                              review: '"Expedited service was requested and pickup from the driver was very fast and earlier than expected"',
+                              avatarColor: Color(0xFF00BFA5),
+                            ),
                           ),
                           SizedBox(height: 16.h),
       

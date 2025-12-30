@@ -140,6 +140,7 @@ class _SplitRideHomeScreenState extends State<SplitRideHomeScreen> {
                   colors: [
                     Color(0xFF45C4D9),
                     Color(0xFF6B7FEC),
+                    Color(0xFF725bf0),
                     Color(0xFFB565D8),
                   ],
                 ),

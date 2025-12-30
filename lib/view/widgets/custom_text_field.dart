@@ -102,7 +102,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           horizontal: widget.contentPaddingHorizontal ?? 20,
           vertical: widget.contentPaddingVertical ?? 14,
         ),
-        fillColor: widget.filColor ?? Colors.white,
+        fillColor: widget.filColor ?? Color(0xfff4f4f4),
         filled: true,
         prefixIcon: widget.prefixIcon,
         suffixIcon: widget.isPassword
@@ -141,7 +141,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   OutlineInputBorder _focusedBorder() {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(widget.borderRadio ?? 14),
+      borderRadius: BorderRadius.circular(widget.borderRadio ?? 30),
       borderSide: BorderSide(
         color: widget.borderColor ?? const Color(0xFF6B7FEC),
         width: 1.5,
@@ -151,7 +151,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   OutlineInputBorder _enabledBorder() {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(widget.borderRadio ?? 14),
+      borderRadius: BorderRadius.circular(widget.borderRadio ?? 30),
       borderSide: BorderSide(
         color: widget.borderColor ?? const Color(0xFFE2E8F0),
         width: 0.8,
@@ -161,7 +161,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   OutlineInputBorder _errorBorder() {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(widget.borderRadio ?? 14),
+      borderRadius: BorderRadius.circular(widget.borderRadio ?? 30),
       borderSide: const BorderSide(
         color: Colors.red,
         width: 0.8,
@@ -171,7 +171,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
 
   OutlineInputBorder _focusedErrorBorder() {
     return OutlineInputBorder(
-      borderRadius: BorderRadius.circular(widget.borderRadio ?? 14),
+      borderRadius: BorderRadius.circular(widget.borderRadio ?? 30),
       borderSide: const BorderSide(
         color: Colors.red,
       ),

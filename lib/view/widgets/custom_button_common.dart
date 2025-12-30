@@ -45,9 +45,10 @@ class CustomButtonCommon extends StatelessWidget {
           gradient: useGradient
               ? LinearGradient(
             colors: gradientColors ?? [
-              const Color(0xFF26C6DA), // Cyan
-              const Color(0xFF5B7FE8), // Blue
-              const Color(0xFFB259E8), // Purple
+              Color(0xFF45C4D9),
+          Color(0xFF6B7FEC),
+          Color(0xFF5c58eb),
+          Color(0xFFB565D8),
             ],
             begin: Alignment.centerLeft,
             end: Alignment.centerRight,

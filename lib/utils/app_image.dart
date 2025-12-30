@@ -18,6 +18,8 @@ class AppImages {
   static const String mapImg = "$path/mapimg.png";
   static const String mapImg1 = "$path/mapimg1.png";
   static const String trackImg = "$path/trackimg.png";
+  static const String endRideMap = "$path/endRideMap.png";
+
 
   static const String signUpImg = "$path/signUpIcon.png";
   static const String signInImg = "$path/signInIcon.png";
