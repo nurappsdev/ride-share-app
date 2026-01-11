@@ -12,18 +12,7 @@ class SignInScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration:  BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [
-              Color(0xFF45C4D9),
-              Color(0xFF6B7FEC),
-              Color(0xFFB565D8),
-            ],
-          ),
-        ),
+      body: GradientBackground(
         child: SafeArea(
           child: Column(
             children: [

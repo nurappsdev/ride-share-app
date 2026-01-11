@@ -3,8 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:split_ride/routes/app_routes.dart';
+import 'package:split_ride/view/widgets/custom_button_common.dart';
 
 import '../../../utils/utils.dart';
+import '../../widgets/commonGradientBackground.dart';
 
 
 class OTPVerificationScreen extends StatefulWidget {
@@ -24,23 +26,12 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
   }
 
 
-
+  final bool isSignup = Get.arguments ?? false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
-            colors: [
-              Color(0xFF45C4D9),
-              Color(0xFF6B7FEC),
-              Color(0xFFB565D8),
-            ],
-          ),
-        ),
+      body: GradientBackground(
         child: SafeArea(
           child: Column(
             children: [
@@ -122,52 +113,12 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                         ),
                         const SizedBox(height: 40),
                         // Verify Button
-                        Container(
-                          height: 56,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              begin: Alignment.centerLeft,
-                              end: Alignment.centerRight,
-                              colors: [
-                                Color(0xFF45C4D9),
-                                Color(0xFF6B7FEC),
-                                Color(0xFFB565D8),
-                              ],
-                            ),
-                            borderRadius: BorderRadius.circular(28),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF6B7FEC).withOpacity(0.3),
-                                blurRadius: 20,
-                                offset: const Offset(0, 10),
-                              ),
-                            ],
-                          ),
-                          child: ElevatedButton(
-                            onPressed: () {
-                              // Handle verification
+                        CustomButtonCommon(title:  'Verify your account', useGradient: true, onpress: (){
+                          _showVerificationDialog(context);
+                          print('Verify OTP: ${_otpController.text}');
 
-                              _showVerificationDialog(context);
-                              print('Verify OTP: ${_otpController.text}');
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.transparent,
-                              shadowColor: Colors.transparent,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(28),
-                              ),
-                            ),
-                            child: const Text(
-                              'Verify your account',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                                  fontFamily: "Outfit"
-                              ),
-                            ),
-                          ),
-                        ),
+                        }),
+
                         const SizedBox(height: 24),
                         // Resend Code Link
                         Row(

@@ -37,7 +37,7 @@ class CustomButtonCommon extends StatelessWidget {
       onTap: loading ? () {} : onpress,
       child: Container(
         width: width ?? 355.w,
-        height: height ?? 60.h,
+        height: height ?? 50.h,
         padding: EdgeInsets.all(10.r),
         decoration: BoxDecoration(
           borderRadius: allBorderRadius ?? BorderRadius.circular(30.r),

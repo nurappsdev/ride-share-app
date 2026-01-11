@@ -19,3 +19,6 @@ export 'user/rides/create_review_screen.dart';
 export 'user/home/personal_info_screen.dart';
 export 'all_privacy_policy_screen.dart';
 export 'user/help_support_screen.dart';
+export 'driver/vihicle_details_screen.dart';
+export 'driver/document_screen.dart';
+export 'driver/driver_available_ride_screen.dart';
