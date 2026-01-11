@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:split_ride/view/screen/driver/complete_profile_screen.dart';
 import '../view/screen/screens.dart';
 
 class AppRoutes {
@@ -23,6 +24,10 @@ class AppRoutes {
   static const String personalInfoScreen = "/personalInfoScreen";
   static const String privacyPolicyAllScreen = "/privacyPolicyAllScreen.dart";
   static const String helpAndSupportScreen = "/helpAndSupportScreen.dart";
+  static const String completeProfileScreen = "/completeProfileScreen.dart";
+  static const String vehicleDetailsScreen = "/vehicleDetailsScreen.dart";
+  static const String driverDocScreen = "/driverDocScreen.dart";
+  static const String driverAvailableScreen = "/driverAvailableScreen.dart";
 
 
 
@@ -52,6 +57,10 @@ class AppRoutes {
     GetPage(name: personalInfoScreen, page: () => PersonalInfoScreen()),
     GetPage(name: privacyPolicyAllScreen, page: () => PrivacyPolicyAllScreen()),
     GetPage(name: helpAndSupportScreen, page: () => HelpSupportScreen()),
+    GetPage(name: completeProfileScreen, page: () => CompleteProfileScreen()),
+    GetPage(name: vehicleDetailsScreen, page: () => VihicleDetailsScreen()),
+    GetPage(name: driverDocScreen, page: () => DocumentScreen()),
+    GetPage(name: driverAvailableScreen, page: () => DriverAvailableRideScreen()),
     // GetPage(name: overViewScreen, page: () => OverViewScreen()),
 
     // GetPage(name: onBoardScreen, page: () => OnboardingScreen()),

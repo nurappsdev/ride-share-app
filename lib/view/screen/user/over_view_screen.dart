@@ -7,7 +7,6 @@ import '../../../controllers/payment_controller.dart';
 import '../screens.dart';
 
 void showRideOverview(BuildContext context) {
-  PaymentController paymentController = PaymentController() ;
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,

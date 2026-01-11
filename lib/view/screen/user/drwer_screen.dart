@@ -87,21 +87,23 @@ class _CustomDrawerState extends State<CustomDrawer> {
                                     ),
                                   ),
                                   SizedBox(height: 2.h),
-                                  Container(
-                                    child: ShaderMask(
-                                      shaderCallback: (bounds) => const LinearGradient(
-                                        colors: [
-                                          Color(0xFF57D8E9),
-                                          Color(0xFF5A9BEA),
-                                        ],
-                                      ).createShader(bounds),
-                                      child: Text(
-                                        'Verified',
-                                        style: TextStyle(
-                                          fontSize: 18.sp,
-                                          fontWeight: FontWeight.bold,
-                                          fontFamily: 'Outfit',
-                                        ),
+                                  ShaderMask(
+                                    shaderCallback: (bounds) => const LinearGradient(
+                                      colors: [
+                                        Color(0xFF45C4D9),
+                                        Color(0xFF6B7FEC),
+
+                                      ],
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                    ).createShader(bounds),
+                                    blendMode: BlendMode.srcIn,
+                                    child: Text(
+                                      'Verified',
+                                      style: TextStyle(
+                                        fontSize: 18.sp,
+                                        fontWeight: FontWeight.bold,
+                                        fontFamily: 'Outfit',
                                       ),
                                     ),
                                   ),

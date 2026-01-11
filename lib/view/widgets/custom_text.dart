@@ -54,6 +54,7 @@ class CustomText extends StatelessWidget {
           fontFamily: fontName ?? "Outfit",
           fontWeight: fontWeight ?? FontWeight.w400,
           color: color ?? AppColors.textColor4E4E4E,
+          decoration: TextDecoration.none,
         ),
       ),
     );
