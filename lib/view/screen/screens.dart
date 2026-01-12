@@ -22,3 +22,6 @@ export 'user/help_support_screen.dart';
 export 'driver/vihicle_details_screen.dart';
 export 'driver/document_screen.dart';
 export 'driver/driver_available_ride_screen.dart';
+export 'driver/driver_track_rides_screen.dart';
+export 'driver/passenger_review_screen.dart';
+export 'driver/chating_passenger.dart';

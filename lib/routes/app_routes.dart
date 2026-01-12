@@ -28,6 +28,9 @@ class AppRoutes {
   static const String vehicleDetailsScreen = "/vehicleDetailsScreen.dart";
   static const String driverDocScreen = "/driverDocScreen.dart";
   static const String driverAvailableScreen = "/driverAvailableScreen.dart";
+  static const String driverTrackRidesScreen = "/driverTrackRidesScreen.dart";
+  static const String passengerDetailsReviewScreen = "/passengerDetailsReviewScreen.dart";
+  static const String passengerChatingScreen = "/passengerChatingScreen.dart";
 
 
 
@@ -61,6 +64,9 @@ class AppRoutes {
     GetPage(name: vehicleDetailsScreen, page: () => VihicleDetailsScreen()),
     GetPage(name: driverDocScreen, page: () => DocumentScreen()),
     GetPage(name: driverAvailableScreen, page: () => DriverAvailableRideScreen()),
+    GetPage(name: driverTrackRidesScreen, page: () => DriverTrackRidesScreen()),
+    GetPage(name: passengerDetailsReviewScreen, page: () => PassengerReviewScreen()),
+    GetPage(name: passengerChatingScreen, page: () => ChatingPassenger()),
     // GetPage(name: overViewScreen, page: () => OverViewScreen()),
 
     // GetPage(name: onBoardScreen, page: () => OnboardingScreen()),
