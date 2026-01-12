@@ -430,7 +430,7 @@ Widget _verificationCard(BuildContext context) {
         SizedBox(height: 28.h),
 
         /// Button
-        CustomButtonCommon(title:  "View The Map", onpress: (){Get.back();},useGradient: true,),
+        CustomButtonCommon(title:  "View The Map", onpress: (){Get.toNamed(AppRoutes.driverTrackRidesScreen);},useGradient: true,),
       ],
     ),
   );

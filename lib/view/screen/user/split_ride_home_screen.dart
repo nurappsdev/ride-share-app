@@ -107,7 +107,7 @@ class _SplitRideHomeScreenState extends State<SplitRideHomeScreen> {
                       height: 44.h,
                       decoration: BoxDecoration(
                         color: Colors.white,
-                        borderRadius: BorderRadius.circular(12.r),
+                        borderRadius: BorderRadius.circular(30.r),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.06),
