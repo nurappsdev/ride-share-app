@@ -31,6 +31,9 @@ class AppRoutes {
   static const String driverTrackRidesScreen = "/driverTrackRidesScreen.dart";
   static const String passengerDetailsReviewScreen = "/passengerDetailsReviewScreen.dart";
   static const String passengerChatingScreen = "/passengerChatingScreen.dart";
+  static const String passengerRideEndScreen = "/passengerRideEndScreen.dart";
+  static const String passengerReviewCreateEndScreen = "/passengerReviewCreateEndScreen.dart";
+  static const String notificationScreen = "/notificationScreen";
 
 
 
@@ -56,7 +59,7 @@ class AppRoutes {
     GetPage(name: driverDetailsScreen, page: () => DriverDetailsScreen()),
     GetPage(name: driverChatingScreen, page: () => ChatDriverScreen()),
     GetPage(name: driverReviewScreen, page: () => GetReviewScreen()),
-    GetPage(name: createReviewScreen, page: () => CreateReviewScreen()),
+    GetPage(name: createReviewScreen, page: () => PassengerReviewSubmit()),
     GetPage(name: personalInfoScreen, page: () => PersonalInfoScreen()),
     GetPage(name: privacyPolicyAllScreen, page: () => PrivacyPolicyAllScreen()),
     GetPage(name: helpAndSupportScreen, page: () => HelpSupportScreen()),
@@ -67,6 +70,9 @@ class AppRoutes {
     GetPage(name: driverTrackRidesScreen, page: () => DriverTrackRidesScreen()),
     GetPage(name: passengerDetailsReviewScreen, page: () => PassengerReviewScreen()),
     GetPage(name: passengerChatingScreen, page: () => ChatingPassenger()),
+    GetPage(name: passengerRideEndScreen, page: () => PassengerRideEndScreen()),
+    GetPage(name: passengerReviewCreateEndScreen, page: () => PassengerReviewSubmit()),
+    GetPage(name: notificationScreen, page: () => NotificationScreen()),
     // GetPage(name: overViewScreen, page: () => OverViewScreen()),
 
     // GetPage(name: onBoardScreen, page: () => OnboardingScreen()),

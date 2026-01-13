@@ -1,15 +1,17 @@
 
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:split_ride/routes/app_routes.dart';
-import '../../../../utils/utils.dart';
-import '../../../widgets/widgets.dart';
-import '../../screens.dart';
 
-class GetReviewScreen extends StatelessWidget {
-   GetReviewScreen({Key? key}) : super(key: key);
+import '../../../routes/app_routes.dart';
+import '../../../utils/utils.dart';
+import '../../widgets/widgets.dart';
+import '../screens.dart';
+
+class PassengerRideEndScreen extends StatelessWidget {
+  PassengerRideEndScreen({Key? key}) : super(key: key);
   int rating = 4;
   final TextEditingController controller = TextEditingController();
   @override
@@ -85,7 +87,7 @@ class GetReviewScreen extends StatelessWidget {
                 child: Padding(
                   padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    mainAxisAlignment: MainAxisAlignment.start,
                     children: [
                       // Menu Button
                       GestureDetector(
@@ -107,6 +109,7 @@ class GetReviewScreen extends StatelessWidget {
                         ),
                       ),
 
+                      SizedBox(width: 10.w,),
                       // Title
                       Text(
                         'Your Ride has ended',
@@ -119,33 +122,12 @@ class GetReviewScreen extends StatelessWidget {
                       ),
 
                       // Notification Button
-                      Container(
-                        width: 44.w,
-                        height: 44.h,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.1),
-                              blurRadius: 8.r,
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.notifications_outlined,
-                          color: Color(0xFF2D3748),
-                          size: 24,
-                        ),
-                      ),
+
                     ],
                   ),
                 ),
               ),
             ),
-
-
-
 
 
             // Bottom Card
@@ -175,8 +157,38 @@ class GetReviewScreen extends StatelessWidget {
                     children: [
                       SizedBox(height: 24.h),
 
+                    Container(
+                          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 12.h),
+                          decoration:  BoxDecoration(
+                              color: Color(0xFFF3E8FF),
+                              borderRadius: BorderRadius.all(Radius.circular(12.r))
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'Booking ID:',
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontFamily: "Outfit",
+                                  fontWeight: FontWeight.w500,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              Text(
+                                "58136564",
+                                style: TextStyle(
+                                  fontSize: 14.sp,
+                                  fontFamily: "Outfit",
+                                  fontWeight: FontWeight.w600,
+                                  color: Color(0xFF7C3AED),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      SizedBox(height: 20.h),
                       // Booking Details with dotted separators
-                      _buildDetailRow('Booking ID', '58136564', isBlue: true, fontSize: 15.sp, fontFamily: 'Outfit'),
                       _buildDetailRow('Base Fare', '€4.99', fontSize: 15.sp, fontFamily: 'Outfit'),
                       _buildDetailRow('Booking Fee', '€2.13', fontSize: 15.sp, fontFamily: 'Outfit'),
                       _buildDetailRow('Minimum Fare', '€7.00', fontSize: 15.sp, fontFamily: 'Outfit'),
@@ -186,6 +198,7 @@ class GetReviewScreen extends StatelessWidget {
                       _buildDetailRow('2 Passengers Discount', '- €4.00', fontSize: 15.sp, fontFamily: 'Outfit'),
                       SizedBox(height: 8.h),
                       _buildDetailRow('Total Fare', '\$65.90', isBlue: true, fontSize: 18.sp, fontFamily: 'Outfit',),
+
                       Row(
                         children: [
                           SvgPicture.asset(AppIcons.currIcon,),
@@ -193,10 +206,11 @@ class GetReviewScreen extends StatelessWidget {
 
                         ],
                       ),
+                      SizedBox(height: 8.h),
                       CustomButtonCommon(
                         title: "Review Your Ride",
                         onpress: () {
-                          Get.toNamed(AppRoutes.createReviewScreen,preventDuplicates: false);
+                          Get.toNamed(AppRoutes.passengerReviewCreateEndScreen,preventDuplicates: false);
                         },
                         useGradient: true,
                       ),

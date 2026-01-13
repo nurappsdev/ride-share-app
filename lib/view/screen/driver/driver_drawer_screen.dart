@@ -9,8 +9,8 @@ import 'package:get/get.dart';
 
 import '../../../routes/app_routes.dart';
 
-class CustomDrawer extends StatelessWidget {
-  const CustomDrawer({super.key});
+class DriverDrawerScreen extends StatelessWidget {
+   DriverDrawerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +116,9 @@ class CustomDrawer extends StatelessWidget {
                       Get.toNamed(AppRoutes.personalInfoScreen,preventDuplicates: false);
                     },
                     child: _menu(Icons.person_outline, "Personal Info")),
-                _menu(Icons.lock_outline, "Login & Security"),
+                _menu(Icons.payments_outlined, "My Payment"),
+                _menu(Icons.watch_later_outlined, "My Rides"),
+                _menu(Icons.directions_car_outlined, "My Vehicles"),
                 InkWell(
                     onTap:(){
                       Get.toNamed(AppRoutes.privacyPolicyAllScreen,preventDuplicates: false);
@@ -125,12 +127,12 @@ class CustomDrawer extends StatelessWidget {
                     onTap:(){
                       Get.toNamed(AppRoutes.privacyPolicyAllScreen,preventDuplicates: false);
                     },child: _menu(Icons.shield_outlined, "Privacy")),
-        InkWell(
-            onTap:(){
+                InkWell(
+                    onTap:(){
 
-              Get.toNamed(AppRoutes.helpAndSupportScreen,preventDuplicates: false);
+                      Get.toNamed(AppRoutes.helpAndSupportScreen,preventDuplicates: false);
 
-              },child: _menu(Icons.help_outline, "Help & Support")),
+                    },child: _menu(Icons.help_outline, "Help & Support")),
                 _menu(Icons.bookmark_outline, "Saved Places"),
                 _menu(Icons.language_outlined, "Language"),
               ],

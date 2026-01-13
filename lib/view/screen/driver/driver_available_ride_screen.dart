@@ -7,12 +7,15 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:split_ride/routes/app_routes.dart';
 import 'package:split_ride/utils/app_colors.dart';
 import 'package:split_ride/utils/app_image.dart';
 import 'package:split_ride/view/widgets/custom_button_common.dart';
+import '../../../utils/utils.dart';
 import '../screens.dart';
+import 'driver_drawer_screen.dart';
 import 'passenger_details_screen.dart';
 
 class DriverAvailableRideScreen extends StatefulWidget {
@@ -61,6 +64,26 @@ class _DriverAvailableRideScreenState extends State<DriverAvailableRideScreen> {
       fare: 20.00,
     ),
   ];
+
+
+  // Function to show drawer
+  void _showCustomDrawer() {
+    Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierColor: Colors.transparent,
+        pageBuilder: (_, __, ___) =>  DriverDrawerScreen(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          const begin = Offset(-1.0, 0.0);
+          const end = Offset.zero;
+          const curve = Curves.easeInOut;
+          var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+          var offsetAnimation = animation.drive(tween);
+          return SlideTransition(position: offsetAnimation, child: child);
+        },
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -93,9 +116,7 @@ class _DriverAvailableRideScreenState extends State<DriverAvailableRideScreen> {
                   children: [
                     // Menu Button
                     GestureDetector(
-                      onTap: () {
-                        Get.toNamed(AppRoutes.drawerScreen);
-                      },
+                      onTap: _showCustomDrawer,
                       child: Container(
                         width: 44.w,
                         height: 44.h,
@@ -107,7 +128,7 @@ class _DriverAvailableRideScreenState extends State<DriverAvailableRideScreen> {
                               Color(0xFFB565D8),
                             ],
                           ),
-                          borderRadius: BorderRadius.circular(12.r),
+                          borderRadius: BorderRadius.circular(30.r),
                           boxShadow: [
                             BoxShadow(
                               color: const Color(0xFF6B7FEC).withOpacity(0.3),
@@ -116,11 +137,11 @@ class _DriverAvailableRideScreenState extends State<DriverAvailableRideScreen> {
                             ),
                           ],
                         ),
-                        child: Icon(
-                          Icons.menu_sharp,
-                          color: Colors.white,
-                          size: 24.r,
+                        child:    Padding(
+                          padding: const EdgeInsets.all(12.0),
+                          child: SvgPicture.asset(AppIcons.menuIcon),
                         ),
+
                       ),
                     ),
 

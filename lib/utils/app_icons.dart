@@ -7,5 +7,7 @@ class AppIcons {
   static const String appLogo = "$path/appLogos.svg";
   static const String mapIcon = "$path/map.svg";
   static const String imgIcon = "$path/imageIcon.svg";
+  static const String currIcon = "$path/currIcon.svg";
+  static const String menuIcon = "$path/menuIcon.svg";
 
 }
