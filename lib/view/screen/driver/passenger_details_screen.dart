@@ -17,199 +17,201 @@ void showPassengerDetails(BuildContext context) {
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (context) {
-      return Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
-        ),
-        padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Passenger Information',
-                    style: TextStyle(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.bold,
-                      color: const Color(0xFF2D2D2D),
-                      fontFamily: 'Outfit',
-                    ),
-                  ),
-                  IconButton(
-                    icon: Icon(Icons.close, color: Colors.grey, size: 24.sp),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ],
-              ),
-              const Divider(color: Color(0xFFF1F1F1)),
-              // Driver Profile Section
-              Container(
-                padding: EdgeInsets.symmetric(vertical: 24.h),
-                child: Column(
+      return SafeArea(
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
+          child: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Header
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Driver Avatar
-                    CircleAvatar(
-                      radius: 40.r,
-                      backgroundImage: NetworkImage(
-                        'https://i.pravatar.cc/150?img=12',
+                    Text(
+                      'Passenger Information',
+                      style: TextStyle(
+                        fontSize: 20.sp,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF2D2D2D),
+                        fontFamily: 'Outfit',
                       ),
                     ),
-                    SizedBox(height: 12.h),
-                    // Driver Name and Rating
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Bernard Alvarado',
-                          style: TextStyle(
-                            fontSize: 16.sp,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Outfit',
-                            color: Colors.black,
-                          ),
-                        ),
-                        SizedBox(width: 8.w),
-                        Icon(
-                          Icons.star,
-                          color: const Color(0xFFFFA726),
-                          size: 16.sp,
-                        ),
-                        SizedBox(width: 4.w),
-                        Text(
-                          '4.9',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Outfit',
-                            color: Colors.black,
-                          ),
-                        ),
-                      ],
+                    IconButton(
+                      icon: Icon(Icons.close, color: Colors.grey, size: 24.sp),
+                      onPressed: () => Navigator.pop(context),
                     ),
                   ],
                 ),
-              ),
-
-              // Details Section
-              Column(
-                children: [
-                  // Ride Price
-
-
-                  Container(
-                    padding: EdgeInsets.all(10.r),
-                  decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(12.r)),  color: Color(0xffe6f3ff), ),
-
-                    child: Column(
-                      children: [
-                        _buildDetailRow(
-                          'Ride Price',
-                          '€60',
-                          valueColor: const Color(0xFF7C3AED),
+                const Divider(color: Color(0xFFF1F1F1)),
+                // Driver Profile Section
+                Container(
+                  padding: EdgeInsets.symmetric(vertical: 24.h),
+                  child: Column(
+                    children: [
+                      // Driver Avatar
+                      CircleAvatar(
+                        radius: 40.r,
+                        backgroundImage: NetworkImage(
+                          'https://i.pravatar.cc/150?img=12',
                         ),
-                        SizedBox(height: 4.h),
-                        Divider(color: Colors.white,),
-                        SizedBox(height: 4.h),
-
-                        // Booking ID
-                        _buildDetailRow(
-                          'Booking ID',
-                          'SR1284E6',
-                        ),
-                        SizedBox(height: 4.h),
-                        Divider(color: Colors.white,),
-                        SizedBox(height: 4.h),
-
-                        // Passenger
-                        _buildPassengerRow(
-                          'Passenger',
-                          'Devon Lane',
-                          '+1 234 567 8901',
-                          'https://i.pravatar.cc/150?img=33',
-                        ),
-                        SizedBox(height: 4.h),
-                        Divider(color: Colors.white,),
-                        SizedBox(height: 4.h),
-
-                        // Pickup
-                        _buildDetailRow(
-                          'Pickup',
-                          'Parateek Wisteria\nSector 77, Niod...',
-                        ),
-                        SizedBox(height: 4.h),
-                        Divider(color: Colors.white,),
-                        SizedBox(height: 4.h),
-
-                        // Drop Off
-                        _buildDetailRow(
-                          'Drop Off',
-                          'HCL Technologies\nSector 126, Rai...',
-                        ),
-                        SizedBox(height: 4.h),
-                        Divider(color: Colors.white,),
-                        SizedBox(height: 4.h),
-
-                        // Luggage
-                        _buildDetailRow(
-                          'Luggage',
-                          'Suitcase',
-                          subtitle: 'Luggage Description by user',
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  SizedBox(height: 20.h),
-
-                  // Passenger Note Section
-                  Container(
-                    width: double.infinity,
-                    padding: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF8F8F8),
-                      borderRadius: BorderRadius.circular(12.r),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Passenger Note:',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w600,
-                            fontFamily: 'Outfit',
-                            color: Colors.black,
+                      ),
+                      SizedBox(height: 12.h),
+                      // Driver Name and Rating
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Bernard Alvarado',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Outfit',
+                              color: Colors.black,
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 8.h),
-                        Text(
-                          'Please enter with your change or transfer to the account on the headrest.',
-                          style: TextStyle(
-                            fontSize: 13.sp,
-                            fontFamily: 'Outfit',
-                            color: Colors.grey[600],
-                            height: 1.5,
+                          SizedBox(width: 8.w),
+                          Icon(
+                            Icons.star,
+                            color: const Color(0xFFFFA726),
+                            size: 16.sp,
                           ),
-                        ),
-                      ],
-                    ),
+                          SizedBox(width: 4.w),
+                          Text(
+                            '4.9',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Outfit',
+                              color: Colors.black,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                  SizedBox(height: 24.h),
-
-                  // Accept Ride Button
-                  CustomButtonCommon(title:   'Accept Ride', onpress: (){
-                    _showVerificationDialog(context);
-                  }, useGradient: true,),
-                  SizedBox(height: 24.h),
-                ],
-              ),
-            ],
+                ),
+        
+                // Details Section
+                Column(
+                  children: [
+                    // Ride Price
+        
+        
+                    Container(
+                      padding: EdgeInsets.all(10.r),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(12.r)),  color: Color(0xffe6f3ff), ),
+        
+                      child: Column(
+                        children: [
+                          _buildDetailRow(
+                            'Ride Price',
+                            '€60',
+                            valueColor: const Color(0xFF7C3AED),
+                          ),
+                          SizedBox(height: 4.h),
+                          Divider(color: Colors.white,),
+                          SizedBox(height: 4.h),
+        
+                          // Booking ID
+                          _buildDetailRow(
+                            'Booking ID',
+                            'SR1284E6',
+                          ),
+                          SizedBox(height: 4.h),
+                          Divider(color: Colors.white,),
+                          SizedBox(height: 4.h),
+        
+                          // Passenger
+                          _buildPassengerRow(
+                            'Passenger',
+                            'Devon Lane',
+                            '+1 234 567 8901',
+                            'https://i.pravatar.cc/150?img=33',
+                          ),
+                          SizedBox(height: 4.h),
+                          Divider(color: Colors.white,),
+                          SizedBox(height: 4.h),
+        
+                          // Pickup
+                          _buildDetailRow(
+                            'Pickup',
+                            'Parateek Wisteria\nSector 77, Niod...',
+                          ),
+                          SizedBox(height: 4.h),
+                          Divider(color: Colors.white,),
+                          SizedBox(height: 4.h),
+        
+                          // Drop Off
+                          _buildDetailRow(
+                            'Drop Off',
+                            'HCL Technologies\nSector 126, Rai...',
+                          ),
+                          SizedBox(height: 4.h),
+                          Divider(color: Colors.white,),
+                          SizedBox(height: 4.h),
+        
+                          // Luggage
+                          _buildDetailRow(
+                            'Luggage',
+                            'Suitcase',
+                            subtitle: 'Luggage Description by user',
+                          ),
+                        ],
+                      ),
+                    ),
+        
+                    SizedBox(height: 20.h),
+        
+                    // Passenger Note Section
+                    Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(16.w),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8F8F8),
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Passenger Note:',
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Outfit',
+                              color: Colors.black,
+                            ),
+                          ),
+                          SizedBox(height: 8.h),
+                          Text(
+                            'Please enter with your change or transfer to the account on the headrest.',
+                            style: TextStyle(
+                              fontSize: 13.sp,
+                              fontFamily: 'Outfit',
+                              color: Colors.grey[600],
+                              height: 1.5,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(height: 24.h),
+        
+                    // Accept Ride Button
+                    CustomButtonCommon(title:   'Accept Ride', onpress: (){
+                      _showVerificationDialog(context);
+                    }, useGradient: true,),
+                    SizedBox(height: 24.h),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       );

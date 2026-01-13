@@ -191,7 +191,7 @@ class PassengerReviewScreen extends StatelessWidget {
                           // Review Item 1
                           InkWell(
                             onTap: (){
-                              Get.toNamed(AppRoutes.driverReviewScreen,preventDuplicates: false);
+                              Get.toNamed(AppRoutes.passengerRideEndScreen,preventDuplicates: false);
                             },
                             child: _buildReviewItem(
                               name: 'Devon Lane',
