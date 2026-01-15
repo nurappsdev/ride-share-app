@@ -95,8 +95,12 @@ class RoleScreen1 extends StatelessWidget {
                         child:CustomButtonCommon(
                           title: "Driver",
                           onpress: () {
-                            // Get.toNamed(AppRoutes.signUpScreen,preventDuplicates: false);
-                            Get.toNamed(AppRoutes.completeProfileScreen,preventDuplicates: false);
+                            Get.toNamed(
+                              AppRoutes.signUpScreen,
+                              arguments: true, // or false
+                              preventDuplicates: false,
+                            );
+                           // Get.toNamed(AppRoutes.completeProfileScreen,preventDuplicates: false);
                           },
                           titlecolor: Color(0xffBA63FF),
                           color: Color(0xffebddfb),
