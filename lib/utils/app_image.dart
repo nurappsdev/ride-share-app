@@ -20,6 +20,7 @@ class AppImages {
   static const String trackImg = "$path/trackimg.png";
   static const String endRideMap = "$path/endRideMap.png";
   static const String mapDriverImg = "$path/mapDriverImg.png";
+  static const String carImg = "$path/carImg.png";
 
 
   static const String signUpImg = "$path/signUpIcon.png";

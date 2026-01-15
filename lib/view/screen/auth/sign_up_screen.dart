@@ -9,6 +9,8 @@ class SignUpScreen extends StatelessWidget {
 
   TextEditingController nameController = TextEditingController();
   TextEditingController numberController = TextEditingController();
+  final bool isSignup = Get.arguments ?? false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -107,7 +109,9 @@ class SignUpScreen extends StatelessWidget {
                           onpress: ()
 
                           {
-                            Get.toNamed(AppRoutes.OTPVerifyScreen,preventDuplicates: false);
+                            Get.toNamed(AppRoutes.OTPVerifyScreen,
+                                arguments: isSignup, // or false
+                                preventDuplicates: false);
                           },
                           useGradient: true,
                         ),

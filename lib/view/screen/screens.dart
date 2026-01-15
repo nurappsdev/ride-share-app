@@ -28,3 +28,8 @@ export 'driver/chating_passenger.dart';
 export 'driver/passenger_ride_end_screen.dart';
 export 'driver/passenger_review_submit.dart';
 export 'driver/notification_screen.dart';
+export 'driver/driver_profile_edit_screen.dart';
+export 'driver/my_payment_screen.dart';
+export 'driver/my_rieds_driver_screen.dart';
+export 'driver/driver_my_vehicles_screen.dart';
+export 'driver/driver_vehicle_add.dart';

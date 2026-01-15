@@ -34,6 +34,11 @@ class AppRoutes {
   static const String passengerRideEndScreen = "/passengerRideEndScreen.dart";
   static const String passengerReviewCreateEndScreen = "/passengerReviewCreateEndScreen.dart";
   static const String notificationScreen = "/notificationScreen";
+  static const String driverProfileEditScreen = "/driverProfileEditScreen";
+  static const String driverPaymentScreen = "/driverPaymentScreen";
+  static const String driverMyRideScreen = "/driverMyRideScreen";
+  static const String driverMyVehiclesScreen = "/driverMyVehiclesScreen";
+  static const String vihicleAddScreen = "/vihicleAddScreen";
 
 
 
@@ -73,6 +78,11 @@ class AppRoutes {
     GetPage(name: passengerRideEndScreen, page: () => PassengerRideEndScreen()),
     GetPage(name: passengerReviewCreateEndScreen, page: () => PassengerReviewSubmit()),
     GetPage(name: notificationScreen, page: () => NotificationScreen()),
+    GetPage(name: driverProfileEditScreen, page: () => DriverProfileEditScreen()),
+    GetPage(name: driverPaymentScreen, page: () => MyPaymentScreen()),
+    GetPage(name: driverMyRideScreen, page: () => MyRiedsDriverScreen()),
+    GetPage(name: driverMyVehiclesScreen, page: () => DriverMyVehiclesScreen()),
+    GetPage(name: vihicleAddScreen, page: () => VihicleAddScreen()),
     // GetPage(name: overViewScreen, page: () => OverViewScreen()),
 
     // GetPage(name: onBoardScreen, page: () => OnboardingScreen()),
