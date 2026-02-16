@@ -1,7 +1,10 @@
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:split_ride/helpers/get_storage.dart';
+import 'package:split_ride/view/widgets/toast_manager.dart';
+import 'package:split_ride/helpers/user_enum.dart';
 import 'package:split_ride/routes/app_routes.dart';
 import 'package:split_ride/utils/app_constant.dart';
 import 'package:split_ride/utils/app_image.dart';
@@ -13,15 +16,13 @@ class RoleScreen1 extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool fromSignInPage = Get.arguments['fromSignInPage'] ?? false;
     return Scaffold(
       body: Stack(
         children: [
           /// 🔹 Background Image
           Positioned.fill(
-            child: Image.asset(
-              '${AppImages.roleScreenImg}',
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset('${AppImages.roleScreenImg}', fit: BoxFit.cover),
           ),
 
           /// 🔹 Top Logo Section
@@ -32,10 +33,7 @@ class RoleScreen1 extends StatelessWidget {
             child: Column(
               children: [
                 SizedBox(height: 25.h),
-                Image.asset(
-                  '${AppImages.appLogo}',
-                  height: 70.h,
-                ),
+                Image.asset('${AppImages.appLogo}', height: 70.h),
               ],
             ),
           ),
@@ -62,7 +60,7 @@ class RoleScreen1 extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 22.sp,
                     fontWeight: FontWeight.bold,
-                      fontFamily: "Outfit"
+                    fontFamily: "Outfit",
                   ),
                 ),
                 SizedBox(height: 8.h),
@@ -72,7 +70,7 @@ class RoleScreen1 extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 14.sp,
                     color: Colors.grey,
-                      fontFamily: "Outfit"
+                    fontFamily: "Outfit",
                   ),
                 ),
                 SizedBox(height: 24.h),
@@ -81,31 +79,49 @@ class RoleScreen1 extends StatelessWidget {
                 Row(
                   children: [
                     Expanded(
-                        child: CustomButtonCommon(
-                          title: "Passenger",
-                          onpress: () {
-                            Get.toNamed(AppRoutes.signUpScreen,preventDuplicates: false);
-                          },
-                          useGradient: true,
-                        )
-
+                      child: CustomButtonCommon(
+                        title: "Passenger",
+                        onpress: () async {
+                          await GetStorageModel().saveString(
+                            AppConstants.currentRole,
+                            UserRole.user.name,
+                          );
+                          fromSignInPage
+                              ? Get.offNamed(
+                                  AppRoutes.signInScreen,
+                                  preventDuplicates: false,
+                                )
+                              : Get.offNamed(
+                                  AppRoutes.signUpScreen,
+                                  preventDuplicates: false,
+                                );
+                        },
+                        useGradient: true,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                        child:CustomButtonCommon(
-                          title: "Driver",
-                          onpress: () {
-                            Get.toNamed(
-                              AppRoutes.signUpScreen,
-                              arguments: true, // or false
-                              preventDuplicates: false,
-                            );
-                           // Get.toNamed(AppRoutes.completeProfileScreen,preventDuplicates: false);
-                          },
-                          titlecolor: Color(0xffBA63FF),
-                          color: Color(0xffebddfb),
-                        )
-
+                      child: CustomButtonCommon(
+                        title: "Driver",
+                        onpress: () async {
+                          await GetStorageModel().saveString(
+                            AppConstants.currentRole,
+                            UserRole.provider.name,
+                          );
+                          fromSignInPage
+                              ? Get.offNamed(
+                            AppRoutes.signInScreen,
+                            preventDuplicates: false,
+                          )
+                              : Get.offNamed(
+                            AppRoutes.signUpScreen,
+                            preventDuplicates: false,
+                          );
+                          // Get.toNamed(AppRoutes.completeProfileScreen,preventDuplicates: false);
+                        },
+                        titlecolor: Color(0xffBA63FF),
+                        color: Color(0xffebddfb),
+                      ),
                     ),
                   ],
                 ),
@@ -118,4 +134,3 @@ class RoleScreen1 extends StatelessWidget {
     );
   }
 }
-

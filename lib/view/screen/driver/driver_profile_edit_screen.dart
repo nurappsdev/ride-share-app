@@ -67,7 +67,7 @@ class _DriverProfileEditScreenState extends State<DriverProfileEditScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        animateColor: true,
+        // animateColor: true,
         backgroundColor: Colors.white,
         elevation: 1,
         leading: IconButton(

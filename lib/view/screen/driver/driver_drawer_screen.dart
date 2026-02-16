@@ -1,19 +1,22 @@
-
-
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:split_ride/controllers/auth_controller/driver_document_upload_controller.dart';
+import 'package:split_ride/controllers/driver_drawer_controller.dart';
 
+import '../../../controllers/passenger_drawer_controller.dart';
 import '../../../routes/app_routes.dart';
 
 class DriverDrawerScreen extends StatelessWidget {
-   DriverDrawerScreen({super.key});
+  const DriverDrawerScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final DriverDrawerController driverDrawerController = Get.put(
+      DriverDrawerController(),
+    );
     return Stack(
       children: [
         // 🔥 TRANSPARENT + BLUR BACKGROUND
@@ -21,9 +24,7 @@ class DriverDrawerScreen extends StatelessWidget {
           onTap: () => Navigator.pop(context),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-            child: Container(
-              color: Colors.black.withValues(alpha: 0.05),
-            ),
+            child: Container(color: Colors.black.withValues(alpha: 0.05)),
           ),
         ),
 
@@ -47,7 +48,8 @@ class DriverDrawerScreen extends StatelessWidget {
   }
 
   Widget _drawerContent(BuildContext context) {
-    return Material(  // Add Material widget as ancestor for ListTile
+    return Material(
+      // Add Material widget as ancestor for ListTile
       color: Colors.transparent,
       child: Column(
         children: [
@@ -67,8 +69,11 @@ class DriverDrawerScreen extends StatelessWidget {
                   CircleAvatar(
                     radius: 26.r,
                     backgroundColor: Colors.purple[100],
-                    child: Icon(Icons.person,
-                        color: const Color(0xFF6552EC), size: 28.sp),
+                    child: Icon(
+                      Icons.person,
+                      color: const Color(0xFF6552EC),
+                      size: 28.sp,
+                    ),
                   ),
                   SizedBox(width: 12.w),
                   Column(
@@ -83,10 +88,9 @@ class DriverDrawerScreen extends StatelessWidget {
                         ),
                       ),
                       ShaderMask(
-                        shaderCallback: (bounds) =>
-                            const LinearGradient(
-                              colors: [Color(0xFF45C4D9), Color(0xFF6B7FEC)],
-                            ).createShader(bounds),
+                        shaderCallback: (bounds) => const LinearGradient(
+                          colors: [Color(0xFF45C4D9), Color(0xFF6B7FEC)],
+                        ).createShader(bounds),
                         child: Text(
                           'Verified',
                           style: TextStyle(
@@ -98,7 +102,7 @@ class DriverDrawerScreen extends StatelessWidget {
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
@@ -112,36 +116,71 @@ class DriverDrawerScreen extends StatelessWidget {
               padding: EdgeInsets.zero,
               children: [
                 InkWell(
-                    onTap:(){
-                      Get.toNamed(AppRoutes.driverProfileEditScreen,preventDuplicates: false);
-                    },
-                    child: _menu(Icons.person_outline, "Personal Info")),
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.driverProfileEditScreen,
+                      preventDuplicates: false,
+                    );
+                  },
+                  child: _menu(Icons.person_outline, "Personal Info"),
+                ),
                 InkWell(
-                    onTap:(){
-                      Get.toNamed(AppRoutes.driverPaymentScreen,preventDuplicates: false);
-                    },child: _menu(Icons.payments_outlined, "My Payment")),
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.driverPaymentScreen,
+                      preventDuplicates: false,
+                    );
+                  },
+                  child: _menu(Icons.payments_outlined, "My Payment"),
+                ),
                 InkWell(
-                    onTap:(){
-                      Get.toNamed(AppRoutes.driverMyRideScreen,preventDuplicates: false);
-                    },child: _menu(Icons.watch_later_outlined, "My Rides")),
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.driverMyRideScreen,
+                      preventDuplicates: false,
+                    );
+                  },
+                  child: _menu(Icons.watch_later_outlined, "My Rides"),
+                ),
                 InkWell(
-                    onTap:(){
-                      Get.toNamed(AppRoutes.driverMyVehiclesScreen,preventDuplicates: false);
-                    },child: _menu(Icons.directions_car_outlined, "My Vehicles")),
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.driverMyVehiclesScreen,
+                      preventDuplicates: false,
+                    );
+                  },
+                  child: _menu(Icons.directions_car_outlined, "My Vehicles"),
+                ),
                 InkWell(
-                    onTap:(){
-                      Get.toNamed(AppRoutes.privacyPolicyAllScreen,preventDuplicates: false);
-                    },child: _menu(Icons.description_outlined, "Terms & Conditions")),
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.privacyPolicyAllScreen,
+                      preventDuplicates: false,
+                    );
+                  },
+                  child: _menu(
+                    Icons.description_outlined,
+                    "Terms & Conditions",
+                  ),
+                ),
                 InkWell(
-                    onTap:(){
-                      Get.toNamed(AppRoutes.privacyPolicyAllScreen,preventDuplicates: false);
-                    },child: _menu(Icons.shield_outlined, "Privacy")),
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.privacyPolicyAllScreen,
+                      preventDuplicates: false,
+                    );
+                  },
+                  child: _menu(Icons.shield_outlined, "Privacy"),
+                ),
                 InkWell(
-                    onTap:(){
-
-                      Get.toNamed(AppRoutes.helpAndSupportScreen,preventDuplicates: false);
-
-                    },child: _menu(Icons.help_outline, "Help & Support")),
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.helpAndSupportScreen,
+                      preventDuplicates: false,
+                    );
+                  },
+                  child: _menu(Icons.help_outline, "Help & Support"),
+                ),
                 _menu(Icons.bookmark_outline, "Saved Places"),
                 _menu(Icons.language_outlined, "Language"),
               ],
@@ -154,14 +193,19 @@ class DriverDrawerScreen extends StatelessWidget {
             child: Column(
               children: [
                 InkWell(
-                onTap: (){   _showVerificationDialog(context);},
+                  onTap: () {
+                    _showVerificationDialog(context);
+                  },
 
-
-                    child: _action(Icons.logout, "Log out")),
+                  child: _action(Icons.logout, "Log out"),
+                ),
                 SizedBox(height: 12.h),
                 InkWell(
-                    onTap: (){   _deleteAccountDialog(context);},
-                    child: _action(Icons.delete_outline, "Delete account")),
+                  onTap: () {
+                    _deleteAccountDialog(context);
+                  },
+                  child: _action(Icons.delete_outline, "Delete account"),
+                ),
               ],
             ),
           ),
@@ -202,34 +246,26 @@ class DriverDrawerScreen extends StatelessWidget {
   }
 }
 
-
-
 void _showVerificationDialog(BuildContext context) {
   showGeneralDialog(
     context: context,
     barrierDismissible: false,
     barrierLabel: "Verification",
-    barrierColor: Colors.black.withOpacity(0.25), // soft dim
+    barrierColor: Colors.black.withOpacity(0.25),
+    // soft dim
     transitionDuration: const Duration(milliseconds: 10),
     pageBuilder: (_, __, ___) {
       return BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: 1,
-          sigmaY: 1,
-        ),
-        child: Center(
-          child: _logoutDialog(context),
-        ),
+        filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+        child: Center(child: _logoutDialog(context)),
       );
     },
   );
 }
 
-
 Widget _logoutDialog(BuildContext context) {
-  return
-    Padding(
-    padding:  EdgeInsets.all(16.r),
+  return Padding(
+    padding: EdgeInsets.all(16.r),
     child: Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -247,11 +283,7 @@ Widget _logoutDialog(BuildContext context) {
               color: Color(0xFFFF3B30),
               shape: BoxShape.circle,
             ),
-            child: Icon(
-              Icons.logout_rounded,
-              color: Colors.white,
-              size: 34.sp,
-            ),
+            child: Icon(Icons.logout_rounded, color: Colors.white, size: 34.sp),
           ),
 
           SizedBox(height: 16.h),
@@ -328,8 +360,10 @@ Widget _logoutDialog(BuildContext context) {
               /// Logout
               Expanded(
                 child: GestureDetector(
-                  onTap: () {
-                    Get.toNamed(AppRoutes.signInScreen,preventDuplicates: false);
+                  onTap: () async {
+                    await Get.find<DriverDrawerController>()
+                        .handlePassengerLogout();
+                    // Get.toNamed(AppRoutes.signInScreen,preventDuplicates: false);
                     /// logout logic
                   },
                   child: Container(
@@ -366,22 +400,26 @@ Widget _deleteAccountDialog(BuildContext context) {
   return DeleteAccountDialogContent();
 }
 
-
 class DeleteAccountDialogContent extends StatefulWidget {
   const DeleteAccountDialogContent({Key? key}) : super(key: key);
 
   @override
-  State<DeleteAccountDialogContent> createState() => _DeleteAccountDialogContentState();
+  State<DeleteAccountDialogContent> createState() =>
+      _DeleteAccountDialogContentState();
 }
 
-class _DeleteAccountDialogContentState extends State<DeleteAccountDialogContent> {
+class _DeleteAccountDialogContentState
+    extends State<DeleteAccountDialogContent> {
   String selectedReason = 'no-longer-using';
 
   final List<Map<String, String>> reasons = [
     {'id': 'no-longer-using', 'label': 'I am no longer using my account'},
     {'id': 'not-pay-well', 'label': "The service doesn't pay well"},
     {'id': 'change-number', 'label': 'I want to change my phone number'},
-    {'id': 'dont-understand', 'label': "I don't understand how to use the service"},
+    {
+      'id': 'dont-understand',
+      'label': "I don't understand how to use the service",
+    },
     {'id': 'not-available', 'label': 'The service is not available in my city'},
     {'id': 'other', 'label': 'Other'},
   ];
@@ -414,7 +452,7 @@ class _DeleteAccountDialogContentState extends State<DeleteAccountDialogContent>
                     color: Color(0xFFEF4444),
                     shape: BoxShape.circle,
                   ),
-                  child:  Icon(
+                  child: Icon(
                     Icons.delete_outline,
                     color: Colors.white,
                     size: 40.r,
@@ -569,10 +607,7 @@ class _DeleteAccountDialogContentState extends State<DeleteAccountDialogContent>
                         height: 56,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [
-                              Color(0xFFEF4444),
-                              Color(0xFFDC2626),
-                            ],
+                            colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
                           ),
                           borderRadius: BorderRadius.circular(28.r),
                           boxShadow: [
@@ -601,7 +636,7 @@ class _DeleteAccountDialogContentState extends State<DeleteAccountDialogContent>
                             borderRadius: BorderRadius.circular(28),
                             child: Center(
                               child: Padding(
-                                padding:  EdgeInsets.all(12.r),
+                                padding: EdgeInsets.all(12.r),
                                 child: Text(
                                   'Delete Account',
                                   style: TextStyle(

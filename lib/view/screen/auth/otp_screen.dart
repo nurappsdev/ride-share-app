@@ -6,32 +6,22 @@ import 'package:get/get.dart';
 import 'package:pin_code_fields/pin_code_fields.dart';
 import 'package:split_ride/routes/app_routes.dart';
 import 'package:split_ride/view/widgets/custom_button_common.dart';
+import 'package:split_ride/view/widgets/custom_loading.dart';
 
+import '../../../controllers/auth_controller/verify_mail_controller.dart';
 import '../../../utils/utils.dart';
 import '../../widgets/commonGradientBackground.dart';
 
-
-class OTPVerificationScreen extends StatefulWidget {
-  const OTPVerificationScreen({Key? key}) : super(key: key);
-
-  @override
-  State<OTPVerificationScreen> createState() => _OTPVerificationScreenState();
-}
-
-class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
-  final TextEditingController _otpController = TextEditingController();
-
-  @override
-  void dispose() {
-    _otpController.dispose();
-    super.dispose();
-  }
-
-
-  final bool isDriver = Get.arguments ?? false;
+class OTPVerificationScreen extends StatelessWidget {
+  const OTPVerificationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final EmailVerifyController emailVerifyController = Get.put(
+      EmailVerifyController(),
+    );
+    final TextEditingController otpController = TextEditingController();
+    final registrationForm = Get.arguments['registration_form'] ?? {};
     return Scaffold(
       body: GradientBackground(
         child: SafeArea(
@@ -39,7 +29,10 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
             children: [
               // Header Section
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
                 child: Row(
                   children: [
                     // Back Button
@@ -54,7 +47,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                           color: Colors.white.withOpacity(0.2),
                           borderRadius: BorderRadius.circular(34.r),
                         ),
-                        child:  Icon(
+                        child: Icon(
                           Icons.arrow_back,
                           color: Colors.white,
                           size: 20.sp,
@@ -65,14 +58,11 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                     // Logo
                     Column(
                       children: [
-                        Image.asset(
-                          '${AppImages.appLogo2}',
-                          height: 45.h,
-                        ),
+                        Image.asset('${AppImages.appLogo2}', height: 45.h),
                       ],
                     ),
-                     Spacer(),
-                     SizedBox(width: 40.w), // Balance the back button
+                    Spacer(),
+                    SizedBox(width: 40.w), // Balance the back button
                   ],
                 ),
               ),
@@ -92,7 +82,7 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                         SizedBox(height: 40.h),
+                        SizedBox(height: 40.h),
                         // Title
                         Text(
                           'Please check your messages & enter your 6 digit code',
@@ -100,14 +90,14 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                             fontSize: 16.sp,
                             color: Colors.grey[600],
                             height: 1.5,
-                            fontFamily: "Outfit"
+                            fontFamily: "Outfit",
                           ),
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 40),
                         // OTP Input Field using CustomPinCodeTextField
                         CustomPinCodeTextField(
-                          textEditingController: _otpController,
+                          textEditingController: otpController,
                           onCompleted: (value) {
                             print('OTP Completed: $value');
                             // Handle OTP verification here
@@ -115,13 +105,22 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                         ),
                         const SizedBox(height: 40),
                         // Verify Button
-                        CustomButtonCommon(title:  'Verify your account', useGradient: true, onpress: (){
-                          isDriver != true? _showVerificationDialog(context):Get.toNamed(AppRoutes.completeProfileScreen,preventDuplicates: false);
-
-
-                          print('Verify OTP: ${_otpController.text}');
-
-                        }),
+                        Obx(
+                          () => Visibility(
+                            visible:
+                                emailVerifyController.loader.value == false,
+                            replacement: CustomLoading(),
+                            child: CustomButtonCommon(
+                              title: 'Verify your account',
+                              useGradient: true,
+                              onpress: () {
+                                emailVerifyController.handleOTPVerifyForSignUp(
+                                  otp: otpController.text.trim(),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
 
                         const SizedBox(height: 24),
                         // Resend Code Link
@@ -133,31 +132,45 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontSize: 14,
-                                  fontFamily: "Outfit"
+                                fontFamily: "Outfit",
                               ),
                             ),
-                            GestureDetector(
-                              onTap: () {
-                                print('Resend OTP');
-                                // Handle resend OTP
-                              },
-                              child: ShaderMask(
-                                shaderCallback: (bounds) => const LinearGradient(
-                                  colors: [
-                                    Color(0xFF45C4D9),
-                                    Color(0xFF6B7FEC),
-                                    Color(0xFFB565D8),
-                                  ],
-                                  begin: Alignment.centerLeft,
-                                  end: Alignment.centerRight,
-                                ).createShader(bounds),
-                                child: const Text(
-                                  'Resend',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 14,     fontFamily: "Outfit",
+                            Obx(
+                              () => Visibility(
+                                visible:
+                                    emailVerifyController
+                                        .resendOtpLoader
+                                        .value ==
+                                    false,
+                                replacement: CustomLoading(),
+                                child: GestureDetector(
+                                  onTap: () {
+                                    emailVerifyController
+                                        .handleResendOTPForSignUp(
+                                          registrationForm: registrationForm,
+                                        );
+                                  },
+                                  child: ShaderMask(
+                                    shaderCallback: (bounds) =>
+                                        const LinearGradient(
+                                          colors: [
+                                            Color(0xFF45C4D9),
+                                            Color(0xFF6B7FEC),
+                                            Color(0xFFB565D8),
+                                          ],
+                                          begin: Alignment.centerLeft,
+                                          end: Alignment.centerRight,
+                                        ).createShader(bounds),
+                                    child: const Text(
+                                      'Resend',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 14,
+                                        fontFamily: "Outfit",
 
-                                    fontWeight: FontWeight.w600,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -175,160 +188,6 @@ class _OTPVerificationScreenState extends State<OTPVerificationScreen> {
       ),
     );
   }
-
-  void _showVerificationDialog(BuildContext context) {
-    showGeneralDialog(
-      context: context,
-      barrierDismissible: false,
-      barrierLabel: "Verification",
-      barrierColor: Colors.black.withOpacity(0.25), // soft dim
-      transitionDuration: const Duration(milliseconds: 10),
-      pageBuilder: (_, __, ___) {
-        return BackdropFilter(
-          filter: ImageFilter.blur(
-            sigmaX: 1,
-            sigmaY: 1,
-          ),
-          child: Center(
-            child: _logoutDialog(context),
-          ),
-        );
-      },
-    );
-  }
-
-
-  Widget _logoutDialog(BuildContext context) {
-    return
-      Padding(
-        padding:  EdgeInsets.all(20.r),
-        child: Container(
-          padding: EdgeInsets.all(40.w),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(32.r),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.1),
-                blurRadius: 30,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Success Icon with Gradient
-              Container(
-                width: 100.w,
-                height: 100.h,
-                decoration: const BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Color(0xFF45C4D9),
-                      Color(0xFF6B7FEC),
-                      Color(0xFF5c58eb),
-                      Color(0xFFB565D8),
-                    ],
-                  ),
-                  shape: BoxShape.circle,
-                ),
-                child: Icon(
-                  Icons.check,
-                  color: Colors.white,
-                  size: 60.sp,
-                  weight: 4,
-                ),
-              ),
-              SizedBox(height: 32.h),
-              // Title
-              Text(
-                "You're Verified!",
-                style: TextStyle(
-                  fontSize: 28.sp,
-                  fontFamily: "Outfit",
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.none,
-                  color: const Color(0xFF2D3748),
-                  letterSpacing: -0.5,
-                ),
-              ),
-              SizedBox(height: 12.h),
-              // Subtitle
-              Text(
-                'You have successfully verified your account.',
-                style: TextStyle(
-                  fontSize: 15.sp,
-                  fontFamily: "Outfit",
-                  decoration: TextDecoration.none,
-                  color: Colors.grey[600],
-                  height: 1.5,
-                  fontWeight: FontWeight.w400,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 24.h),
-              // Start Button
-              Container(
-                width: double.infinity,
-                height: 60.h,
-                decoration: BoxDecoration(
-                  gradient: const LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: [
-                      Color(0xFF45C4D9),
-                      Color(0xFF6B7FEC),
-                      Color(0xFF5c58eb),
-                      Color(0xFFB565D8),
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(30.r),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF6B7FEC).withOpacity(0.4),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: ElevatedButton(
-                  onPressed: () {
-                    Get.toNamed(AppRoutes.allBottomBar,preventDuplicates: false);
-                    // Navigate to home or next screen
-                    print('Start Enjoying Split Ride');
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.transparent,
-                    shadowColor: Colors.transparent,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30.r),
-                    ),
-                  ),
-                  child: Text(
-                    'Start Enjoying Split Ride',
-                    style: TextStyle(
-                      fontSize: 17.sp,
-                      fontFamily: "Outfit",
-                      decoration: TextDecoration.none,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                      letterSpacing: 0.3,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-  }
-
-
-
-
 }
 
 // Custom Pin Code TextField Widget

@@ -1,11 +1,9 @@
-
-
-
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:split_ride/controllers/passenger_drawer_controller.dart';
 
 import '../../../routes/app_routes.dart';
 
@@ -14,6 +12,10 @@ class CustomDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final PassengerDrawerController passengerDrawerController = Get.put(
+      PassengerDrawerController(),
+    );
+
     return Stack(
       children: [
         // 🔥 TRANSPARENT + BLUR BACKGROUND
@@ -21,9 +23,7 @@ class CustomDrawer extends StatelessWidget {
           onTap: () => Navigator.pop(context),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 6, sigmaY: 6),
-            child: Container(
-              color: Colors.black.withValues(alpha: 0.05),
-            ),
+            child: Container(color: Colors.black.withValues(alpha: 0.05)),
           ),
         ),
 
@@ -47,7 +47,8 @@ class CustomDrawer extends StatelessWidget {
   }
 
   Widget _drawerContent(BuildContext context) {
-    return Material(  // Add Material widget as ancestor for ListTile
+    return Material(
+      // Add Material widget as ancestor for ListTile
       color: Colors.transparent,
       child: Column(
         children: [
@@ -67,8 +68,11 @@ class CustomDrawer extends StatelessWidget {
                   CircleAvatar(
                     radius: 26.r,
                     backgroundColor: Colors.purple[100],
-                    child: Icon(Icons.person,
-                        color: const Color(0xFF6552EC), size: 28.sp),
+                    child: Icon(
+                      Icons.person,
+                      color: const Color(0xFF6552EC),
+                      size: 28.sp,
+                    ),
                   ),
                   SizedBox(width: 12.w),
                   Column(
@@ -83,10 +87,9 @@ class CustomDrawer extends StatelessWidget {
                         ),
                       ),
                       ShaderMask(
-                        shaderCallback: (bounds) =>
-                            const LinearGradient(
-                              colors: [Color(0xFF45C4D9), Color(0xFF6B7FEC)],
-                            ).createShader(bounds),
+                        shaderCallback: (bounds) => const LinearGradient(
+                          colors: [Color(0xFF45C4D9), Color(0xFF6B7FEC)],
+                        ).createShader(bounds),
                         child: Text(
                           'Verified',
                           style: TextStyle(
@@ -98,7 +101,7 @@ class CustomDrawer extends StatelessWidget {
                         ),
                       ),
                     ],
-                  )
+                  ),
                 ],
               ),
             ),
@@ -112,25 +115,45 @@ class CustomDrawer extends StatelessWidget {
               padding: EdgeInsets.zero,
               children: [
                 InkWell(
-                    onTap:(){
-                      Get.toNamed(AppRoutes.personalInfoScreen,preventDuplicates: false);
-                    },
-                    child: _menu(Icons.person_outline, "Personal Info")),
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.personalInfoScreen,
+                      preventDuplicates: false,
+                    );
+                  },
+                  child: _menu(Icons.person_outline, "Personal Info"),
+                ),
                 _menu(Icons.lock_outline, "Login & Security"),
                 InkWell(
-                    onTap:(){
-                      Get.toNamed(AppRoutes.privacyPolicyAllScreen,preventDuplicates: false);
-                    },child: _menu(Icons.description_outlined, "Terms & Conditions")),
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.privacyPolicyAllScreen,
+                      preventDuplicates: false,
+                    );
+                  },
+                  child: _menu(
+                    Icons.description_outlined,
+                    "Terms & Conditions",
+                  ),
+                ),
                 InkWell(
-                    onTap:(){
-                      Get.toNamed(AppRoutes.privacyPolicyAllScreen,preventDuplicates: false);
-                    },child: _menu(Icons.shield_outlined, "Privacy")),
-        InkWell(
-            onTap:(){
-
-              Get.toNamed(AppRoutes.helpAndSupportScreen,preventDuplicates: false);
-
-              },child: _menu(Icons.help_outline, "Help & Support")),
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.privacyPolicyAllScreen,
+                      preventDuplicates: false,
+                    );
+                  },
+                  child: _menu(Icons.shield_outlined, "Privacy"),
+                ),
+                InkWell(
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.helpAndSupportScreen,
+                      preventDuplicates: false,
+                    );
+                  },
+                  child: _menu(Icons.help_outline, "Help & Support"),
+                ),
                 _menu(Icons.bookmark_outline, "Saved Places"),
                 _menu(Icons.language_outlined, "Language"),
               ],
@@ -143,15 +166,18 @@ class CustomDrawer extends StatelessWidget {
             child: Column(
               children: [
                 InkWell(
-                    onTap:(){
-                      _showVerificationDialog(context);
-                    },
-                    child: _action(Icons.logout, "Log out")),
+                  onTap: () {
+                    _showVerificationDialog(context);
+                  },
+                  child: _action(Icons.logout, "Log out"),
+                ),
                 SizedBox(height: 12.h),
                 InkWell(
-                    onTap:(){
-                      _showDeleteAccountDialog(context);
-                    },child: _action(Icons.delete_outline, "Delete account")),
+                  onTap: () {
+                    _showDeleteAccountDialog(context);
+                  },
+                  child: _action(Icons.delete_outline, "Delete account"),
+                ),
               ],
             ),
           ),
@@ -192,166 +218,154 @@ class CustomDrawer extends StatelessWidget {
   }
 }
 
-
 void _showVerificationDialog(BuildContext context) {
   showGeneralDialog(
     context: context,
     barrierDismissible: false,
     barrierLabel: "Verification",
-    barrierColor: Colors.black.withOpacity(0.25), // soft dim
+    barrierColor: Colors.black.withOpacity(0.25),
+    // soft dim
     transitionDuration: const Duration(milliseconds: 10),
     pageBuilder: (_, __, ___) {
       return BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: 1,
-          sigmaY: 1,
-        ),
-        child: Center(
-          child: _logoutDialog(context),
-        ),
+        filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+        child: Center(child: _logoutDialog(context)),
       );
     },
   );
 }
 
-
 Widget _logoutDialog(BuildContext context) {
-  return
-    Padding(
-      padding:  EdgeInsets.all(16.r),
-      child: Container(
-        padding: EdgeInsets.all(20.w),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(26.r),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            /// Logout Icon
-            Container(
-              height: 70.w,
-              width: 70.w,
-              decoration: const BoxDecoration(
-                color: Color(0xFFFF3B30),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.logout_rounded,
-                color: Colors.white,
-                size: 34.sp,
-              ),
-            ),
-
-            SizedBox(height: 16.h),
-
-            /// Title
-            Text(
-              'Logout?',
-              style: TextStyle(
-                fontSize: 20.sp,
-
-                decoration: TextDecoration.none,
-                fontWeight: FontWeight.w600,
-                fontFamily: 'Outfit',
-
-                color: const Color(0xFF2B2B2B),
-              ),
-            ),
-
-            SizedBox(height: 6.h),
-
-            /// Subtitle
-            Text(
-              'Are you sure you want to log out of SplitRide?',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 14.sp,
-
-                decoration: TextDecoration.none,
-                fontFamily: 'Outfit',
-                color: const Color(0xFF8A8A8A),
-              ),
-            ),
-
-            SizedBox(height: 22.h),
-
-            /// Buttons
-            Row(
-              children: [
-                /// Cancel
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () => Get.back(),
-                    child: Container(
-                      height: 48.h,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            Color(0xFF45C4D9),
-                            Color(0xFF6B7FEC),
-                            Color(0xFF5c58eb),
-                            Color(0xFFB565D8),
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(24.r),
-                      ),
-                      child: Text(
-                        'Cancel',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16.sp,
-
-                          decoration: TextDecoration.none,
-                          fontFamily: 'Outfit',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                SizedBox(width: 12.w),
-
-                /// Logout
-                Expanded(
-                  child: GestureDetector(
-                    onTap: () {
-                      Get.toNamed(AppRoutes.signInScreen,preventDuplicates: false);
-                      /// logout logic
-                    },
-                    child: Container(
-                      height: 48.h,
-                      alignment: Alignment.center,
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFFF3B30),
-                        borderRadius: BorderRadius.circular(24.r),
-                      ),
-                      child: Text(
-                        'Logout',
-
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16.sp,
-
-                          decoration: TextDecoration.none,
-                          fontFamily: 'Outfit',
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+  return Padding(
+    padding: EdgeInsets.all(16.r),
+    child: Container(
+      padding: EdgeInsets.all(20.w),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(26.r),
       ),
-    );
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          /// Logout Icon
+          Container(
+            height: 70.w,
+            width: 70.w,
+            decoration: const BoxDecoration(
+              color: Color(0xFFFF3B30),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.logout_rounded, color: Colors.white, size: 34.sp),
+          ),
+
+          SizedBox(height: 16.h),
+
+          /// Title
+          Text(
+            'Logout?',
+            style: TextStyle(
+              fontSize: 20.sp,
+
+              decoration: TextDecoration.none,
+              fontWeight: FontWeight.w600,
+              fontFamily: 'Outfit',
+
+              color: const Color(0xFF2B2B2B),
+            ),
+          ),
+
+          SizedBox(height: 6.h),
+
+          /// Subtitle
+          Text(
+            'Are you sure you want to log out of SplitRide?',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14.sp,
+
+              decoration: TextDecoration.none,
+              fontFamily: 'Outfit',
+              color: const Color(0xFF8A8A8A),
+            ),
+          ),
+
+          SizedBox(height: 22.h),
+
+          /// Buttons
+          Row(
+            children: [
+              /// Cancel
+              Expanded(
+                child: GestureDetector(
+                  onTap: () => Get.back(),
+                  child: Container(
+                    height: 48.h,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFF45C4D9),
+                          Color(0xFF6B7FEC),
+                          Color(0xFF5c58eb),
+                          Color(0xFFB565D8),
+                        ],
+                      ),
+                      borderRadius: BorderRadius.circular(24.r),
+                    ),
+                    child: Text(
+                      'Cancel',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.sp,
+                        decoration: TextDecoration.none,
+                        fontFamily: 'Outfit',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              SizedBox(width: 12.w),
+
+              /// Logout
+              Expanded(
+                child: GestureDetector(
+                  onTap: () {
+                    Get.find<PassengerDrawerController>()
+                        .handlePassengerLogout();
+
+                    /// logout logic
+                  },
+                  child: Container(
+                    height: 48.h,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFF3B30),
+                      borderRadius: BorderRadius.circular(24.r),
+                    ),
+                    child: Text(
+                      'Logout',
+
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.sp,
+
+                        decoration: TextDecoration.none,
+                        fontFamily: 'Outfit',
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    ),
+  );
 }
-
-
 
 void _showDeleteAccountDialog(BuildContext context) {
   showGeneralDialog(
@@ -362,13 +376,8 @@ void _showDeleteAccountDialog(BuildContext context) {
     transitionDuration: const Duration(milliseconds: 10),
     pageBuilder: (_, __, ___) {
       return BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: 1,
-          sigmaY: 1,
-        ),
-        child: Center(
-          child: _deleteAccountDialog(context),
-        ),
+        filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+        child: Center(child: _deleteAccountDialog(context)),
       );
     },
   );
@@ -378,22 +387,26 @@ Widget _deleteAccountDialog(BuildContext context) {
   return DeleteAccountDialogContent();
 }
 
-
 class DeleteAccountDialogContent extends StatefulWidget {
   const DeleteAccountDialogContent({Key? key}) : super(key: key);
 
   @override
-  State<DeleteAccountDialogContent> createState() => _DeleteAccountDialogContentState();
+  State<DeleteAccountDialogContent> createState() =>
+      _DeleteAccountDialogContentState();
 }
 
-class _DeleteAccountDialogContentState extends State<DeleteAccountDialogContent> {
+class _DeleteAccountDialogContentState
+    extends State<DeleteAccountDialogContent> {
   String selectedReason = 'no-longer-using';
 
   final List<Map<String, String>> reasons = [
     {'id': 'no-longer-using', 'label': 'I am no longer using my account'},
     {'id': 'not-pay-well', 'label': "The service doesn't pay well"},
     {'id': 'change-number', 'label': 'I want to change my phone number'},
-    {'id': 'dont-understand', 'label': "I don't understand how to use the service"},
+    {
+      'id': 'dont-understand',
+      'label': "I don't understand how to use the service",
+    },
     {'id': 'not-available', 'label': 'The service is not available in my city'},
     {'id': 'other', 'label': 'Other'},
   ];
@@ -426,7 +439,7 @@ class _DeleteAccountDialogContentState extends State<DeleteAccountDialogContent>
                     color: Color(0xFFEF4444),
                     shape: BoxShape.circle,
                   ),
-                  child:  Icon(
+                  child: Icon(
                     Icons.delete_outline,
                     color: Colors.white,
                     size: 40.r,
@@ -581,10 +594,7 @@ class _DeleteAccountDialogContentState extends State<DeleteAccountDialogContent>
                         height: 56,
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
-                            colors: [
-                              Color(0xFFEF4444),
-                              Color(0xFFDC2626),
-                            ],
+                            colors: [Color(0xFFEF4444), Color(0xFFDC2626)],
                           ),
                           borderRadius: BorderRadius.circular(28.r),
                           boxShadow: [
@@ -613,7 +623,7 @@ class _DeleteAccountDialogContentState extends State<DeleteAccountDialogContent>
                             borderRadius: BorderRadius.circular(28),
                             child: Center(
                               child: Padding(
-                                padding:  EdgeInsets.all(12.r),
+                                padding: EdgeInsets.all(12.r),
                                 child: Text(
                                   'Delete Account',
                                   style: TextStyle(

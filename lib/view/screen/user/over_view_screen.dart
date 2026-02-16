@@ -204,7 +204,7 @@ Widget _buildLuggageChip(String label, Color borderColor) {
           ),
         ),
         SizedBox(width: 4.w),
-        Icon(Icons.close, size: 14.sp, color: Colors.red),
+        // Icon(Icons.close, size: 14.sp, color: Colors.red),
       ],
     ),
   );

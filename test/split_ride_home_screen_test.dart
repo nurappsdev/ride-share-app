@@ -4,7 +4,7 @@ import 'package:split_ride/view/screen/user/split_ride_home_screen.dart';
 
 void main() {
   testWidgets('SplitRideHomeScreen ride type button selection works', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: SplitRideHomeScreen()));
+    await tester.pumpWidget(const MaterialApp(home: PassengerHomeScreen()));
 
     // Initially, no button should be selected
     expect(find.text('Split Your Ride'), findsOneWidget);

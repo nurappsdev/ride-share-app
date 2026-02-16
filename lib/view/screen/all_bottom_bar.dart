@@ -16,7 +16,7 @@ class _AllBottomBarState extends State<AllBottomBar> {
   int _selectedIndex = 0;
 
   static final List _screens = [
-    const SplitRideHomeScreen(),
+    const PassengerHomeScreen(),
     const MyRidesScreen(),
     const PersonalInfoScreen(),
   ];

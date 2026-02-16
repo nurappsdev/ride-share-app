@@ -110,7 +110,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           onTap: toggle,
           child: Icon(
             obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
-            color: Colors.grey,
+            color: AppColors.primaryColor.withValues(alpha: 0.5),
           ),
         )
             : widget.suffixIcon,
@@ -135,6 +135,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           height: widget.validationHeight,
           fontFamily: "Outfit"
         ),
+
       ),
     );
   }
