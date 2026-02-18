@@ -41,7 +41,7 @@ class NetworkCaller {
           await put(uri, headers: requestHeaders, body: jsonEncode(body));
           break;
         case 'DELETE':
-          response = await delete(uri, headers: requestHeaders);
+          response = await delete(uri, body: jsonEncode(body), headers: requestHeaders);
           break;
         case 'PATCH':
           response =

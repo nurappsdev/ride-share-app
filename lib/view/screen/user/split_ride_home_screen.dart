@@ -6,7 +6,6 @@ import 'package:split_ride/utils/app_colors.dart';
 import 'package:split_ride/utils/app_icons.dart';
 import 'package:split_ride/utils/app_image.dart';
 import 'package:split_ride/model/driver_registration/car_type_model.dart';
-
 import '../../../controllers/passenger_home_controller.dart';
 import '../../widgets/location_auto_complete.dart';
 import '../../widgets/saved_place_bottomsheet.dart';
@@ -29,7 +28,6 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
     passengerHomeController = Get.put(PassengerHomeController());
   }
 
-  // Function to show drawer
   void _showCustomDrawer() {
     Navigator.of(context).push(
       PageRouteBuilder(
@@ -78,7 +76,6 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Menu Button
                     GestureDetector(
                       onTap: _showCustomDrawer,
                       child: Container(
@@ -107,8 +104,6 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                         ),
                       ),
                     ),
-
-                    // Title
                     const Text(
                       'Start Your Ride',
                       style: TextStyle(
@@ -118,8 +113,6 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                         color: Color(0xFF2D3748),
                       ),
                     ),
-
-                    // Notification Button
                     Container(
                       width: 44.w,
                       height: 44.h,
@@ -281,7 +274,6 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                     _buildSectionTitle('Luggage Type'),
                     SizedBox(height: 12.h),
 
-                    // Show selected luggage items
                     Obx(() {
                       if (passengerHomeController
                           .selectedLuggageItems
@@ -296,7 +288,6 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                       return const SizedBox.shrink();
                     }),
 
-                    // Luggage dropdown (conditionally shown)
                     Obx(() {
                       if (passengerHomeController.showLuggageDropdown.value) {
                         return Column(
@@ -309,7 +300,6 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                       return const SizedBox.shrink();
                     }),
 
-                    // Add More Luggage Button
                     InkWell(
                       onTap: () =>
                           passengerHomeController.showLuggageDropdownField(),
@@ -324,8 +314,56 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                       ),
                     ),
                     SizedBox(height: 16.h),
+                    // Add this section after the "Add Luggage" button in PassengerHomeScreen
+// Insert this after line ~380 (after the "Add Luggage" InkWell)
 
-                    // From Location
+// Optional Luggage Notes Field
+                    Obx(() {
+                      if (passengerHomeController.selectedLuggageItems.isNotEmpty) {
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(height: 12.h),
+                            Text(
+                              'Luggage Notes (Optional)',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontWeight: FontWeight.w600,
+                                color: const Color(0xFF2D3748),
+                                fontFamily: "Outfit",
+                              ),
+                            ),
+                            SizedBox(height: 8.h),
+                            TextField(
+                              controller: passengerHomeController.luggageNoteController,
+                              maxLines: 2,
+                              decoration: InputDecoration(
+                                hintText: 'e.g., Handle with care, fragile items',
+                                hintStyle: TextStyle(
+                                  color: const Color(0xFFB8B8B8),
+                                  fontSize: 13.sp,
+                                  fontFamily: "Outfit",
+                                ),
+                                filled: true,
+                                fillColor: const Color(0xFFF7FAFC),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12.r),
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 16.w,
+                                  vertical: 12.h,
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    }),
+                    SizedBox(height: 16.h),
+
+                    // FROM LOCATION SECTION
                     Row(
                       children: [
                         Text(
@@ -338,40 +376,72 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                           ),
                         ),
                         const Spacer(),
-                        TextButton(
-                          onPressed: () {},
-                          child: Container(
-                            padding: EdgeInsets.all(8.w),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.star,
-                                  color: const Color(0xFF5C58EB),
-                                  size: 16.sp,
+                        Obx(() {
+                          final isSaved =
+                              passengerHomeController.isFromLocationSaved;
+                          final hasLocation =
+                              passengerHomeController
+                                  .fromLocation
+                                  .value
+                                  .isNotEmpty &&
+                              passengerHomeController.fromLatitude.value != 0.0;
+
+                          return Visibility(
+                            visible:
+                                passengerHomeController
+                                    .isLoadingSavedPlaces
+                                    .value ==
+                                false,
+                            replacement: SizedBox.shrink(),
+                            child: TextButton(
+                              onPressed: hasLocation
+                                  ? () => passengerHomeController
+                                        .toggleSaveFromLocation()
+                                  : null,
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 6.h,
                                 ),
-                                SizedBox(width: 4.w),
-                                Text(
-                                  'Save this place',
-                                  style: TextStyle(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: "Outfit",
-                                    color: const Color(0xFF5C58EB),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    isSaved ? Icons.star : Icons.star_border,
+                                    color: hasLocation
+                                        ? (isSaved
+                                              ? AppColors.orange
+                                              : AppColors.primary3rdColor)
+                                        : AppColors.grey,
+                                    size: 18.sp,
                                   ),
-                                ),
-                              ],
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    isSaved ? 'Saved' : 'Save this place',
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: "Outfit",
+                                      color: hasLocation
+                                          ? (isSaved
+                                                ? AppColors.orange
+                                                : AppColors.primary3rdColor)
+                                          : AppColors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ),
+                          );
+                        }),
                       ],
                     ),
+                    SizedBox(height: 8.h),
 
-                    // From Location Autocomplete Field
                     Obx(() {
                       final position =
                           passengerHomeController.currentLocationBias.value;
-
                       return passengerHomeController
                               .isLoadingCurrentLocation
                               .value
@@ -422,26 +492,31 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                             );
                     }),
                     SizedBox(height: 8.h),
+
                     InkWell(
                       onTap: () {
                         showModalBottomSheet(
                           context: context,
                           backgroundColor: Colors.transparent,
-                          builder: (_) => const SavedPlacesBottomSheet(),
+                          isScrollControlled: true,
+                          builder: (_) => const SavedPlacesBottomSheet(
+                            isFromLocation: true,
+                          ),
                         );
                       },
                       child: Text(
                         'Choose from Saved Places',
                         style: TextStyle(
-                          fontSize: 16.sp,
+                          fontSize: 14.sp,
                           fontFamily: "Outfit",
-                          color: const Color(0xFF5C58EB),
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary3rdColor,
                         ),
                       ),
                     ),
                     SizedBox(height: 16.h),
 
-                    // To Location
+                    // TO LOCATION SECTION
                     Row(
                       children: [
                         Text(
@@ -454,40 +529,72 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                           ),
                         ),
                         const Spacer(),
-                        TextButton(
-                          onPressed: () {},
-                          child: Container(
-                            padding: EdgeInsets.all(8.w),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.star,
-                                  color: const Color(0xFF5C58EB),
-                                  size: 16.sp,
+                        Obx(() {
+                          final isSaved =
+                              passengerHomeController.isToLocationSaved;
+                          final hasLocation =
+                              passengerHomeController
+                                  .toLocation
+                                  .value
+                                  .isNotEmpty &&
+                              passengerHomeController.toLatitude.value != 0.0;
+
+                          return Visibility(
+                            visible:
+                                passengerHomeController
+                                    .isLoadingSavedPlaces
+                                    .value ==
+                                false,
+                            replacement: SizedBox.shrink(),
+                            child: TextButton(
+                              onPressed: hasLocation
+                                  ? () => passengerHomeController
+                                        .toggleSaveToLocation()
+                                  : null,
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 6.h,
                                 ),
-                                SizedBox(width: 4.w),
-                                Text(
-                                  'Save this place',
-                                  style: TextStyle(
-                                    fontSize: 16.sp,
-                                    fontWeight: FontWeight.w600,
-                                    fontFamily: "Outfit",
-                                    color: const Color(0xFF5C58EB),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    isSaved ? Icons.star : Icons.star_border,
+                                    color: hasLocation
+                                        ? (isSaved
+                                              ? AppColors.orange
+                                              : AppColors.primary3rdColor)
+                                        : AppColors.grey,
+                                    size: 18.sp,
                                   ),
-                                ),
-                              ],
+                                  SizedBox(width: 4.w),
+                                  Text(
+                                    isSaved ? 'Saved' : 'Save this place',
+                                    style: TextStyle(
+                                      fontSize: 14.sp,
+                                      fontWeight: FontWeight.w600,
+                                      fontFamily: "Outfit",
+                                      color: hasLocation
+                                          ? (isSaved
+                                                ? AppColors.orange
+                                                : AppColors.primary3rdColor)
+                                          : AppColors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        ),
+                          );
+                        }),
                       ],
                     ),
+                    SizedBox(height: 8.h),
 
-                    // To Location Autocomplete Field
                     Obx(() {
                       final position =
                           passengerHomeController.currentLocationBias.value;
-
                       return LocationAutocompleteWidget(
                         controller:
                             passengerHomeController.toLocationController,
@@ -503,24 +610,26 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                         },
                       );
                     }),
-
                     SizedBox(height: 8.h),
 
-                    // Choose from Saved Places
                     InkWell(
                       onTap: () {
                         showModalBottomSheet(
                           context: context,
                           backgroundColor: Colors.transparent,
-                          builder: (_) => const SavedPlacesBottomSheet(),
+                          isScrollControlled: true,
+                          builder: (_) => const SavedPlacesBottomSheet(
+                            isFromLocation: false,
+                          ),
                         );
                       },
                       child: Text(
                         'Choose from Saved Places',
                         style: TextStyle(
-                          fontSize: 16.sp,
+                          fontSize: 14.sp,
                           fontFamily: "Outfit",
-                          color: const Color(0xFF5C58EB),
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary3rdColor,
                         ),
                       ),
                     ),
@@ -952,7 +1061,6 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
       ),
       child: DropdownButton<String>(
         value: null,
-        // Always null to allow multiple selections
         isExpanded: true,
         underline: const SizedBox(),
         hint: Text(
@@ -964,19 +1072,36 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
             color: const Color(0xFF6B6B6B),
           ),
         ),
-        items: ['Suitcase', 'Handcarry', 'Backpack', 'Box', 'Bag'].map((value) {
-          return DropdownMenuItem(
-            value: value,
-            child: Text(
-              value,
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w500,
-                fontFamily: "Outfit",
-              ),
-            ),
-          );
-        }).toList(),
+
+        items:
+            [
+              'suitcase',
+              'duffel_bag',
+              'backpack',
+              'trolley',
+              'handbag',
+              'sports_bag',
+              'box',
+              'golf_bag',
+            ].map((String value) {
+              return DropdownMenuItem(
+                value: value,
+                child: Text(
+                  value == "duffel_bag"
+                      ? "Duffel Bag"
+                      : value == "sports_bag"
+                      ? "Sports Bag"
+                      : value == "golf_bag"
+                      ? "Golf Bag"
+                      : value.capitalizeFirst ?? '',
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    fontFamily: "Outfit",
+                  ),
+                ),
+              );
+            }).toList(),
         onChanged: (value) {
           if (value != null) {
             passengerHomeController.addLuggageItem(value);
@@ -995,7 +1120,7 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
     return Wrap(
       spacing: 8.w,
       runSpacing: 8.h,
-      children: passengerHomeController.selectedLuggageItems.map((item) {
+      children: passengerHomeController.selectedLuggageItems.map((value) {
         return Container(
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
           decoration: BoxDecoration(
@@ -1006,7 +1131,13 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                item,
+                value == "duffel_bag"
+                    ? "Duffel Bag"
+                    : value == "sports_bag"
+                    ? "Sports Bag"
+                    : value == "golf_bag"
+                    ? "Golf Bag"
+                    : value.capitalizeFirst ?? '',
                 style: TextStyle(
                   fontSize: 13.sp,
                   fontWeight: FontWeight.w500,
@@ -1016,7 +1147,7 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
               ),
               SizedBox(width: 6.w),
               GestureDetector(
-                onTap: () => passengerHomeController.removeLuggageItem(item),
+                onTap: () => passengerHomeController.removeLuggageItem(value),
                 child: Icon(
                   Icons.close,
                   size: 16.sp,
@@ -1027,82 +1158,6 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
           ),
         );
       }).toList(),
-    );
-  }
-
-  Widget _buildLocationDropdown({required bool isFrom}) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF7FAFC),
-        borderRadius: BorderRadius.circular(34.r),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            Icons.location_on_outlined,
-            color: const Color(0xFF6B7FEC),
-            size: 20.sp,
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: DropdownButton<String>(
-              value: null,
-              isExpanded: true,
-              underline: Container(),
-              hint: Text(
-                'Select Location',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  color: const Color(0xFF2D3748),
-                  fontFamily: "Outfit",
-                ),
-              ),
-              items:
-                  <String>[
-                    'Home',
-                    'Office',
-                    'Airport',
-                    'University',
-                    'Shopping Mall',
-                    'Other',
-                  ].map<DropdownMenuItem<String>>((String value) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(
-                        value,
-                        style: TextStyle(fontSize: 14.sp, fontFamily: "Outfit"),
-                      ),
-                    );
-                  }).toList(),
-              onChanged: (String? newValue) {
-                // TODO: Implement location selection with actual lat/lng
-                if (newValue != null) {
-                  if (isFrom) {
-                    passengerHomeController.setFromLocation(
-                      location: newValue,
-                      latitude: 23.8103, // Demo values
-                      longitude: 90.4125,
-                    );
-                  } else {
-                    passengerHomeController.setToLocation(
-                      location: newValue,
-                      latitude: 23.8103, // Demo values
-                      longitude: 90.4125,
-                    );
-                  }
-                }
-              },
-              icon: Icon(
-                Icons.arrow_drop_down,
-                color: const Color(0xFF6B7FEC),
-                size: 24.sp,
-              ),
-              iconSize: 24,
-            ),
-          ),
-        ],
-      ),
     );
   }
 

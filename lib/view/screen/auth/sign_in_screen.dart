@@ -342,10 +342,11 @@ class SignInScreen extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(30.r),
                                 ),
                               ),
-                              icon: Image.network(
+                               icon: Image.network(
                                 'https://www.google.com/favicon.ico',
                                 width: 20.w,
                                 height: 20.h,
+                                errorBuilder: (_,_, _)=> SizedBox.shrink() ,
                               ),
                               label: const Text(
                                 'Continue with Google',

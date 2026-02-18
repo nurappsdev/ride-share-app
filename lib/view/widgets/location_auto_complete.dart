@@ -31,8 +31,6 @@ class LocationAutocompleteWidget extends StatelessWidget {
       textEditingController: controller,
       googleAPIKey: AppConstants.googleMapKey,
 
-
-
       inputDecoration: InputDecoration(
         hintText: hintText,
         hintStyle: TextStyle(
@@ -48,6 +46,7 @@ class LocationAutocompleteWidget extends StatelessWidget {
             size: 20.sp,
           ),
         ),
+
         filled: true,
         fillColor: const Color(0xFFF7FAFC),
         border: OutlineInputBorder(
@@ -60,15 +59,9 @@ class LocationAutocompleteWidget extends StatelessWidget {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(34.r),
-          borderSide: BorderSide(
-            color: AppColors.primary3rdColor,
-            width: 1.5,
-          ),
+          borderSide: BorderSide(color: AppColors.primary3rdColor, width: 1.5),
         ),
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: 16.w,
-          vertical: 12.h,
-        ),
+        contentPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
       ),
 
       debounceTime: 600,
@@ -88,26 +81,17 @@ class LocationAutocompleteWidget extends StatelessWidget {
         controller.text = prediction.description ?? '';
       },
 
-      seperatedBuilder: Divider(
-        color: Colors.grey.shade200,
-        thickness: 1,
-      ),
+      seperatedBuilder: Divider(color: Colors.grey.shade200, thickness: 1),
 
       // Custom item builder for better styling
       containerHorizontalPadding: 0,
       itemBuilder: (context, index, Prediction prediction) {
         return Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: 16.w,
-            vertical: 12.h,
-          ),
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border(
-              bottom: BorderSide(
-                color: Colors.grey.shade100,
-                width: 1,
-              ),
+              bottom: BorderSide(color: Colors.grey.shade100, width: 1),
             ),
           ),
           child: Row(
@@ -124,7 +108,8 @@ class LocationAutocompleteWidget extends StatelessWidget {
                   children: [
                     Text(
                       prediction.structuredFormatting?.mainText ??
-                          prediction.description ?? "",
+                          prediction.description ??
+                          "",
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.w600,
