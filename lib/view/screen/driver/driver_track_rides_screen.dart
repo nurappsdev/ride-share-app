@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:split_ride/routes/app_routes.dart';
 
 import '../../../../utils/utils.dart';
+import '../../widgets/address_card.dart';
 import '../../widgets/widgets.dart';
 import '../screens.dart';
 
@@ -319,7 +320,7 @@ class DriverTrackRidesScreen extends StatelessWidget {
                       SizedBox(height: 20.h),
 
                       // Location Details
-                      AddressCard(),
+                      AddressCard(fromLocation: '', toLocation: '',),
 
 
               Container(

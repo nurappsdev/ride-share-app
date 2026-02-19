@@ -8,7 +8,7 @@ import 'package:get/get.dart';
 import 'package:split_ride/routes/app_routes.dart';
 import 'package:split_ride/view/widgets/custom_button_common.dart';
 
-import '../../../controllers/payment_controller.dart';
+import '../../../controllers/nurbhai_payment_controller.dart';
 import '../screens.dart';
 
 void showPassengerDetails(BuildContext context) {

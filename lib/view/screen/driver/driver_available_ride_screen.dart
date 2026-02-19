@@ -14,6 +14,7 @@ import 'package:split_ride/utils/app_colors.dart';
 import 'package:split_ride/utils/app_image.dart';
 import 'package:split_ride/view/widgets/custom_button_common.dart';
 import '../../../utils/utils.dart';
+import '../../widgets/address_card.dart';
 import '../screens.dart';
 import 'driver_drawer_screen.dart';
 import 'passenger_details_screen.dart';

@@ -4,6 +4,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../../../widgets/address_card.dart';
 import '../../screens.dart';
 
 class BookingDetailsScreen extends StatelessWidget {
@@ -108,7 +109,7 @@ class BookingDetailsScreen extends StatelessWidget {
                   _divider(),
 
                   /// Locations
-                  AddressCard(),
+                  AddressCard(fromLocation: '', toLocation: '',),
                   SizedBox(height: 16.h),
                   _divider(),
 

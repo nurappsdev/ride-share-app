@@ -63,6 +63,7 @@ class PassengerHomeController extends GetxController {
   final RxString calculatedFromAddress = ''.obs;
   final RxString calculatedToAddress = ''.obs;
   final RxString bookingId = ''.obs;
+  final RxString rideType = ''.obs;
 
   @override
   void onInit() {
@@ -130,9 +131,9 @@ class PassengerHomeController extends GetxController {
 
   /// Get address from coordinates using reverse geocoding
   Future<String> _getAddressFromCoordinates(
-      double latitude,
-      double longitude,
-      ) async {
+    double latitude,
+    double longitude,
+  ) async {
     try {
       List<Placemark> placemarks = await placemarkFromCoordinates(
         latitude,
@@ -298,9 +299,11 @@ class PassengerHomeController extends GetxController {
       return false;
     }
 
-    return savedPlaces.any((place) =>
-    place.latitude == fromLatitude.value &&
-        place.longitude == fromLongitude.value);
+    return savedPlaces.any(
+      (place) =>
+          place.latitude == fromLatitude.value &&
+          place.longitude == fromLongitude.value,
+    );
   }
 
   /// Check if current to location is saved
@@ -309,28 +312,30 @@ class PassengerHomeController extends GetxController {
       return false;
     }
 
-    return savedPlaces.any((place) =>
-    place.latitude == toLatitude.value &&
-        place.longitude == toLongitude.value);
+    return savedPlaces.any(
+      (place) =>
+          place.latitude == toLatitude.value &&
+          place.longitude == toLongitude.value,
+    );
   }
 
-  /// Save a place to backend
+  /// Add a safe place to backend
   Future<bool> savePlace({
     required double latitude,
     required double longitude,
   }) async {
     try {
-      loader.value = true;
+      isLoadingSavedPlaces.value = true;
 
       final String token =
           await SecureStorageService().read(AppConstants.accessToken) ?? '';
 
       final payload = {
-        "coordinates": [longitude, latitude]
+        "coordinates": [longitude, latitude],
       };
 
-      final NetworkResponse response = await NetworkCaller().postRequest(
-        AppUrl.passengerSavedPlaces,
+      final NetworkResponse response = await NetworkCaller().putRequest(
+        AppUrl.addPassengerSavedPlaces,
         headers: {'Authorization': 'Bearer $token'},
         body: payload,
       );
@@ -353,7 +358,7 @@ class PassengerHomeController extends GetxController {
       Toast.showError('Failed to save place');
       return false;
     } finally {
-      loader.value = false;
+      isLoadingSavedPlaces.value = false;
     }
   }
 
@@ -363,24 +368,25 @@ class PassengerHomeController extends GetxController {
     required double longitude,
   }) async {
     try {
-      loader.value = true;
+      isLoadingSavedPlaces.value = true;
 
       final String token =
           await SecureStorageService().read(AppConstants.accessToken) ?? '';
 
       final payload = {
-        "coordinates": [longitude, latitude]
+        "coordinates": [longitude, latitude],
       };
 
-      final NetworkResponse response = await NetworkCaller().postRequest(
-        AppUrl.passengerSavedPlaces,
+      final NetworkResponse response = await NetworkCaller().deleteRequest(
+        AppUrl.passengerRemoveSavedPlace,
         headers: {'Authorization': 'Bearer $token'},
         body: payload,
       );
 
       if (response.isSuccess) {
-        savedPlaces.removeWhere((place) =>
-        place.latitude == latitude && place.longitude == longitude);
+        savedPlaces.removeWhere(
+          (place) => place.latitude == latitude && place.longitude == longitude,
+        );
 
         Toast.showSuccess('Place removed from saved places');
         LoggerUtils.debug('Place unsaved: $latitude, $longitude');
@@ -396,7 +402,7 @@ class PassengerHomeController extends GetxController {
       Toast.showError('Failed to remove place');
       return false;
     } finally {
-      loader.value = false;
+      isLoadingSavedPlaces.value = false;
     }
   }
 
@@ -409,9 +415,11 @@ class PassengerHomeController extends GetxController {
       return;
     }
 
-    final isSaved = savedPlaces.any((place) =>
-    place.latitude == fromLatitude.value &&
-        place.longitude == fromLongitude.value);
+    final isSaved = savedPlaces.any(
+      (place) =>
+          place.latitude == fromLatitude.value &&
+          place.longitude == fromLongitude.value,
+    );
 
     if (isSaved) {
       await unsavePlace(
@@ -435,9 +443,11 @@ class PassengerHomeController extends GetxController {
       return;
     }
 
-    final isSaved = savedPlaces.any((place) =>
-    place.latitude == toLatitude.value &&
-        place.longitude == toLongitude.value);
+    final isSaved = savedPlaces.any(
+      (place) =>
+          place.latitude == toLatitude.value &&
+          place.longitude == toLongitude.value,
+    );
 
     if (isSaved) {
       await unsavePlace(
@@ -445,10 +455,7 @@ class PassengerHomeController extends GetxController {
         longitude: toLongitude.value,
       );
     } else {
-      await savePlace(
-        latitude: toLatitude.value,
-        longitude: toLongitude.value,
-      );
+      await savePlace(latitude: toLatitude.value, longitude: toLongitude.value);
     }
   }
 
@@ -491,7 +498,8 @@ class PassengerHomeController extends GetxController {
         }
       } else {
         Toast.show(
-          message: getResponse.jsonResponse?['message'] ??
+          message:
+              getResponse.jsonResponse?['message'] ??
               'Failed to fetch car types',
           type: ToastType.error,
         );
@@ -625,10 +633,13 @@ class PassengerHomeController extends GetxController {
 
   Map<String, dynamic> prepareBookingData() {
     // Format datetime to ISO string
-    final dateTimeString = selectedDateTime.value?.toUtc().toIso8601String() ?? '';
+    final dateTimeString =
+        selectedDateTime.value?.toUtc().toIso8601String() ?? '';
 
     // Convert luggage items to lowercase for API
-    final luggageList = selectedLuggageItems.map((item) => item.toLowerCase()).toList();
+    final luggageList = selectedLuggageItems
+        .map((item) => item.toLowerCase())
+        .toList();
 
     // Calculate distance between from and to locations
     final distance = calculateDistance(
@@ -651,9 +662,7 @@ class PassengerHomeController extends GetxController {
       'luggageDetails': luggageNoteController.text.trim().isNotEmpty
           ? luggageNoteController.text.trim()
           : '', // Optional
-      'note': noteController.text.trim().isNotEmpty
-          ? noteController.text.trim()
-          : '', // Optional
+      'note': noteController.text.trim() ?? '', // Optional
       'coordinates': [fromLongitude.value, fromLatitude.value], // [lng, lat]
       'destCoordinates': [toLongitude.value, toLatitude.value], // [lng, lat]
       'distance': distance, // Calculated distance in km
@@ -688,9 +697,11 @@ class PassengerHomeController extends GetxController {
         bookingId.value = data?['_id'] ?? '';
         calculatedFare.value = (data?['fare'] ?? 0.0).toDouble();
         calculatedCharge.value = (data?['charge'] ?? 0.0).toDouble();
+        rideType.value = data?['type'] ?? '';
         calculatedTotalFare.value = (data?['totalFare'] ?? 0.0).toDouble();
         calculatedDistance.value = (data?['distance'] ?? 0.0).toDouble();
-        calculatedFromAddress.value = extra?['fromAddress'] ?? fromLocation.value;
+        calculatedFromAddress.value =
+            extra?['fromAddress'] ?? fromLocation.value;
         calculatedToAddress.value = extra?['toAddress'] ?? toLocation.value;
 
         LoggerUtils.debug('Booking created successfully: ${bookingId.value}');
@@ -700,7 +711,8 @@ class PassengerHomeController extends GetxController {
         Toast.showSuccess('Ride booking created successfully');
         return true;
       } else {
-        final errorMessage = response.jsonResponse?['message'] ?? 'Booking failed';
+        final errorMessage =
+            response.jsonResponse?['message'] ?? 'Booking failed';
         Toast.showError(errorMessage);
         LoggerUtils.error('Booking failed: ${response.jsonResponse}');
         return false;

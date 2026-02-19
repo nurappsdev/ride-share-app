@@ -12,11 +12,11 @@ import '../helpers/helpers.dart';
 import '../services/api_constants.dart';
 import '../utils/utils.dart';
 
-class PaymentController {
+class NurBhaiPaymentController {
   // CartController myEntriesController = Get.put(CartController());
   Map<String, dynamic>? paymentIntentData;
 
-  PaymentController() {
+  NurBhaiPaymentController() {
     Stripe.publishableKey = PaymentConstants.publishAbleKey;
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:split_ride/utils/app_colors.dart';
 import 'package:split_ride/utils/app_icons.dart';
@@ -377,7 +378,7 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                         ),
                         const Spacer(),
                         Obx(() {
-                          final isSaved =
+                          final bool isSaved =
                               passengerHomeController.isFromLocationSaved;
                           final hasLocation =
                               passengerHomeController
@@ -392,7 +393,7 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                                     .isLoadingSavedPlaces
                                     .value ==
                                 false,
-                            replacement: SizedBox.shrink(),
+                            replacement: TextButton(onPressed: null, child: Text('Saving...')),
                             child: TextButton(
                               onPressed: hasLocation
                                   ? () => passengerHomeController
@@ -545,17 +546,17 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                                     .isLoadingSavedPlaces
                                     .value ==
                                 false,
-                            replacement: SizedBox.shrink(),
+                            replacement: TextButton(onPressed: null, child: Text('Saving...')),
                             child: TextButton(
                               onPressed: hasLocation
                                   ? () => passengerHomeController
                                         .toggleSaveToLocation()
                                   : null,
                               style: TextButton.styleFrom(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: 12.w,
-                                  vertical: 6.h,
-                                ),
+                                // padding: EdgeInsets.symmetric(
+                                //   horizontal: 12.w,
+                                //   vertical: 6.h,
+                                // ),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -593,7 +594,7 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                     SizedBox(height: 8.h),
 
                     Obx(() {
-                      final position =
+                      final Position? position =
                           passengerHomeController.currentLocationBias.value;
                       return LocationAutocompleteWidget(
                         controller:

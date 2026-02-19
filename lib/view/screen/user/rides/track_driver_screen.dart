@@ -1,16 +1,15 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:split_ride/routes/app_routes.dart';
 
 import '../../../../utils/utils.dart';
+import '../../../widgets/address_card.dart';
 import '../../../widgets/widgets.dart';
 import '../../screens.dart';
 
 class TrackDriverScreen extends StatelessWidget {
-  const TrackDriverScreen({Key? key}) : super(key: key);
+  const TrackDriverScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -41,14 +40,11 @@ class TrackDriverScreen extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: const Color(0xFFF5F5F5),
                       image: DecorationImage(
-                        image: AssetImage(
-                            "${AppImages.trackImg}"
-                        ),
+                        image: AssetImage("${AppImages.trackImg}"),
                         fit: BoxFit.cover,
                       ),
                     ),
                   ),
-
 
                   // Street Labels
                   Positioned(
@@ -83,33 +79,36 @@ class TrackDriverScreen extends StatelessWidget {
               right: 0,
               child: SafeArea(
                 child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 16.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 20.w,
+                    vertical: 16.h,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       // Menu Button
-                              GestureDetector(
-                                onTap: () => Navigator.pop(context),
-                                child: Container(
-                                  width: 40.w,
-                                  height: 40.h,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.1),
-                                        blurRadius: 8.r,
-                                      ),
-                                    ],
-                                  ),
-                                  child: Icon(Icons.close, size: 20.sp),
-                                ),
+                      GestureDetector(
+                        onTap: () => Navigator.pop(context),
+                        child: Container(
+                          width: 40.w,
+                          height: 40.h,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.1),
+                                blurRadius: 8.r,
                               ),
+                            ],
+                          ),
+                          child: Icon(Icons.close, size: 20.sp),
+                        ),
+                      ),
 
                       // Title
-                       Text(
-                         'Track Driver',
+                      Text(
+                        'Track Driver',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -175,7 +174,6 @@ class TrackDriverScreen extends StatelessWidget {
               ),
             ),
 
-
             Positioned(
               top: 380.h,
               right: 20.w,
@@ -200,7 +198,7 @@ class TrackDriverScreen extends StatelessWidget {
                 child: Icon(Icons.navigation, color: Colors.white, size: 24.sp),
               ),
             ),
-      
+
             // Bottom Card
             Positioned(
               bottom: 0,
@@ -228,9 +226,7 @@ class TrackDriverScreen extends StatelessWidget {
                     children: [
                       // Arrival Info Card
                       Row(
-
                         children: [
-
                           CustomText(
                             text: 'Arriving in  ',
                             fontsize: 14.sp,
@@ -238,13 +234,13 @@ class TrackDriverScreen extends StatelessWidget {
                             color: Colors.grey[600],
                           ),
 
-                              CustomText(
-                                text: '10 Mins',
-                                fontsize: 20.sp,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF7C3AED),
-                              ),
-                          SizedBox(width: 150.w,),
+                          CustomText(
+                            text: '10 Mins',
+                            fontsize: 20.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF7C3AED),
+                          ),
+                          SizedBox(width: 150.w),
                           CustomText(
                             text: '10:30 PM',
                             fontsize: 14,
@@ -257,8 +253,11 @@ class TrackDriverScreen extends StatelessWidget {
 
                       // Driver & Vehicle Info
                       InkWell(
-                        onTap: (){
-                          Get.toNamed(AppRoutes.driverDetailsScreen,preventDuplicates: false);
+                        onTap: () {
+                          Get.toNamed(
+                            AppRoutes.driverDetailsScreen,
+                            preventDuplicates: false,
+                          );
                         },
                         child: Container(
                           padding: EdgeInsets.all(16.w),
@@ -269,7 +268,6 @@ class TrackDriverScreen extends StatelessWidget {
                           child: Row(
                             children: [
                               // Driver Photo
-
 
                               // Driver Details
                               Expanded(
@@ -282,16 +280,17 @@ class TrackDriverScreen extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         border: Border.all(
-
                                           color: Color(0xFF22D3EE),
                                           width: 3.w,
                                         ),
                                         gradient: LinearGradient(
                                           begin: Alignment.topLeft,
                                           end: Alignment.bottomRight,
-                                          colors: [ Color(0xFF45C4D9),
+                                          colors: [
+                                            Color(0xFF45C4D9),
                                             Color(0xFF6B7FEC),
-                                            Color(0xFFB565D8),],
+                                            Color(0xFFB565D8),
+                                          ],
                                         ),
                                       ),
                                       child: ClipOval(
@@ -360,12 +359,13 @@ class TrackDriverScreen extends StatelessWidget {
                                     ),
 
                                     decoration: BoxDecoration(
-
                                       borderRadius: BorderRadius.circular(6.r),
                                       gradient: LinearGradient(
-                                        colors: [  Color(0xFF45C4D9),
+                                        colors: [
+                                          Color(0xFF45C4D9),
                                           Color(0xFF6B7FEC),
-                                          Color(0xFFB565D8),],
+                                          Color(0xFFB565D8),
+                                        ],
                                       ),
                                     ),
                                     child: CustomText(
@@ -419,7 +419,7 @@ class TrackDriverScreen extends StatelessWidget {
                       SizedBox(height: 20.h),
 
                       // Location Details
-                      AddressCard(),
+                      AddressCard(fromLocation: '', toLocation: ''),
 
                       // Action Buttons
                       Row(
@@ -429,9 +429,11 @@ class TrackDriverScreen extends StatelessWidget {
                               height: 56.h,
                               decoration: BoxDecoration(
                                 gradient: LinearGradient(
-                                  colors: [  Color(0xFF45C4D9),
+                                  colors: [
+                                    Color(0xFF45C4D9),
                                     Color(0xFF6B7FEC),
-                                    Color(0xFFB565D8),],
+                                    Color(0xFFB565D8),
+                                  ],
                                 ),
                                 borderRadius: BorderRadius.circular(28.r),
                                 boxShadow: [
@@ -454,7 +456,10 @@ class TrackDriverScreen extends StatelessWidget {
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(Icons.chat_bubble_outline, size: 20.sp),
+                                    Icon(
+                                      Icons.chat_bubble_outline,
+                                      size: 20.sp,
+                                    ),
                                     SizedBox(width: 8.w),
                                     CustomText(
                                       text: 'Chat with your driver',
@@ -475,9 +480,11 @@ class TrackDriverScreen extends StatelessWidget {
                               gradient: LinearGradient(
                                 begin: Alignment.topLeft,
                                 end: Alignment.bottomRight,
-                                colors: [  Color(0xFF45C4D9),
+                                colors: [
+                                  Color(0xFF45C4D9),
                                   Color(0xFF6B7FEC),
-                                  Color(0xFFB565D8),],
+                                  Color(0xFFB565D8),
+                                ],
                               ),
                               shape: BoxShape.circle,
                               boxShadow: [
@@ -488,7 +495,11 @@ class TrackDriverScreen extends StatelessWidget {
                                 ),
                               ],
                             ),
-                            child: Icon(Icons.phone, color: Colors.white, size: 24.sp),
+                            child: Icon(
+                              Icons.phone,
+                              color: Colors.white,
+                              size: 24.sp,
+                            ),
                           ),
                         ],
                       ),
