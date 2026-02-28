@@ -212,14 +212,21 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                     SizedBox(height: 20.h),
 
                     // Split Your Ride / Private Ride Buttons
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildRideTypeButton('Split Your Ride'),
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(child: _buildRideTypeButton('Private Ride')),
-                      ],
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF7FAFC),
+                        borderRadius: BorderRadius.circular(24.r),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: _buildRideTypeButton('Split Your Ride'),
+                          ),
+                          // SizedBox(width: 12.w),
+                          Expanded(child: _buildRideTypeButton('Private Ride')),
+                        ],
+                      ),
                     ),
                     SizedBox(height: 16.h),
 
@@ -316,11 +323,13 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                     ),
                     SizedBox(height: 16.h),
                     // Add this section after the "Add Luggage" button in PassengerHomeScreen
-// Insert this after line ~380 (after the "Add Luggage" InkWell)
+                    // Insert this after line ~380 (after the "Add Luggage" InkWell)
 
-// Optional Luggage Notes Field
+                    // Optional Luggage Notes Field
                     Obx(() {
-                      if (passengerHomeController.selectedLuggageItems.isNotEmpty) {
+                      if (passengerHomeController
+                          .selectedLuggageItems
+                          .isNotEmpty) {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -336,10 +345,12 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                             ),
                             SizedBox(height: 8.h),
                             TextField(
-                              controller: passengerHomeController.luggageNoteController,
+                              controller:
+                                  passengerHomeController.luggageNoteController,
                               maxLines: 2,
                               decoration: InputDecoration(
-                                hintText: 'e.g., Handle with care, fragile items',
+                                hintText:
+                                    'e.g., Handle with care, fragile items',
                                 hintStyle: TextStyle(
                                   color: const Color(0xFFB8B8B8),
                                   fontSize: 13.sp,
@@ -393,7 +404,10 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                                     .isLoadingSavedPlaces
                                     .value ==
                                 false,
-                            replacement: TextButton(onPressed: null, child: Text('Saving...')),
+                            replacement: TextButton(
+                              onPressed: null,
+                              child: Text('Saving...'),
+                            ),
                             child: TextButton(
                               onPressed: hasLocation
                                   ? () => passengerHomeController
@@ -546,7 +560,10 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                                     .isLoadingSavedPlaces
                                     .value ==
                                 false,
-                            replacement: TextButton(onPressed: null, child: Text('Saving...')),
+                            replacement: TextButton(
+                              onPressed: null,
+                              child: Text('Saving...'),
+                            ),
                             child: TextButton(
                               onPressed: hasLocation
                                   ? () => passengerHomeController

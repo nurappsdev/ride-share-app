@@ -20,7 +20,7 @@ import 'driver_drawer_screen.dart';
 import 'passenger_details_screen.dart';
 
 class DriverAvailableRideScreen extends StatefulWidget {
-  const DriverAvailableRideScreen({Key? key}) : super(key: key);
+  const DriverAvailableRideScreen({super.key});
 
   @override
   State<DriverAvailableRideScreen> createState() => _DriverAvailableRideScreenState();

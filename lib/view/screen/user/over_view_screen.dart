@@ -3,8 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:split_ride/routes/app_routes.dart';
+import 'package:split_ride/utils/app_colors.dart';
 import 'package:split_ride/view/widgets/address_card.dart';
 import '../../../controllers/passenger_home_controller.dart';
+import '../../widgets/webview_modal.dart';
 import '../screens.dart';
 
 void showRideOverview(BuildContext context) {
@@ -230,10 +232,15 @@ void showRideOverview(BuildContext context) {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Checkbox(
-                            value: true,
-                            onChanged: (value) {},
-                            activeColor: Colors.purple,
+                          Obx(
+                            () => Checkbox(
+                              value: controller.agreeCheckValue.value,
+                              onChanged: (value) {
+                                controller.agreeCheckValue.value =
+                                    !controller.agreeCheckValue.value;
+                              },
+                              activeColor: Colors.purple,
+                            ),
                           ),
                           Expanded(
                             child: Padding(
@@ -280,50 +287,55 @@ void showRideOverview(BuildContext context) {
               ),
             ),
             // Gradient Button
-            Container(
-              width: double.infinity,
-              margin: EdgeInsets.only(bottom: 20, left: 12, right: 12),
-              decoration: BoxDecoration(
-                 borderRadius: BorderRadius.circular(28.r),
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF45C4D9),
-                    Color(0xFF6B7FEC),
-                    Color(0xFFB565D8),
-                  ],
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
+            Obx(
+              ()=> Container(
+                width: double.infinity,
+                margin: EdgeInsets.only(bottom: 20, left: 12, right: 12),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(28.r),
+                  gradient: controller.agreeCheckValue.value
+                      ? LinearGradient(
+                          colors: [
+                            Color(0xFF45C4D9),
+                            Color(0xFF6B7FEC),
+                            Color(0xFFB565D8),
+                          ],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        )
+                      : const LinearGradient(
+                          colors: [Colors.grey, Colors.grey],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                        ),
                 ),
-              ),
-              child: ElevatedButton(
-                onPressed: () {
-                  // Navigate to payment with booking data
-                  Get.toNamed(
-                    AppRoutes.bookingPaymentScreen,
-                    preventDuplicates: false,
-                    arguments: {
-                      'bookingId': controller.bookingId.value,
-                      'totalFare': controller.calculatedTotalFare.value,
-                      'fare': controller.calculatedFare.value,
-                      'charge': controller.calculatedCharge.value,
-                      'distance': controller.calculatedDistance.value,
-                    },
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.transparent,
-                  shadowColor: Colors.transparent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(28.r),
+                child: ElevatedButton(
+                  onPressed: controller.agreeCheckValue.value || controller.loader.value
+                      ? () {
+                          controller.makePayment(
+                            payId: controller.bookingId.value,
+                          );
+                        }
+                      : () {},
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28.r),
+                    ),
                   ),
-                ),
-                child: Text(
-                  'Continue to Payment',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18.sp,
-                    fontWeight: FontWeight.bold,
-                    fontFamily: 'Outfit',
+                  child: Visibility(
+                    replacement: CircularProgressIndicator(color: AppColors.white,),
+                    visible: controller.loader.value == false ,
+                    child: Text(
+                      'Continue to Payment',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 18.sp,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Outfit',
+                      ),
+                    ),
                   ),
                 ),
               ),

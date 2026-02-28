@@ -298,11 +298,11 @@ class DriverProfileRegistrationController extends GetxController {
 
       var request = http.MultipartRequest(
         'POST',
-        Uri.parse(AppUrl.imageBaseUrl),
+        Uri.parse(AppUrl.imageUploadUrl),
       );
       request.files.add(await http.MultipartFile.fromPath('file', file.path));
 
-      LoggerUtils.debug('Uploading profile image to ${AppUrl.imageBaseUrl}');
+      LoggerUtils.debug('Uploading profile image to ${AppUrl.imageUploadUrl}');
 
       var streamedResponse = await request.send();
       var response = await http.Response.fromStream(streamedResponse);

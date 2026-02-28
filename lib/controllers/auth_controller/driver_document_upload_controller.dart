@@ -88,10 +88,10 @@ class DriverDocumentUploadController extends GetxController {
       uploadingStates[type] = true;
       isUploading.value = true;
 
-      var request = http.MultipartRequest('POST', Uri.parse(AppUrl.imageBaseUrl));
+      var request = http.MultipartRequest('POST', Uri.parse(AppUrl.imageUploadUrl));
       request.files.add(await http.MultipartFile.fromPath('file', file.path));
 
-      LoggerUtils.debug('Uploading $type to ${AppUrl.imageBaseUrl}');
+      LoggerUtils.debug('Uploading $type to ${AppUrl.imageUploadUrl}');
 
       var streamedResponse = await request.send();
       var response = await http.Response.fromStream(streamedResponse);

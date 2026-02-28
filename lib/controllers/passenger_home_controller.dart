@@ -12,9 +12,11 @@ import '../../helpers/app_url.dart';
 import '../../helpers/logger_util.dart';
 import '../helpers/secured_storage.dart';
 import '../utils/app_constant.dart';
+import '../view/widgets/webview_modal.dart';
 
 class PassengerHomeController extends GetxController {
   final RxBool loader = false.obs;
+  final RxBool agreeCheckValue = false.obs;
 
   // Ride details
   final RxInt passengers = 1.obs;
@@ -709,6 +711,62 @@ class PassengerHomeController extends GetxController {
         LoggerUtils.debug('Distance: ${calculatedDistance.value} km');
 
         Toast.showSuccess('Ride booking created successfully');
+        return true;
+      } else {
+        final errorMessage =
+            response.jsonResponse?['message'] ?? 'Booking failed';
+        Toast.showError(errorMessage);
+        LoggerUtils.error('Booking failed: ${response.jsonResponse}');
+        return false;
+      }
+    } catch (e) {
+      LoggerUtils.debug('Booking error: $e');
+      Toast.showError('Failed to book ride');
+      return false;
+    } finally {
+      loader.value = false;
+    }
+  }
+
+  /// ===============>
+  // Make a payment through the method ===============>
+  makePayment({required String payId}) async {
+    try {
+      loader.value = true;
+
+      final bookingData = prepareBookingData();
+      LoggerUtils.debug('Booking Data: $bookingData');
+
+      final String token =
+          await SecureStorageService().read(AppConstants.accessToken) ?? '';
+
+      final NetworkResponse response = await NetworkCaller().postRequest(
+        AppUrl.makePayment(id: payId),
+
+        headers: {'Authorization': 'Bearer $token'},
+        body: bookingData,
+      );
+      LoggerUtils.error(response.jsonResponse);
+      // showModalBottomSheet(
+      //   context: context,
+      //   isScrollControlled: true,
+      //   isDismissible: false,
+      //   enableDrag: false,
+      //   backgroundColor: Colors.transparent,
+      //   builder: (BuildContext context) => CommonWebViewModal(url: "https://www.google.com/"),
+      // );
+      if (response.isSuccess) {
+        final String paymentUrl = response.jsonResponse?['data']['url'];
+        showModalBottomSheet(
+          context: Get.context!,
+          isScrollControlled: true,
+          isDismissible: false,
+          enableDrag: false,
+          backgroundColor: Colors.transparent,
+          builder: (BuildContext context) =>
+              CommonWebViewModal(url: paymentUrl),
+        );
+
         return true;
       } else {
         final errorMessage =
