@@ -8,6 +8,7 @@ import 'package:split_ride/utils/app_constant.dart';
 
 class LocationAutocompleteWidget extends StatelessWidget {
   final TextEditingController controller;
+  final FocusNode focusNode;
   final String hintText;
   final Function(double lat, double lng, String address) onLocationSelected;
   final double? biasLatitude;
@@ -17,6 +18,7 @@ class LocationAutocompleteWidget extends StatelessWidget {
   const LocationAutocompleteWidget({
     Key? key,
     required this.controller,
+    required this.focusNode,
     required this.hintText,
     required this.onLocationSelected,
     this.biasLatitude,
@@ -28,6 +30,7 @@ class LocationAutocompleteWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return GooglePlaceAutoCompleteTextField(
       boxDecoration: const BoxDecoration(border: Border()),
+      focusNode: focusNode,
       textEditingController: controller,
       googleAPIKey: AppConstants.googleMapKey,
 
