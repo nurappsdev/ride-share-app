@@ -3,12 +3,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:split_ride/controllers/personal_info_controller.dart';
-import 'package:split_ride/helpers/app_url.dart';
+import 'package:split_ride/helpers/logger_util.dart';
 import 'package:split_ride/utils/app_colors.dart';
-import 'package:split_ride/utils/app_icons.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'dart:io';
 import '../../../widgets/widgets.dart';
 
 class PersonalInfoScreen extends StatelessWidget {
@@ -193,6 +191,7 @@ class PersonalInfoScreen extends StatelessWidget {
   /// Get profile image decoration
   DecorationImage? _getProfileImage(PersonalInfoController controller) {
     // Priority: Local selected image > Network image
+    LoggerUtils.debug(controller.profileImageUrl.value) ;
     if (controller.selectedImage.value != null) {
       return DecorationImage(
         image: FileImage(controller.selectedImage.value!),

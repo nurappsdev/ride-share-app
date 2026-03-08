@@ -23,7 +23,8 @@ class AppUrl {
   static String makePayment({required String id}) {
     return '$baseUrl/job/pay/$id';
   }
-  static String userProfile = '$baseUrl/user/me'; // POST - Create new ride booking
+  static String userProfile = '$baseUrl/user/me';
+  static String passengerOngoingRide = '$baseUrl/job/ongoing?limit=100000';
 
   // static String userPaymentHistoryDetails({required String id}) {
   //   return '${baseUrl}v1/service-bookings/with-costs-summary/$id';

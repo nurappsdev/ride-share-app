@@ -59,7 +59,7 @@ class AppRoutes {
     GetPage(name: drawerScreen, page: () => CustomDrawer()),
     // GetPage(name: bookingPaymentScreen, page: () => PaymentBookingScreen()),
     GetPage(name: bookingDetailsScreen, page: () => BookingDetailsScreen()),
-    GetPage(name: myRidesScreen, page: () => MyRidesScreen()),
+    GetPage(name: myRidesScreen, page: () => PassengerMyRidesScreen()),
     GetPage(name: trackDriversScreen, page: () => TrackDriverScreen()),
     GetPage(name: driverDetailsScreen, page: () => DriverDetailsScreen()),
     GetPage(name: driverChatingScreen, page: () => ChatDriverScreen()),

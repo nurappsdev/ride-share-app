@@ -17,7 +17,7 @@ class _AllBottomBarState extends State<AllBottomBar> {
 
   static final List _screens = [
     const PassengerHomeScreen(),
-    const MyRidesScreen(),
+    const PassengerMyRidesScreen(),
     const PersonalInfoScreen(),
   ];
 
@@ -176,7 +176,7 @@ class HomeScreen extends StatelessWidget {
 
 
 class AccountScreen extends StatelessWidget {
-  const AccountScreen({Key? key}) : super(key: key);
+  const AccountScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

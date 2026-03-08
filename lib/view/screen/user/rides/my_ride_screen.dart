@@ -2,82 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
-import 'package:split_ride/routes/app_routes.dart';
+import 'package:intl/intl.dart';
+  import 'package:split_ride/routes/app_routes.dart';
 import 'package:split_ride/utils/app_colors.dart';
 import 'package:split_ride/utils/app_icons.dart';
-
+import 'package:split_ride/view/widgets/custom_loading.dart';
+import '../../../../controllers/passenger_ride_controller.dart';
+import '../../../../model/driver_registration/passenger_models/passenger_ongoing_rides.dart';
 import '../../../widgets/widgets.dart';
 
-
-class MyRidesScreen extends StatefulWidget {
-  const MyRidesScreen({Key? key}) : super(key: key);
-
-  @override
-  State<MyRidesScreen> createState() => _MyRidesScreenState();
-}
-
-class _MyRidesScreenState extends State<MyRidesScreen> {
-  bool isUpcoming = true;
-
-  List<Map<String, dynamic>> upcomingRides = [
-    {
-      'pickupLocation': '1901 Thornridge Cir. Shiloh',
-      'dropLocation': '4140 Parker Rd. Allentown',
-      'bookingId': 'SR12B4E6',
-      'dateTime': '16 July 2023, 10:30 PM',
-      'driver': 'Jane Cooper',
-      'carSeats': '4',
-      'paymentStatus': 'Advance Paid',
-      'showCancel': true,
-    },
-    {
-      'pickupLocation': '1901 Thornridge Cir. Shiloh',
-      'dropLocation': '4140 Parker Rd. Allentown',
-      'bookingId': 'SR12B4E7',
-      'dateTime': '18 July 2023, 2:00 PM',
-      'driver': 'John Doe',
-      'carSeats': '3',
-      'paymentStatus': 'Pending',
-      'showCancel': false,
-    },
-    {
-      'pickupLocation': '1901 Thornridge Cir. Shiloh',
-      'dropLocation': '4140 Parker Rd. Allentown',
-      'bookingId': 'SR12B4E7',
-      'dateTime': '18 July 2023, 2:00 PM',
-      'driver': 'John Doe',
-      'carSeats': '3',
-      'paymentStatus': 'Pending',
-      'showCancel': false,
-    },
-  ];
-
-  List<Map<String, dynamic>> pastRides = [
-    {
-      'pickupLocation': '123 Main St, New York',
-      'dropLocation': '456 Park Ave, New York',
-      'bookingId': 'SR12B4E8',
-      'dateTime': '10 June 2023, 9:15 AM',
-      'driver': 'Robert Smith',
-      'carSeats': '4',
-      'paymentStatus': 'Completed',
-      'showCancel': false,
-    },
-    {
-      'pickupLocation': '789 Broadway, San Francisco',
-      'dropLocation': '321 Market St, San Francisco',
-      'bookingId': 'SR12B4E9',
-      'dateTime': '5 May 2023, 3:45 PM',
-      'driver': 'Emily Johnson',
-      'carSeats': '2',
-      'paymentStatus': 'Completed',
-      'showCancel': false,
-    },
-  ];
+class PassengerMyRidesScreen extends StatelessWidget {
+  const PassengerMyRidesScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-
+    final PassengerMyRidesController controller = Get.put(PassengerMyRidesController());
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5FF),
@@ -104,32 +43,43 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
       ),
       body: Column(
         children: [
+          // Tab Selector
           Padding(
             padding: EdgeInsets.all(12.r),
             child: Container(
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(34.r),color: Colors.grey[200]),
-              child: Row(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(34.r),
+                color: Colors.grey[200],
+              ),
+              child: Obx(() => Row(
                 children: [
+                  // Upcoming Tab
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => setState(() => isUpcoming = true),
+                      onTap: () => controller.switchToUpcoming(),
                       child: Container(
                         padding: EdgeInsets.symmetric(vertical: 12.h),
                         decoration: BoxDecoration(
-                          gradient: isUpcoming
+                          gradient: controller.isUpcoming.value
                               ? const LinearGradient(
-                            colors: [ Color(0xFF45C4D9),
+                            colors: [
+                              Color(0xFF45C4D9),
                               Color(0xFF6B7FEC),
-                              Color(0xFFB565D8),],
+                              Color(0xFFB565D8),
+                            ],
                           )
                               : null,
-                          color: isUpcoming ? null : Colors.transparent,
+                          color: controller.isUpcoming.value
+                              ? null
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(34.r),
                         ),
                         child: Center(
                           child: CustomText(
                             text: 'Upcoming Rides',
-                            color: isUpcoming ? Colors.white : AppColors.primary3rdColor,
+                            color: controller.isUpcoming.value
+                                ? Colors.white
+                                : AppColors.primary3rdColor,
                             fontsize: 14.sp,
                             fontWeight: FontWeight.w800,
                           ),
@@ -138,26 +88,33 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
                     ),
                   ),
                   SizedBox(width: 12.w),
+                  // Past Rides Tab
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => setState(() => isUpcoming = false),
+                      onTap: () => controller.switchToPast(),
                       child: Container(
                         padding: EdgeInsets.symmetric(vertical: 12.h),
                         decoration: BoxDecoration(
-                          gradient: !isUpcoming
+                          gradient: !controller.isUpcoming.value
                               ? const LinearGradient(
-                            colors: [ Color(0xFF45C4D9),
+                            colors: [
+                              Color(0xFF45C4D9),
                               Color(0xFF6B7FEC),
-                              Color(0xFFB565D8),],
+                              Color(0xFFB565D8),
+                            ],
                           )
                               : null,
-                          color: !isUpcoming ? null : Colors.transparent,
+                          color: !controller.isUpcoming.value
+                              ? null
+                              : Colors.transparent,
                           borderRadius: BorderRadius.circular(25.w),
                         ),
                         child: Center(
                           child: CustomText(
                             text: 'Past Rides',
-                            color: !isUpcoming ? Colors.white : AppColors.primary3rdColor,
+                            color: !controller.isUpcoming.value
+                                ? Colors.white
+                                : AppColors.primary3rdColor,
                             fontsize: 14.sp,
                             fontWeight: FontWeight.w800,
                           ),
@@ -166,40 +123,80 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
                     ),
                   ),
                 ],
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.all(16.w),
-              itemCount: isUpcoming ? upcomingRides.length : pastRides.length,
-              itemBuilder: (context, index) {
-                final ride = isUpcoming ? upcomingRides[index] : pastRides[index];
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom: index < (isUpcoming ? upcomingRides.length : pastRides.length) - 1 ? 16.h : 0,
-                  ),
-                  child: InkWell(
-                    onTap: (){
-                      Get.toNamed(AppRoutes.trackDriversScreen,preventDuplicates: false);
-                    },
-                    child: RideCard(
-                      pickupLocation: ride['pickupLocation'],
-                      dropLocation: ride['dropLocation'],
-                      bookingId: ride['bookingId'],
-                      dateTime: ride['dateTime'],
-                      driver: ride['driver'],
-                      carSeats: ride['carSeats'],
-                      paymentStatus: ride['paymentStatus'],
-                      showCancel: ride['showCancel'],
-                      isPastRide: !isUpcoming, // Show "Download invoice" only for past rides
-                    ),
-                  ),
-                );
-              },
+              )),
             ),
           ),
 
+          // Rides List
+          Expanded(
+            child: Obx(() {
+              // Loading state
+              if (controller.isCurrentTabLoading) {
+                return Center(
+                  child: CustomLoading(),
+                );
+              }
+
+              // Empty state
+              final rides = controller.currentRides;
+              if (rides.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.directions_car_outlined,
+                        size: 80.sp,
+                        color: AppColors.primary3rdColor,
+                      ),
+                      SizedBox(height: 16.h),
+                      CustomText(
+                        text: controller.isUpcoming.value
+                            ? 'No Upcoming Rides'
+                            : 'No Past Rides',
+                        fontsize: 18.sp,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(height: 8.h),
+                      CustomText(
+                        text: controller.isUpcoming.value
+                            ? 'Book your first ride now!'
+                            : 'Your completed rides will appear here',
+                        fontsize: 14.sp,
+                        color: Colors.grey,
+                      ),
+                    ],
+                  ),
+                );
+              }
+
+              // Rides list
+              return RefreshIndicator(
+                onRefresh: () => controller.refreshCurrentTab(),
+                color: AppColors.primary3rdColor,
+                child: ListView.builder(
+                  padding: EdgeInsets.all(16.w),
+                  itemCount: rides.length,
+                  itemBuilder: (context, index) {
+                    final ride = rides[index];
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: index < rides.length - 1 ? 16.h : 0,
+                      ),
+                      child: RideCard(
+                        ride: ride,
+                        isPastRide: !controller.isUpcoming.value,
+                        onCancel: () => controller.cancelRide(ride.jobId ?? ''),
+                        canCancel: controller.canCancelRide(ride),
+                        cancellationFee: controller.getCancellationFee(ride),
+                      ),
+                    );
+                  },
+                ),
+              );
+            }),
+          ),
         ],
       ),
     );
@@ -207,190 +204,259 @@ class _MyRidesScreenState extends State<MyRidesScreen> {
 }
 
 class RideCard extends StatelessWidget {
-  final String pickupLocation;
-  final String dropLocation;
-  final String bookingId;
-  final String dateTime;
-  final String driver;
-  final String carSeats;
-  final String paymentStatus;
-  final bool showCancel;
+  final PassengerOngoingRidesModel ride;
   final bool isPastRide;
+  final VoidCallback onCancel;
+  final bool canCancel;
+  final double cancellationFee;
 
   const RideCard({
     Key? key,
-    required this.pickupLocation,
-    required this.dropLocation,
-    required this.bookingId,
-    required this.dateTime,
-    required this.driver,
-    required this.carSeats,
-    required this.paymentStatus,
-    required this.showCancel,
-    this.isPastRide = false,
+    required this.ride,
+    required this.isPastRide,
+    required this.onCancel,
+    required this.canCancel,
+    required this.cancellationFee,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16.w),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(16.w),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SvgPicture.asset(
-                  AppIcons.mapIcon,
-                  width: 70.w,
-                  height: 70.w,
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.play_arrow,
-                            color: const Color(0xFF5ED5F3),
-                            size: 20.w,
-                          ),
-                          SizedBox(width: 4.w),
-                          CustomText(
-                            text: pickupLocation,
-                            fontsize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                          ),
-
-                        ],
-                      ),
-                      SizedBox(height: 8.h),
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.location_on,
-                            color: const Color(0xFF9C8FFF),
-                            size: 20.w,
-                          ),
-                          SizedBox(width: 4.w),
-                          CustomText(
-                            text: dropLocation,
-                            fontsize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 8.h),
-                      if (isPastRide)
+    return InkWell(
+      onTap: () {
+        // Navigate to track driver screen with ride details
+        Get.toNamed(
+          AppRoutes.trackDriversScreen,
+          preventDuplicates: false,
+          arguments: {'rideId': ride.jobId},
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16.w),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            // Top Section - Locations
+            Padding(
+              padding: EdgeInsets.all(16.w),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SvgPicture.asset(
+                    AppIcons.mapIcon,
+                    width: 70.w,
+                    height: 70.w,
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Pickup Location
                         Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Icon(
-                              Icons.receipt,
-                              color: AppColors.whiteColor,
+                              Icons.play_arrow,
+                              color: const Color(0xFF5ED5F3),
                               size: 20.w,
                             ),
-                            SizedBox(width: 2.w),
-                            CustomText(
-                              text: 'Download invoice',
-                              fontsize: 14.sp,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.primary3rdColor,
+                            SizedBox(width: 4.w),
+                            Expanded(
+                              child: CustomText(
+                                text: ride.fromAddress ?? 'Unknown Location',
+                                fontsize: 13.sp,
+                                fontWeight: FontWeight.w500,
+                                maxline: 2,
+                              ),
                             ),
                           ],
                         ),
                         SizedBox(height: 8.h),
+                        // Drop Location
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Icon(
+                              Icons.location_on,
+                              color: const Color(0xFF9C8FFF),
+                              size: 20.w,
+                            ),
+                            SizedBox(width: 4.w),
+                            Expanded(
+                              child: CustomText(
+                                text: ride.toAddress ?? 'Unknown Destination',
+                                fontsize: 13.sp,
+                                fontWeight: FontWeight.w500,
+                                maxline: 2,
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 8.h),
+                        // Download Invoice (Past rides only)
+                        if (isPastRide)
+                          InkWell(
+                            onTap: () {
+                              // TODO: Download invoice
+                              Get.snackbar(
+                                'Invoice',
+                                'Downloading invoice for ${ride.jobId}',
+                                snackPosition: SnackPosition.BOTTOM,
+                                backgroundColor: AppColors.primary3rdColor,
+                                colorText: Colors.white,
+                              );
+                            },
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.receipt,
+                                  color: AppColors.primary3rdColor,
+                                  size: 18.w,
+                                ),
+                                SizedBox(width: 4.w),
+                                CustomText(
+                                  text: 'Download invoice',
+                                  fontsize: 13.sp,
+                                  fontWeight: FontWeight.w600,
+                                  color: AppColors.primary3rdColor,
+                                ),
+                              ],
+                            ),
+                          ),
                       ],
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ),
-          Container(
-            decoration: const BoxDecoration(
-              border: Border(
-                top: BorderSide(color: Color(0xFFE0E0E0), width: 1),
+                ],
               ),
             ),
-            padding: EdgeInsets.all(16.w),
-            child: Column(
-              children: [
-                _buildInfoRow('Booking ID', bookingId),
-                SizedBox(height: 4.h),
-                Divider(color: Colors.grey[200],),
-                SizedBox(height: 8.h),
-                _buildInfoRow('Date & Time', dateTime),
-                SizedBox(height: 4.h),
-                Divider(color: Colors.grey[200],),
-                SizedBox(height: 8.h),
-                _buildInfoRow('Driver', driver),
-                SizedBox(height: 4.h),
-                Divider(color: Colors.grey[200],),
-                SizedBox(height: 8.h),
-                _buildInfoRow('Car seats', carSeats),
-                SizedBox(height: 4.h),
-                Divider(color: Colors.grey[200],),
-                SizedBox(height: 8.h),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    CustomText(
-                      text: 'Payment Status',
-                      color: Colors.grey,
-                      fontsize: 14.sp,
-                    ),
-                    CustomText(
-                      text: paymentStatus,
-                      color: const Color(0xFF5ED5F3),
-                      fontsize: 14.sp,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ],
+
+            // Bottom Section - Details
+            Container(
+              decoration: const BoxDecoration(
+                border: Border(
+                  top: BorderSide(color: Color(0xFFE0E0E0), width: 1),
                 ),
-                if (showCancel) ...[
-                  SizedBox(height: 16.h),
+              ),
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                children: [
+                  _buildInfoRow('Booking ID', ride.jobId ?? 'N/A'),
+                  _buildDivider(),
+                  _buildInfoRow(
+                    'Date & Time',
+                    _formatDateTime(ride.dateTime),
+                  ),
+                  _buildDivider(),
+                  _buildInfoRow('Driver', ride.userName ?? 'Not Assigned'),
+                  _buildDivider(),
+                  _buildInfoRow('Car seats', '${ride.seat ?? 0}'),
+                  _buildDivider(),
+                  _buildInfoRow(
+                    'Total Fare',
+                    '€${ride.totalFare?.toStringAsFixed(2) ?? '0.00'}',
+                  ),
+                  _buildDivider(),
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Icon(
-                        Icons.directions_car,
-                        color: Colors.grey,
-                        size: 20.w,
-                      ),
-                      SizedBox(width: 8.w),
                       CustomText(
-                        text: 'Cancel your ride?',
+                        text: 'Status',
                         color: Colors.grey,
                         fontsize: 14.sp,
                       ),
-                      const Spacer(),
-                      TextButton(
-                        onPressed: () {
-                          showCancelRideDialog(context,bookingId);
-
-                        },
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.w,
+                          vertical: 4.h,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(ride.status).withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12.r),
+                        ),
                         child: CustomText(
-                          text: 'Cancel',
-                          color: Colors.red,
-                          fontsize: 14.sp,
+                          text: _formatStatus(ride.status),
+                          color: _getStatusColor(ride.status),
+                          fontsize: 13.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ],
                   ),
+
+                  // Cancel Option (Upcoming rides only)
+                  if (!isPastRide && ride.status != 'completed') ...[
+                    SizedBox(height: 16.h),
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.directions_car,
+                          color: Colors.grey,
+                          size: 20.w,
+                        ),
+                        SizedBox(width: 8.w),
+                        CustomText(
+                          text: 'Cancel your ride?',
+                          color: Colors.grey,
+                          fontsize: 14.sp,
+                        ),
+                        const Spacer(),
+                        TextButton(
+                          onPressed: () {
+                            _showCancelRideDialog(
+                              context,
+                              ride.jobId ?? '',
+                              cancellationFee,
+                              ride.totalFare ?? 0.0,
+                              onCancel,
+                            );
+                          },
+                          child: CustomText(
+                            text: 'Cancel',
+                            color: Colors.red,
+                            fontsize: 14.sp,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
-              ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4.h),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          CustomText(
+            text: label,
+            color: Colors.grey,
+            fontsize: 14.sp,
+          ),
+          Flexible(
+            child: CustomText(
+              text: value,
+              color: Colors.black,
+              fontsize: 14.sp,
+              fontWeight: FontWeight.w500,
+              textAlign: TextAlign.right,
+              maxline: 2,
             ),
           ),
         ],
@@ -398,27 +464,52 @@ class RideCard extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        CustomText(
-          text: label,
-          color: Colors.grey,
-          fontsize: 14.sp,
-        ),
-        CustomText(
-          text: value,
-          color: Colors.black,
-          fontsize: 14.sp,
-          fontWeight: FontWeight.w500,
-        ),
-      ],
+  Widget _buildDivider() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4.h),
+      child: Divider(color: Colors.grey[200]),
     );
   }
-  // Function to show the cancel ride dialog with ScreenUtil
-  void showCancelRideDialog(BuildContext context, String bookingId) {
-    showDialog<bool>(
+
+  String _formatDateTime(DateTime? dateTime) {
+    if (dateTime == null) return 'N/A';
+    return DateFormat('dd MMM yyyy, hh:mm a').format(dateTime);
+  }
+
+  String _formatStatus(String? status) {
+    if (status == null) return 'Unknown';
+    return status.substring(0, 1).toUpperCase() + status.substring(1);
+  }
+
+  Color _getStatusColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'created':
+      case 'requested':
+        return const Color(0xFFFFA500); // Orange
+      case 'accepted':
+        return const Color(0xFF5ED5F3); // Cyan
+      case 'picked':
+        return const Color(0xFF6B7FEC); // Blue
+      case 'completed':
+      case 'paid':
+        return const Color(0xFF4CAF50); // Green
+      case 'cancelled':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  void _showCancelRideDialog(
+      BuildContext context,
+      String bookingId,
+      double cancellationFee,
+      double totalFare,
+      VoidCallback onConfirm,
+      ) {
+    final refundAmount = totalFare * (100 - cancellationFee) / 100;
+
+    showDialog(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext context) {
@@ -459,7 +550,7 @@ class RideCard extends StatelessWidget {
                     child: Center(
                       child: CustomText(
                         text: '?',
-                        fontsize: 32,
+                        fontsize: 32.sp,
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
@@ -471,7 +562,7 @@ class RideCard extends StatelessWidget {
                 // Title
                 CustomText(
                   text: 'Cancel Ride?',
-                  fontsize: 24,
+                  fontsize: 24.sp,
                   fontWeight: FontWeight.bold,
                   color: Colors.black87,
                 ),
@@ -483,13 +574,13 @@ class RideCard extends StatelessWidget {
                   children: [
                     CustomText(
                       text: 'Booking ID: ',
-                      fontsize: 14,
+                      fontsize: 14.sp,
                       fontWeight: FontWeight.normal,
                       color: Colors.grey,
                     ),
                     CustomText(
                       text: bookingId,
-                      fontsize: 14,
+                      fontsize: 14.sp,
                       fontWeight: FontWeight.w600,
                       color: AppColors.primary3rdColor,
                     ),
@@ -497,14 +588,62 @@ class RideCard extends StatelessWidget {
                 ),
                 SizedBox(height: 16.h),
 
+                // Cancellation Fee Info
+                Container(
+                  padding: EdgeInsets.all(12.w),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12.r),
+                  ),
+                  child: Column(
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          CustomText(
+                            text: 'Cancellation Fee:',
+                            fontsize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          CustomText(
+                            text: '${cancellationFee.toStringAsFixed(0)}%',
+                            fontsize: 14.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 4.h),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          CustomText(
+                            text: 'Refund Amount:',
+                            fontsize: 14.sp,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          CustomText(
+                            text: '€${refundAmount.toStringAsFixed(2)}',
+                            fontsize: 14.sp,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 16.h),
+
                 // Description
                 CustomText(
-                  text: 'If you cancel this ride, the booking within 24 hours before you start your ride will cost you 20% of the ride amount. The cancellation charges may vary for different ride.',
-                  fontsize: 14,
+                  text:
+                  'Cancellation charges: >24hrs: 0%, 2-24hrs: 50%, <2hrs: 100% of ride amount.',
+                  fontsize: 13.sp,
                   fontWeight: FontWeight.normal,
                   color: Colors.grey,
                   textAlign: TextAlign.center,
-                  maxline: 5,
+                  maxline: 3,
                 ),
                 SizedBox(height: 24.h),
 
@@ -514,9 +653,8 @@ class RideCard extends StatelessWidget {
                   height: 56.h,
                   child: ElevatedButton(
                     onPressed: () {
-                      Navigator.of(context).pop(true);
-                      // Handle cancel ride logic here
-                      print('Ride cancelled');
+                      Navigator.of(context).pop();
+                      onConfirm();
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
@@ -527,8 +665,8 @@ class RideCard extends StatelessWidget {
                       ),
                     ),
                     child: CustomText(
-                      text: 'Cancel',
-                      fontsize: 16,
+                      text: 'Confirm Cancellation',
+                      fontsize: 16.sp,
                       fontWeight: FontWeight.w600,
                       color: Colors.white,
                     ),
@@ -536,6 +674,23 @@ class RideCard extends StatelessWidget {
                 ),
                 SizedBox(height: 12.h),
 
+                // Keep Ride Button
+                OutlinedButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: Size(double.infinity, 56.h),
+                    side: BorderSide(color: AppColors.primary3rdColor, width: 2),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(28.r),
+                    ),
+                  ),
+                  child: CustomText(
+                    text: 'Keep My Ride',
+                    fontsize: 16.sp,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primary3rdColor,
+                  ),
+                ),
               ],
             ),
           ),
@@ -543,31 +698,4 @@ class RideCard extends StatelessWidget {
       },
     );
   }
-  
-}
-
-class DottedLinePainters extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = Colors.grey.withOpacity(0.5)
-      ..strokeWidth = 2
-      ..style = PaintingStyle.stroke;
-
-    const dashHeight = 3.0;
-    const dashSpace = 3.0;
-    double startY = 0;
-
-    while (startY < size.height) {
-      canvas.drawLine(
-        Offset(size.width / 2, startY),
-        Offset(size.width / 2, startY + dashHeight),
-        paint,
-      );
-      startY += dashHeight + dashSpace;
-    }
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
