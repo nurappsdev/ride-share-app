@@ -345,6 +345,7 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                             ),
                             SizedBox(height: 8.h),
                             TextField(
+                              focusNode: passengerHomeController.luggageFocus,
                               controller:
                                   passengerHomeController.luggageNoteController,
                               maxLines: 2,
@@ -494,6 +495,7 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                           : LocationAutocompleteWidget(
                               controller: passengerHomeController
                                   .fromLocationController,
+                              focusNode: passengerHomeController.fromLocationControllerFocus,
                               hintText: "Select pickup location",
                               biasLatitude: position?.latitude,
                               biasLongitude: position?.longitude,
@@ -616,6 +618,7 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                       return LocationAutocompleteWidget(
                         controller:
                             passengerHomeController.toLocationController,
+                        focusNode: passengerHomeController.toLocationControllerFocus,
                         hintText: "Ride Destination",
                         biasLatitude: position?.latitude,
                         biasLongitude: position?.longitude,

@@ -1,13 +1,13 @@
 class ApiConstants{
 
 
-  // static const String baseUrl = "https://api.drop-dr.com/api/v1";
-  // static const String imageBaseUrl = "https://api.drop-dr.com/uploads/";
-  // static const String socketBaseUrl = "https://api.drop-dr.com";
+  static const String baseUrl = "https://zbs009tm-8080.asse.devtunnels.ms/api/v1";
+  static const String imageBaseUrl = "https://zbs009tm-8080.asse.devtunnels.ms/uploads/";
+  static const String socketBaseUrl = "https://zbs009tm-8080.asse.devtunnels.ms";
 
-  static const String baseUrl = "https://health-mamun.sarv.live/api/v1";
-  static const String imageBaseUrl = "https://health-mamun.sarv.live/uploads/";
-  static const String socketBaseUrl = "https://health-mamun.sarv.live";
+  // static const String baseUrl = "https://health-mamun.sarv.live/api/v1";
+  // static const String imageBaseUrl = "https://health-mamun.sarv.live/uploads/";
+  // static const String socketBaseUrl = "https://health-mamun.sarv.live";
 
 /// client key
   ///AIzaSyAxaYzHRBhydkW_TwUGHeRYSUV2iCc_uuk

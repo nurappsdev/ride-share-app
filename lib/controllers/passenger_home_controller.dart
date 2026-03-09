@@ -33,7 +33,7 @@ class PassengerHomeController extends GetxController {
   final RxList<String> selectedLuggageItems = <String>[].obs;
   final RxBool showLuggageDropdown = false.obs;
   final TextEditingController luggageNoteController = TextEditingController();
-
+FocusNode luggageFocus = FocusNode();
   // Location
   final RxString fromLocation = ''.obs;
   final RxString toLocation = ''.obs;
@@ -52,10 +52,12 @@ class PassengerHomeController extends GetxController {
 
   // Text controllers for location fields
   final TextEditingController fromLocationController = TextEditingController();
+  FocusNode fromLocationControllerFocus = FocusNode();
   final TextEditingController toLocationController = TextEditingController();
-
+  FocusNode toLocationControllerFocus = FocusNode();
   // Note for driver
   final TextEditingController noteController = TextEditingController();
+  FocusNode noteControllerFocus = FocusNode();
 
   // Booking response data
   final RxDouble calculatedFare = 0.0.obs;
