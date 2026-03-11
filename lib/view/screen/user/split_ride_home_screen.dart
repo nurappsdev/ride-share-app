@@ -402,7 +402,7 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                           return Visibility(
                             visible:
                                 passengerHomeController
-                                    .isLoadingSavedPlaces
+                                    .isSavingFromPlace
                                     .value ==
                                 false,
                             replacement: TextButton(
@@ -559,7 +559,7 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                           return Visibility(
                             visible:
                                 passengerHomeController
-                                    .isLoadingSavedPlaces
+                                    .isSavingToPlace
                                     .value ==
                                 false,
                             replacement: TextButton(
