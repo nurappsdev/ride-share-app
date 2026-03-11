@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:split_ride/controllers/personal_info_controller.dart';
+import 'package:split_ride/helpers/app_url.dart';
 import 'package:split_ride/helpers/logger_util.dart';
 import 'package:split_ride/utils/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
@@ -16,11 +17,17 @@ class PersonalInfoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Initialize controller
     final PersonalInfoController controller = Get.put(PersonalInfoController());
+    print( "${AppUrl.imageUploadUrl}/${controller.profileImageUrl.value}");
+    print('------------------------------------');
+    print('------------------------------------');
+    print('------------------------------------');
 
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
+          // leading: SizedBox.shrink(),
+          automaticallyImplyLeading: false,
           backgroundColor: Colors.white,
           elevation: 0,
           title: Text(
@@ -64,10 +71,18 @@ class PersonalInfoScreen extends StatelessWidget {
                 /// Profile Image
                 Center(
                   child: GestureDetector(
-                    onTap: () => _showImagePickerBottomSheet(context, controller),
-                    child: Obx(() => Stack(
-                      children: [
-                        Container(
+                    onTap: () =>
+                        _showImagePickerBottomSheet(context, controller),
+                    child: Obx(() =>
+                        Stack(
+                          children: [
+
+                          /*  CustomNetworkImage(
+                              imageUrl: "${AppUrl.imageUploadUrl}/${controller.profileImageUrl.value}",
+                              height: 110.h,
+                              width: 110.w,
+                              boxShape: BoxShape.circle,),*/
+                             Container(
                           width: 110.w,
                           height: 110.w,
                           decoration: BoxDecoration(
@@ -81,30 +96,30 @@ class PersonalInfoScreen extends StatelessWidget {
                           )
                               : null,
                         ),
-                        // Edit icon
-                        Positioned(
-                          bottom: 0,
-                          right: 0,
-                          child: Container(
-                            width: 32.w,
-                            height: 32.w,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: AppColors.primary3rdColor,
-                              border: Border.all(
-                                color: Colors.white,
-                                width: 2,
+                            // Edit icon
+                            Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: Container(
+                                width: 32.w,
+                                height: 32.w,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppColors.primary3rdColor,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2,
+                                  ),
+                                ),
+                                child: Icon(
+                                  Icons.camera_alt,
+                                  color: Colors.white,
+                                  size: 16.sp,
+                                ),
                               ),
                             ),
-                            child: Icon(
-                              Icons.camera_alt,
-                              color: Colors.white,
-                              size: 16.sp,
-                            ),
-                          ),
-                        ),
-                      ],
-                    )),
+                          ],
+                        )),
                   ),
                 ),
 
@@ -171,7 +186,8 @@ class PersonalInfoScreen extends StatelessWidget {
         bottomNavigationBar: Padding(
           padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 24.h),
           child: Obx(
-                () => controller.loader.value
+                () =>
+            controller.loader.value
                 ? Center(
               child: CircularProgressIndicator(
                 color: AppColors.primary3rdColor,
@@ -191,15 +207,16 @@ class PersonalInfoScreen extends StatelessWidget {
   /// Get profile image decoration
   DecorationImage? _getProfileImage(PersonalInfoController controller) {
     // Priority: Local selected image > Network image
-    LoggerUtils.debug(controller.profileImageUrl.value) ;
+    LoggerUtils.debug(controller.profileImageUrl.value);
     if (controller.selectedImage.value != null) {
       return DecorationImage(
         image: FileImage(controller.selectedImage.value!),
         fit: BoxFit.cover,
       );
-    } else if (controller.profileImageUrl.value.isNotEmpty && controller.profileImageUrl.value.startsWith('http')) {
+    } else if (controller.profileImageUrl.value.isNotEmpty &&
+        controller.profileImageUrl.value.startsWith('http')) {
       return DecorationImage(
-        image: CachedNetworkImageProvider("${controller.profileImageUrl.value}"),
+        image: CachedNetworkImageProvider(controller.profileImageUrl.value),
         fit: BoxFit.cover,
       );
     }
@@ -207,10 +224,8 @@ class PersonalInfoScreen extends StatelessWidget {
   }
 
   /// Show image picker bottom sheet
-  void _showImagePickerBottomSheet(
-      BuildContext context,
-      PersonalInfoController controller,
-      ) {
+  void _showImagePickerBottomSheet(BuildContext context,
+      PersonalInfoController controller,) {
     showModalBottomSheet(
       context: context,
       shape: RoundedRectangleBorder(

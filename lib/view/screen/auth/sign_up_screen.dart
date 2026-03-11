@@ -9,7 +9,7 @@ import '../../../utils/utils.dart';
 import '../../widgets/widgets.dart';
 
 class SignUpScreen extends StatelessWidget {
-  const SignUpScreen({Key? key}) : super(key: key);
+  const SignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +26,7 @@ class SignUpScreen extends StatelessWidget {
                 // Logo Section
                 Column(
                   children: [
-                    Image.asset('${AppImages.appLogo2}', height: 45.h),
+                    Image.asset(AppImages.appLogo2, height: 45.h),
                     SizedBox(height: 4.h),
                   ],
                 ),

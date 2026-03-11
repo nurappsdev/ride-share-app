@@ -34,6 +34,7 @@ class SignUpController extends GetxController {
       final Map<String, dynamic> registrationForm = <String, dynamic>{
         "name": fullNameTEController.text.trim(),
         "email": emailTEController.text.trim(),
+        'phone':phoneNumberTEController.text.trim(),
         "password": passwordTEController.text.trim(),
         "confirmPassword": confirmPasswordTEController.text.trim(),
         "role": currentRole,

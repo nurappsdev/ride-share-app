@@ -192,9 +192,9 @@ class PersonalInfoController extends GetxController {
 
         Toast.showSuccess('Profile updated successfully');
         LoggerUtils.debug('Profile updated: $payload');
-
+        await fetchUserProfile();
         // Optionally navigate back
-        Get.back();
+        // Get.back();
       } else {
         Toast.showError(
           response.jsonResponse?['message'] ?? 'Failed to update profile',
