@@ -693,7 +693,7 @@ FocusNode luggageFocus = FocusNode();
         body: bookingData,
       );
 
-      if (response.isSuccess && response.jsonResponse?['code'] == 201) {
+      if (response.isSuccess) {
         final data = response.jsonResponse?['data'];
         final extra = response.jsonResponse?['extra'];
 
@@ -736,17 +736,13 @@ FocusNode luggageFocus = FocusNode();
     try {
       loader.value = true;
 
-      final bookingData = prepareBookingData();
-      LoggerUtils.debug('Booking Data: $bookingData');
-
       final String token =
           await SecureStorageService().read(AppConstants.accessToken) ?? '';
 
       final NetworkResponse response = await NetworkCaller().postRequest(
         AppUrl.makePayment(id: payId),
-
         headers: {'Authorization': 'Bearer $token'},
-        body: bookingData,
+        body: {},
       );
       LoggerUtils.error(response.jsonResponse);
       // showModalBottomSheet(
