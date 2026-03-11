@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:split_ride/controllers/passenger_drawer_controller.dart';
 
 import '../../../routes/app_routes.dart';
+import 'rides/save_places_screen.dart';
 
 class CustomDrawer extends StatelessWidget {
   const CustomDrawer({super.key});
@@ -123,7 +124,7 @@ class CustomDrawer extends StatelessWidget {
                   },
                   child: _menu(Icons.person_outline, "Personal Info"),
                 ),
-                _menu(Icons.lock_outline, "Login & Security"),
+                // _menu(Icons.lock_outline, "Login & Security"),
                 InkWell(
                   onTap: () {
                     Get.toNamed(
@@ -154,8 +155,12 @@ class CustomDrawer extends StatelessWidget {
                   },
                   child: _menu(Icons.help_outline, "Help & Support"),
                 ),
-                _menu(Icons.bookmark_outline, "Saved Places"),
-                _menu(Icons.language_outlined, "Language"),
+                InkWell(
+                    onTap: (){
+                      Get.to(()=>SavedPlacesScreen());
+                    },
+                    child: _menu(Icons.bookmark_outline, "Saved Places")),
+                // _menu(Icons.language_outlined, "Language"),
               ],
             ),
           ),

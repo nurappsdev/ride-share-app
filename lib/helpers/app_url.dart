@@ -6,6 +6,7 @@ class AppUrl {
   static const String baseUrl =
       'https://zbs009tm-8080.asse.devtunnels.ms/api/v1';
   static const String imageUploadUrl = '$baseUrl/upload';
+  static const String imageServeUrl = 'https://zbs009tm-8080.asse.devtunnels.ms/uploads';
 
   static String registerUser = '$baseUrl/auth/register';
   static String login = '$baseUrl/auth/login';
