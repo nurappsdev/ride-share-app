@@ -361,7 +361,13 @@ class DriverDetailsScreen extends StatelessWidget {
                             ),
                             child: ElevatedButton(
                               onPressed: () {
-                                Get.toNamed(AppRoutes.driverChatingScreen);
+                                Get.toNamed(AppRoutes.driverChatingScreen,arguments: {
+                                  'otherUserId': driver?.id,
+                                  'driverName': driver?.name,
+                                  'driverEmail': driver?.email,
+                                  'driverPhone': driver?.phone,
+                                },);
+
                               },
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.transparent,
