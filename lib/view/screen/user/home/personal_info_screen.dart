@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:split_ride/controllers/personal_info_controller.dart';
-import 'package:split_ride/helpers/app_url.dart';
-import 'package:split_ride/helpers/logger_util.dart';
 import 'package:split_ride/utils/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -17,10 +16,6 @@ class PersonalInfoScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     // Initialize controller
     final PersonalInfoController controller = Get.put(PersonalInfoController());
-    print( "${AppUrl.imageUploadUrl}/${controller.profileImageUrl.value}");
-    print('------------------------------------');
-    print('------------------------------------');
-    print('------------------------------------');
 
     return SafeArea(
       child: Scaffold(
@@ -73,53 +68,69 @@ class PersonalInfoScreen extends StatelessWidget {
                   child: GestureDetector(
                     onTap: () =>
                         _showImagePickerBottomSheet(context, controller),
-                    child: Obx(() =>
-                        Stack(
-                          children: [
-
-                          /*  CustomNetworkImage(
-                              imageUrl: "${AppUrl.imageUploadUrl}/${controller.profileImageUrl.value}",
-                              height: 110.h,
-                              width: 110.w,
-                              boxShape: BoxShape.circle,),*/
-                             Container(
-                          width: 110.w,
-                          height: 110.w,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFFF2ECFF),
-                            image: _getProfileImage(controller),
+                    child: Obx(() {
+                      final profileImage = _getProfileImage(controller);
+                      return Stack(
+                        children: [
+                          Container(
+                            width: 110.w,
+                            height: 110.w,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: const Color(0xFFF2ECFF),
+                              image: profileImage,
+                            ),
+                            child: profileImage == null
+                                ? Center(
+                                    child: Icon(Icons.person, size: 32),
+                                  )
+                                : null,
                           ),
-                          child: _getProfileImage(controller) == null
-                              ? Center(
-                            child:Icon(Icons.person, size: 32,),
-                          )
-                              : null,
-                        ),
-                            // Edit icon
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: Container(
-                                width: 32.w,
-                                height: 32.w,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.primary3rdColor,
-                                  border: Border.all(
+                          // Upload progress overlay
+                          if (controller.isUploadingImage.value)
+                            Container(
+                              width: 110.w,
+                              height: 110.w,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.black.withOpacity(0.4),
+                              ),
+                              child: Center(
+                                child: SizedBox(
+                                  width: 32.w,
+                                  height: 32.w,
+                                  child: CircularProgressIndicator(
                                     color: Colors.white,
-                                    width: 2,
+                                    strokeWidth: 3,
                                   ),
-                                ),
-                                child: Icon(
-                                  Icons.camera_alt,
-                                  color: Colors.white,
-                                  size: 16.sp,
                                 ),
                               ),
                             ),
-                          ],
-                        )),
+                          // Edit icon
+                          Positioned(
+                            bottom: 0,
+                            right: 0,
+                            child: Container(
+                              width: 32.w,
+                              height: 32.w,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: AppColors.primary3rdColor,
+                                border: Border.all(
+                                  color: Colors.white,
+                                  width: 2,
+                                ),
+                              ),
+                              child: Icon(
+                                Icons.camera_alt,
+                                color: Colors.white,
+                                size: 16.sp,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
                   ),
                 ),
 
@@ -176,6 +187,45 @@ class PersonalInfoScreen extends StatelessWidget {
                   ),
                 ),
 
+                SizedBox(height: 20.h),
+
+                /// Date of Birth
+                _label('Date of Birth'),
+                SizedBox(height: 8.h),
+                GestureDetector(
+                  onTap: () => _pickDate(context, controller),
+                  child: AbsorbPointer(
+                    child: CustomTextField(
+                      controller: controller.dobController,
+                      hintText: 'Select Date of Birth',
+                      prefixIcon: Padding(
+                        padding: EdgeInsets.all(8.r),
+                        child: Icon(
+                          Icons.calendar_today_outlined,
+                          color: AppColors.primary3rdColor,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                SizedBox(height: 20.h),
+
+                /// Address
+                _label('Address'),
+                SizedBox(height: 8.h),
+                CustomTextField(
+                  controller: controller.addressController,
+                  hintText: 'Enter Address',
+                  prefixIcon: Padding(
+                    padding: EdgeInsets.all(8.r),
+                    child: Icon(
+                      Icons.location_on_outlined,
+                      color: AppColors.primary3rdColor,
+                    ),
+                  ),
+                ),
+
                 SizedBox(height: 40.h),
               ],
             ),
@@ -207,16 +257,14 @@ class PersonalInfoScreen extends StatelessWidget {
   /// Get profile image decoration
   DecorationImage? _getProfileImage(PersonalInfoController controller) {
     // Priority: Local selected image > Network image
-    LoggerUtils.debug(controller.profileImageUrl.value);
     if (controller.selectedImage.value != null) {
       return DecorationImage(
         image: FileImage(controller.selectedImage.value!),
         fit: BoxFit.cover,
       );
-    } else if (controller.profileImageUrl.value.isNotEmpty &&
-        controller.profileImageUrl.value.startsWith('http')) {
+    } else if (controller.fullProfileImageUrl.isNotEmpty) {
       return DecorationImage(
-        image: CachedNetworkImageProvider(controller.profileImageUrl.value),
+        image: CachedNetworkImageProvider(controller.fullProfileImageUrl),
         fit: BoxFit.cover,
       );
     }
@@ -308,6 +356,48 @@ class PersonalInfoScreen extends StatelessWidget {
         );
       },
     );
+  }
+
+  /// Show date picker for Date of Birth
+  void _pickDate(BuildContext context, PersonalInfoController controller) async {
+    final DateTime now = DateTime.now();
+    final DateTime lastDate = DateTime(now.year + 1, 12, 31);
+
+    // Parse existing date if available
+    DateTime initialDate = now;
+    if (controller.dobController.text.isNotEmpty) {
+      try {
+        final parsed = DateTime.parse(controller.dobController.text);
+        if (!parsed.isAfter(lastDate)) {
+          initialDate = parsed;
+        }
+      } catch (_) {}
+    }
+
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime(1950),
+      lastDate: lastDate,
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.primary3rdColor,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: Colors.black,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (picked != null) {
+      // Format as "2026-03-12"
+      controller.dobController.text = DateFormat('yyyy-MM-dd').format(picked);
+    }
   }
 
   /// Label Widget

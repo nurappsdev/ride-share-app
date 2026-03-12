@@ -49,6 +49,8 @@ FocusNode luggageFocus = FocusNode();
   // Saved places
   final RxList<SavedPlaceModel> savedPlaces = <SavedPlaceModel>[].obs;
   final RxBool isLoadingSavedPlaces = false.obs;
+  final RxBool isSavingFromPlace = false.obs;
+  final RxBool isSavingToPlace = false.obs;
 
   // Text controllers for location fields
   final TextEditingController fromLocationController = TextEditingController();
@@ -419,22 +421,27 @@ FocusNode luggageFocus = FocusNode();
       return;
     }
 
-    final isSaved = savedPlaces.any(
-      (place) =>
-          place.latitude == fromLatitude.value &&
-          place.longitude == fromLongitude.value,
-    );
+    isSavingFromPlace.value = true;
+    try {
+      final isSaved = savedPlaces.any(
+        (place) =>
+            place.latitude == fromLatitude.value &&
+            place.longitude == fromLongitude.value,
+      );
 
-    if (isSaved) {
-      await unsavePlace(
-        latitude: fromLatitude.value,
-        longitude: fromLongitude.value,
-      );
-    } else {
-      await savePlace(
-        latitude: fromLatitude.value,
-        longitude: fromLongitude.value,
-      );
+      if (isSaved) {
+        await unsavePlace(
+          latitude: fromLatitude.value,
+          longitude: fromLongitude.value,
+        );
+      } else {
+        await savePlace(
+          latitude: fromLatitude.value,
+          longitude: fromLongitude.value,
+        );
+      }
+    } finally {
+      isSavingFromPlace.value = false;
     }
   }
 
@@ -447,19 +454,24 @@ FocusNode luggageFocus = FocusNode();
       return;
     }
 
-    final isSaved = savedPlaces.any(
-      (place) =>
-          place.latitude == toLatitude.value &&
-          place.longitude == toLongitude.value,
-    );
-
-    if (isSaved) {
-      await unsavePlace(
-        latitude: toLatitude.value,
-        longitude: toLongitude.value,
+    isSavingToPlace.value = true;
+    try {
+      final isSaved = savedPlaces.any(
+        (place) =>
+            place.latitude == toLatitude.value &&
+            place.longitude == toLongitude.value,
       );
-    } else {
-      await savePlace(latitude: toLatitude.value, longitude: toLongitude.value);
+
+      if (isSaved) {
+        await unsavePlace(
+          latitude: toLatitude.value,
+          longitude: toLongitude.value,
+        );
+      } else {
+        await savePlace(latitude: toLatitude.value, longitude: toLongitude.value);
+      }
+    } finally {
+      isSavingToPlace.value = false;
     }
   }
 
@@ -693,7 +705,7 @@ FocusNode luggageFocus = FocusNode();
         body: bookingData,
       );
 
-      if (response.isSuccess && response.jsonResponse?['code'] == 201) {
+      if (response.isSuccess) {
         final data = response.jsonResponse?['data'];
         final extra = response.jsonResponse?['extra'];
 
@@ -731,22 +743,19 @@ FocusNode luggageFocus = FocusNode();
   }
 
   /// ===============>
+  /// change test
   // Make a payment through the method ===============>
   makePayment({required String payId}) async {
     try {
       loader.value = true;
-
-      final bookingData = prepareBookingData();
-      LoggerUtils.debug('Booking Data: $bookingData');
 
       final String token =
           await SecureStorageService().read(AppConstants.accessToken) ?? '';
 
       final NetworkResponse response = await NetworkCaller().postRequest(
         AppUrl.makePayment(id: payId),
-
         headers: {'Authorization': 'Bearer $token'},
-        body: bookingData,
+        body: {},
       );
       LoggerUtils.error(response.jsonResponse);
       // showModalBottomSheet(
