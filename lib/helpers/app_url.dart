@@ -19,11 +19,19 @@ class AppUrl {
       '$baseUrl/user-setting/add-saved-place';
   static String passengerRemoveSavedPlace =
       '$baseUrl/user-setting/remove-saved-place';
-  static String createRide = '$baseUrl/job'; // POST - Create new ride booking
+  static String createRide = '$baseUrl/job';
+
+  static String rideUrl(String jobId) => '/job/$jobId';
+
+  static String driveDetailsUrl(String userId) => '/user/single/$userId';
+
+  static String getReviewUrl(String userId) => '/review/$userId';
+
   /// ===============>
   static String makePayment({required String id}) {
     return '$baseUrl/job/pay/$id';
   }
+
   static String userProfile = '$baseUrl/user/me';
   static String passengerOngoingRide = '$baseUrl/job/ongoing?limit=100000';
 

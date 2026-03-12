@@ -39,6 +39,7 @@ class MyApp extends StatelessWidget {
           builder: (BuildContext context, Widget? widget) {
             return ToastProvider(child: widget);
           },
+          initialBinding: DependencyInjection(),
         );
       },
       designSize: const Size(393, 852),

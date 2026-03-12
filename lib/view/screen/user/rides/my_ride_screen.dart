@@ -12,7 +12,7 @@ import '../../../../model/driver_registration/passenger_models/passenger_ongoing
 import '../../../widgets/widgets.dart';
 
 class PassengerMyRidesScreen extends StatelessWidget {
-  const PassengerMyRidesScreen({Key? key}) : super(key: key);
+  const PassengerMyRidesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,8 @@ class PassengerMyRidesScreen extends StatelessWidget {
               color: Colors.black,
               size: 24.w,
             ),
-            onPressed: () {},
+            onPressed: () {
+            },
           ),
         ],
       ),
