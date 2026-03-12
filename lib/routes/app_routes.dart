@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:split_ride/view/screen/driver/complete_profile_screen.dart';
+import '../view/screen/notification_screen.dart';
 import '../view/screen/screens.dart';
 
 class AppRoutes {
