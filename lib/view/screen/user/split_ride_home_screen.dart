@@ -3,13 +3,16 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
+import 'package:split_ride/routes/app_routes.dart';
 import 'package:split_ride/utils/app_colors.dart';
 import 'package:split_ride/utils/app_icons.dart';
 import 'package:split_ride/utils/app_image.dart';
 import 'package:split_ride/model/driver_registration/car_type_model.dart';
+import 'package:split_ride/view/screen/driver/notification_screen.dart';
 import '../../../controllers/passenger_home_controller.dart';
 import '../../widgets/location_auto_complete.dart';
 import '../../widgets/saved_place_bottomsheet.dart';
+import '../notification_screen.dart';
 import 'drwer_screen.dart';
 import 'over_view_screen.dart';
 
@@ -114,24 +117,30 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                         color: Color(0xFF2D3748),
                       ),
                     ),
-                    Container(
-                      width: 44.w,
-                      height: 44.h,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(30.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: const Icon(
-                        Icons.notifications_outlined,
-                        color: Color(0xFF2D3748),
-                        size: 24,
+                    InkWell(
+                      onTap: (){
+
+                        Get.toNamed(AppRoutes.notificationScreen);
+                      },
+                      child: Container(
+                        width: 44.w,
+                        height: 44.h,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(30.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.06),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.notifications_outlined,
+                          color: Color(0xFF2D3748),
+                          size: 24,
+                        ),
                       ),
                     ),
                   ],
