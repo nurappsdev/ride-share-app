@@ -34,6 +34,7 @@ class AppUrl {
 
   static String userProfile = '$baseUrl/user/me';
   static String passengerOngoingRide = '$baseUrl/job/ongoing?limit=100000';
+  static String notification = '$baseUrl/notification';
 
   // static String userPaymentHistoryDetails({required String id}) {
   //   return '${baseUrl}v1/service-bookings/with-costs-summary/$id';

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:split_ride/controllers/passenger_drawer_controller.dart';
 import 'package:split_ride/helpers/app_url.dart';
 import 'package:split_ride/helpers/logger_util.dart';
 import 'package:split_ride/helpers/secured_storage.dart';
@@ -240,6 +241,14 @@ class PersonalInfoController extends GetxController {
 
         Toast.showSuccess('Profile updated successfully');
         LoggerUtils.debug('Profile updated: $payload');
+        
+        /// Refresh drawer data
+        try {
+          final drawerController = Get.find<PassengerDrawerController>();
+          drawerController.fetchUserProfile();
+        } catch (_) {
+          // Drawer controller might not be initialized, ignore
+        }
       } else {
         Toast.showError(
           response.jsonResponse?['message'] ?? 'Failed to update profile',
