@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:split_ride/helpers/helpers.dart';
 import 'package:split_ride/helpers/logger_util.dart';
 import 'package:split_ride/model/driver_registration/login_both/login_model.dart';
 import 'package:split_ride/routes/app_routes.dart';
@@ -20,8 +21,8 @@ class SignInController extends GetxController {
   final RxString selectedRole = 'passenger'.obs;
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-    /// =======> LOGGED in user model ======> (common model)
-    final Rxn<LoginUserModel> loginUserModel = Rxn<LoginUserModel>();
+  /// =======> LOGGED in user model ======> (common model)
+  final Rxn<LoginUserModel> loginUserModel = Rxn<LoginUserModel>();
 
   handleSignIn() async {
     try {
@@ -31,8 +32,7 @@ class SignInController extends GetxController {
       }
       final String currentRole =
           await GetStorageModel().read(AppConstants.currentRole) ?? '';
-      final Map<String, dynamic> registrationForm = <String, dynamic>
-      {
+      final Map<String, dynamic> registrationForm = <String, dynamic>{
         "role": currentRole,
         "email": emailTEController.text.trim(),
         "password": passwordTEController.text,
@@ -49,6 +49,10 @@ class SignInController extends GetxController {
         loginUserModel.value = LoginUserModel.fromJson(
           postResponse.jsonResponse?['data']['user'],
         );
+        await PrefsHelper.setString(
+          AppConstants.bearerToken,
+          postResponse.jsonResponse?['data']?['tokens']?['accessToken'] ?? '',
+        );
         LoggerUtils.info(loginUserModel.value.toString());
         await SecureStorageService().write(
           AppConstants.accessToken,
@@ -57,7 +61,6 @@ class SignInController extends GetxController {
 
         /// =================> Login According the specified role from the backend ============= >
         if (loginUserModel.value == null) {
-
           LoggerUtils.error('User Model Parsing error !!!');
           return;
         }

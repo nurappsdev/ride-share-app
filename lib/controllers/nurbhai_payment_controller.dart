@@ -135,7 +135,7 @@ class NurBhaiPaymentController {
       final response = await http.get(
         Uri.parse('https://api.stripe.com/v1/charges?payment_intent=$paymentIntent'),
         headers: {
-          "Authorization": "Bearer ${PaymentConstants.secretKey}", // Use sk_test_... key here
+          "Authorization": "Bearer ${PaymentConstants.secretKey}",
           "Content-Type": "application/x-www-form-urlencoded"
         },
       );
