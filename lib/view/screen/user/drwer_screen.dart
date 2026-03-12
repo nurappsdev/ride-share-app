@@ -4,18 +4,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:split_ride/controllers/passenger_drawer_controller.dart';
+import 'package:split_ride/controllers/privacy_policy_controller.dart';
+import 'package:split_ride/helpers/app_url.dart';
 
 import '../../../routes/app_routes.dart';
+import 'rides/save_places_screen.dart';
 
-class CustomDrawer extends StatelessWidget {
+class CustomDrawer extends StatefulWidget {
   const CustomDrawer({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final PassengerDrawerController passengerDrawerController = Get.put(
-      PassengerDrawerController(),
-    );
+  State<CustomDrawer> createState() => _CustomDrawerState();
+}
 
+class _CustomDrawerState extends State<CustomDrawer> {
+  late PassengerDrawerController passengerDrawerController;
+
+  @override
+  void initState() {
+    super.initState();
+    passengerDrawerController = Get.put(PassengerDrawerController());
+    // Refresh user data when drawer opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      passengerDrawerController.refreshUserProfile();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Stack(
       children: [
         // 🔥 TRANSPARENT + BLUR BACKGROUND
@@ -39,14 +55,14 @@ class CustomDrawer extends StatelessWidget {
                 bottomRight: Radius.circular(30.r),
               ),
             ),
-            child: _drawerContent(context),
+            child: _drawerContent(context, passengerDrawerController),
           ),
         ),
       ],
     );
   }
 
-  Widget _drawerContent(BuildContext context) {
+  Widget _drawerContent(BuildContext context, PassengerDrawerController passengerDrawerController) {
     return Material(
       // Add Material widget as ancestor for ListTile
       color: Colors.transparent,
@@ -57,54 +73,118 @@ class CustomDrawer extends StatelessWidget {
           // Profile Card
           Padding(
             padding: EdgeInsets.all(16.w),
-            child: Container(
-              padding: EdgeInsets.all(12.w),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF6ECFF),
-                borderRadius: BorderRadius.circular(14.r),
-              ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 26.r,
-                    backgroundColor: Colors.purple[100],
-                    child: Icon(
-                      Icons.person,
-                      color: const Color(0xFF6552EC),
-                      size: 28.sp,
-                    ),
+            child: Obx(() {
+              if (passengerDrawerController.isLoadingUser.value) {
+                // Loading state
+                return Container(
+                  padding: EdgeInsets.all(12.w),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF6ECFF),
+                    borderRadius: BorderRadius.circular(14.r),
                   ),
-                  SizedBox(width: 12.w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(
-                        'Kimmy Natasa',
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontFamily: 'Outfit',
-                          fontWeight: FontWeight.w600,
+                      CircleAvatar(
+                        radius: 26.r,
+                        backgroundColor: Colors.purple[100],
+                        child: Icon(
+                          Icons.person,
+                          color: const Color(0xFF6552EC),
+                          size: 28.sp,
                         ),
                       ),
-                      ShaderMask(
-                        shaderCallback: (bounds) => const LinearGradient(
-                          colors: [Color(0xFF45C4D9), Color(0xFF6B7FEC)],
-                        ).createShader(bounds),
-                        child: Text(
-                          'Verified',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontFamily: 'Outfit',
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                      SizedBox(width: 12.w),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 120.w,
+                            height: 18.h,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF6552EC).withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(4.r),
+                            ),
                           ),
-                        ),
+                          SizedBox(height: 4.h),
+                          Container(
+                            width: 80.w,
+                            height: 14.h,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF6552EC).withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(4.r),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
+                );
+              }
+
+              // User data loaded
+              return Container(
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF6ECFF),
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
+                child: Row(
+                  children: [
+                    // Profile Image or Avatar
+                    CircleAvatar(
+                      radius: 26.r,
+                      backgroundColor: Colors.purple[100],
+                      backgroundImage: passengerDrawerController.userProfileImage != null &&
+                              passengerDrawerController.userProfileImage!.isNotEmpty
+                          ? NetworkImage('${AppUrl.imageServeUrl}/${passengerDrawerController.userProfileImage}')
+                          : null,
+                      child: passengerDrawerController.userProfileImage == null ||
+                              passengerDrawerController.userProfileImage!.isEmpty
+                          ? Icon(
+                              Icons.person,
+                              color: const Color(0xFF6552EC),
+                              size: 28.sp,
+                            )
+                          : null,
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            passengerDrawerController.userName,
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontFamily: 'Outfit',
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF2D3748),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 4.h),
+                          ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              colors: [Color(0xFF45C4D9), Color(0xFF6B7FEC)],
+                            ).createShader(bounds),
+                            child: Text(
+                              'Verified',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontFamily: 'Outfit',
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
           ),
 
           const Divider(),
@@ -123,12 +203,23 @@ class CustomDrawer extends StatelessWidget {
                   },
                   child: _menu(Icons.person_outline, "Personal Info"),
                 ),
-                _menu(Icons.lock_outline, "Login & Security"),
+                InkWell(
+                    onTap: () {
+                      Get.toNamed(
+                        AppRoutes.resetPassScreen,
+                        preventDuplicates: false,
+                      );
+                    },
+                    child: _menu(Icons.lock_outline, "Reset Password")),
                 InkWell(
                   onTap: () {
                     Get.toNamed(
                       AppRoutes.privacyPolicyAllScreen,
                       preventDuplicates: false,
+                      arguments: {
+                        'contentType': ContentType.termsAndConditions,
+                        'title': 'Terms & Conditions',
+                      },
                     );
                   },
                   child: _menu(
@@ -141,6 +232,23 @@ class CustomDrawer extends StatelessWidget {
                     Get.toNamed(
                       AppRoutes.privacyPolicyAllScreen,
                       preventDuplicates: false,
+                      arguments: {
+                        'contentType': ContentType.aboutUs,
+                        'title': 'About Us',
+                      },
+                    );
+                  },
+                  child: _menu( Icons.description_outlined, "About Us"),
+                ),
+                InkWell(
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.privacyPolicyAllScreen,
+                      preventDuplicates: false,
+                      arguments: {
+                        'contentType': ContentType.privacyPolicy,
+                        'title': 'Privacy Policy',
+                      },
                     );
                   },
                   child: _menu(Icons.shield_outlined, "Privacy"),
@@ -154,8 +262,12 @@ class CustomDrawer extends StatelessWidget {
                   },
                   child: _menu(Icons.help_outline, "Help & Support"),
                 ),
-                _menu(Icons.bookmark_outline, "Saved Places"),
-                _menu(Icons.language_outlined, "Language"),
+                InkWell(
+                    onTap: (){
+                      Get.to(()=>SavedPlacesScreen());
+                    },
+                    child: _menu(Icons.bookmark_outline, "Saved Places")),
+                // _menu(Icons.language_outlined, "Language"),
               ],
             ),
           ),
@@ -215,6 +327,11 @@ class CustomDrawer extends StatelessWidget {
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 }
 

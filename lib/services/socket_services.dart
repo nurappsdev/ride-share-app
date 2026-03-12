@@ -1,144 +1,104 @@
-import 'dart:async';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:split_ride/helpers/app_url.dart';
 
-import '../main.dart';
-import 'api_constants.dart';
+import '../helpers/prefs_helper.dart';
+import '../utils/app_constant.dart';
 
-class SocketServices {
-  static final SocketServices _socketApi = SocketServices._internal();
-  late IO.Socket socket;
-  static String? token;
+/// **SocketClient Service**
+///
+/// A singleton service wrapper around `socket_io_client`.
+/// Manages the raw WebSocket connection, including:
+/// - Initialization with authentication tokens.
+/// - Automatic reconnection handling.
+/// - Establishing the base handshake events.
+class SocketClient extends GetxService {
+  static SocketClient get to => Get.find();
 
-  factory SocketServices() {
-    return _socketApi;
-  }
+  IO.Socket? _socket;
 
-  SocketServices._internal();
+  /// Returns true if the socket is currently connected to the server.
+  bool get isConnected => _socket != null && _socket!.connected;
 
-  Future<void> init({String? userId, fcmToken, BuildContext? context}) async {
-    // if(socket.connected){
-    //   disconnect(isManual: true);
-    // }
+  /// Initializes the socket connection.
+  ///
+  /// This method forces a disconnect/reconnect cycle to ensure the
+  /// authentication token is always fresh (e.g., after login/logout).
+  Future<SocketClient> init() async {
+    // 1. Retrieve the latest token from storage
+    String freshToken = await PrefsHelper.getString(AppConstants.bearerToken);
+    // debugPrint("🔌 Socket: Initializing with Token: ${freshToken.substring(0, 10)}...");
 
-    socket = IO.io(
-      ApiConstants.socketBaseUrl,
-      // '${ApiConstants.imageBaseUrl}?token=$token',
-      IO.OptionBuilder()
-          .setTransports(['websocket'])
-          .enableReconnection()
-          .enableForceNew()
-          .build(),
-    );
+    try {
+      // 2. Clean up previous connection if it exists
+      if (_socket != null) {
+        _socket!.disconnect();
+        _socket!.dispose();
+      }
 
-    _setupSocketListeners(token.toString(), userId.toString(), context);
-    socket.onConnect((_) {
-      socket.emit("user-connected", {
-        "userId": "$userId",
-        "fcmToken": "$fcmToken",
-      });
-    }); // Ensure connection starts
-  }
+      // 3. Configure the Socket.IO instance
+      _socket = IO.io(
+        AppUrl.socketUrl,
+        IO.OptionBuilder()
+            .setTransports(['websocket']) // Force WebSocket only (no polling)
+            .setExtraHeaders({"token": freshToken})
+            .enableReconnection()
+            .build(),
+      );
 
-  void _setupSocketListeners(String token, userId, BuildContext? context) {
-    socket.onConnect((_) {
-      print('========> Socket connected: ${socket.connected}');
-    });
+      // 4. Setup internal event listeners
+      _setupInternalListeners(freshToken);
 
-    socket.onConnectError((err) {
-      print('========> Socket connect error: $err');
-    });
-
-    socket.onReconnect((_) {
-      print('========> Socket reconnected! $token');
-      // init();
-    });
-
-    socket.onError((error) {
-      print('========> Socket error: $error');
-    });
-
-    // // Global listen
-    // socket.on("negotiate", (data) {
-    //   _showGlobalAlert(context!, data);
-    // });
-
-    // socket.on("instant-call-request-$userId", (data) {
-    //   print("=======>request  = \n =====\n ==========\n   data: $data");
-    //
-    //   if (data != null) {
-    //     showGlobalAlert(data);
-    //   }
-    // });
-
-    // socket.on("instant-call-response-$userId", (data) {
-    //   print(
-    //     "=======> response =========== \n =====\n ==========\n data: $data",
-    //   );
-    //
-    //   if (data != null) {
-    //     showGlobalAlertPatient(data);
-    //   }
-    // });
-  }
-
-  Future<dynamic> emitWithAck(String event, dynamic body) async {
-    Completer<dynamic> completer = Completer<dynamic>();
-    socket.emitWithAck(
-      event,
-      body,
-      ack: (data) {
-        completer.complete(data ?? 1);
-      },
-    );
-    return completer.future;
-  }
-
-  void emit(String event, dynamic body) {
-    if (body != null) {
-      socket.emit(event, body);
-      print('===========> Emit $event \n $body');
+      // 5. Connect
+      _socket!.connect();
+    } catch (e) {
+      // debugPrint('❌ Socket: Init failed: $e');
     }
+    return this;
   }
 
-  void disconnect({bool isManual = false}) {
-    if (isManual) {
-      socket.clearListeners(); // Remove all existing listeners
-      socket.disconnect();
-      socket.destroy();
-      print('========> Socket manually disconnected');
-    } else {
-      socket.disconnect();
-      print('========> Socket disconnected without destroying');
+  void _setupInternalListeners(String token) {
+    _socket?.onConnect((_) {
+      // debugPrint('✅ Socket: Connected [${_socket?.id}]');
+      // debugPrint("📤 Socket: Sending 'user-connected' with fresh token...");
+
+      // Standard Handshake
+      _socket?.emit('user-connected', {'token': token});
+    });
+
+    _socket?.on('user-connected-error', (data) {
+      // debugPrint("❌ HANDSHAKE FAILED: $data");
+    });
+
+    _socket?.on('user-connected-success', (data) {
+      // debugPrint("✅ HANDSHAKE SUCCESS! You are now online.");
+    });
+
+    _socket?.onDisconnect((_) {
+      // debugPrint('⚠️ Socket: Disconnected');
+    });
+  }
+
+  // ---------------------------------------------------------------------------
+  // GENERIC METHODS (Wrappers)
+  // ---------------------------------------------------------------------------
+
+  /// Emits an event to the server safely.
+  void emit(String event, dynamic data) {
+    if (!isConnected) {
+      // debugPrint("⚠️ Socket: Cannot emit '$event'. Not connected.");
+      return;
     }
+    _socket?.emit(event, data);
   }
 
+  /// Registers an event listener.
+  void on(String event, Function(dynamic) callback) {
+    _socket?.on(event, callback);
+  }
 
+  /// Unregisters an event listener.
+  void off(String event) {
+    _socket?.off(event);
+  }
 }
-
-
-
-
-// void _showGlobalAlert(BuildContext? context, dynamic data) {
-//   // যদি context null হয়ে যায় (যেমন app background), তখন navigatorKey ব্যবহার করো
-//   final ctx = navigatorKey.currentContext;
-//   if (ctx == null) return;
-//
-//   showDialog(
-//     context: ctx,
-//     builder: (_) => AlertDialog(
-//       title: Text("New Alert"),
-//       content: Text(data.toString()),
-//       actions: [
-//         TextButton(
-//           child: Text("OK"),
-//           onPressed: () => Navigator.pop(ctx),
-//         )
-//       ],
-//     ),
-//   );
-//
-// }
-
-

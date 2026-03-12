@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:split_ride/helpers/helpers.dart';
+import 'package:split_ride/services/socket_services.dart';
 import 'package:split_ride/view/widgets/toast_manager.dart';
 import 'package:split_ride/themes/light_theme.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -17,6 +18,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Get.lazyPut(() => ConnectivityService());
   await GetStorage.init();
+  await Get.putAsync(() => SocketClient().init());
   runApp(MyApp());
 }
 
@@ -39,6 +41,7 @@ class MyApp extends StatelessWidget {
           builder: (BuildContext context, Widget? widget) {
             return ToastProvider(child: widget);
           },
+          initialBinding: DependencyInjection(),
         );
       },
       designSize: const Size(393, 852),
