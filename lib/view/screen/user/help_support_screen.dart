@@ -1,33 +1,19 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:split_ride/utils/app_colors.dart';
-import 'package:split_ride/utils/app_icons.dart';
-import 'dart:io';
-import 'package:image_picker/image_picker.dart';
 import 'package:get/get.dart';
+import 'package:split_ride/controllers/help_support_controller.dart';
+import 'package:split_ride/utils/app_colors.dart';
+import 'package:split_ride/view/widgets/custom_loading.dart';
 
 import '../../widgets/widgets.dart';
 
-class HelpSupportScreen extends StatefulWidget {
+class HelpSupportScreen extends StatelessWidget {
   const HelpSupportScreen({super.key});
 
   @override
-  State<HelpSupportScreen> createState() => _HelpSupportScreenState();
-}
-
-class _HelpSupportScreenState extends State<HelpSupportScreen> {
-  final TextEditingController nameCtrl = TextEditingController();
-  final TextEditingController phoneCtrl = TextEditingController();
-  final TextEditingController emailCtrl = TextEditingController();
-
-
-
-
-  @override
   Widget build(BuildContext context) {
+    final HelpSupportController controller = Get.put(HelpSupportController());
+
     return SafeArea(
       child: Scaffold(
         backgroundColor: Colors.white,
@@ -56,110 +42,160 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
           ],
         ),
 
-        body: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 20.w),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
+        body: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CustomLoading());
+          }
 
-              SizedBox(height: 20.h),
+          return SingleChildScrollView(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
+            child: Form(
+              key: controller.formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 20.h),
 
-              Container(
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(borderRadius: BorderRadius.circular(30),color:   Color(0xfff4f4f4)),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  // Contact Info Card
+                  Container(
+                    padding: EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(30),
+                      color: const Color(0xfff4f4f4),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Icon(Icons.email_outlined,color: AppColors.primary3rdColor,),
-                        SizedBox(width: 10.w,),
-                        CustomText(text: "info@splitride.com",),
+                        Row(
+                          children: [
+                            Icon(Icons.email_outlined, color: AppColors.primary3rdColor),
+                            SizedBox(width: 10.w),
+                            CustomText(text: "info@splitride.com"),
+                          ],
+                        ),
+                        SizedBox(height: 20.h),
+                        Row(
+                          children: [
+                            Icon(Icons.phone_in_talk, color: AppColors.primary3rdColor),
+                            SizedBox(width: 10.w),
+                            CustomText(text: "+1234 567 8901"),
+                          ],
+                        ),
                       ],
                     ),
-                    SizedBox(height: 20.h,),
-                    Row(
-                      children: [
-                        Icon(Icons.phone_in_talk,color: AppColors.primary3rdColor,),
-                        SizedBox(width: 10.w,),
-                        CustomText(text: "+1234 567 8901",),
-                      ],
+                  ),
+
+                  SizedBox(height: 32.h),
+
+                  // Full Name (Non-editable)
+                  _label('Full Name'),
+                  SizedBox(height: 8.h),
+                  AbsorbPointer(
+                    child: CustomTextField(
+                      controller: TextEditingController(text: controller.userName.value),
+                      hintText: 'Your name',
+                      prefixIcon: Padding(
+                        padding: EdgeInsets.all(8.r),
+                        child: Icon(Icons.person_outline, color: AppColors.primary3rdColor),
+                      ),
+                      filColor: const Color(0xFFF5F5F5),
                     ),
-                  ],
-                ),
-                ),
+                  ),
 
-              SizedBox(height: 32.h),
+                  SizedBox(height: 20.h),
 
-              /// Full Name
-              _label('Full Name'),
-              SizedBox(height: 8.h),
-              CustomTextField(
-                controller: nameCtrl,
-                hintText: 'Enter name',
+                  // Phone Number (Non-editable)
+                  _label('Phone Number'),
+                  SizedBox(height: 8.h),
+                  AbsorbPointer(
+                    child: CustomTextField(
+                      controller: TextEditingController(text: controller.userPhone.value),
+                      hintText: 'Enter Phone Number',
+                      keyboardType: TextInputType.phone,
+                      prefixIcon: Padding(
+                        padding: EdgeInsets.all(8.r),
+                        child: Icon(Icons.phone_in_talk_outlined, color: AppColors.primary3rdColor),
+                      ),
+                      filColor: const Color(0xFFF5F5F5),
+                    ),
+                  ),
 
-                prefixIcon:
-                Padding(
-                  padding:  EdgeInsets.all(8.r),
-                  child: Icon(Icons.person_outline, color: AppColors.primary3rdColor),
-                ),
+                  SizedBox(height: 20.h),
+
+                  // Email (Non-editable)
+                  _label('Email'),
+                  SizedBox(height: 8.h),
+                  AbsorbPointer(
+                    child: CustomTextField(
+                      controller: TextEditingController(text: controller.userEmail.value),
+                      hintText: 'Enter Email',
+                      keyboardType: TextInputType.emailAddress,
+                      prefixIcon: Padding(
+                        padding: EdgeInsets.all(8.r),
+                        child: Icon(Icons.email_outlined, color: AppColors.primary3rdColor),
+                      ),
+                      filColor: const Color(0xFFF5F5F5),
+                    ),
+                  ),
+
+                  SizedBox(height: 20.h),
+
+                  // Booking ID (Editable)
+                  _label('Booking ID'),
+                  SizedBox(height: 8.h),
+                  CustomTextField(
+                    controller: controller.bookingIdController,
+                    hintText: 'Enter your booking ID',
+                    keyboardType: TextInputType.text,
+                    prefixIcon: Padding(
+                      padding: EdgeInsets.all(8.r),
+                      child: Icon(Icons.book_online, color: AppColors.primary3rdColor),
+                    ),
+                  ),
+                  SizedBox(height: 8.h),
+                  CustomText(
+                    color: Colors.grey,
+                    textAlign: TextAlign.start,
+                    text: "To find your Booking ID, go to Rides, select your ride, and you'll\nsee the Booking ID in the ride details.",
+                    fontsize: 12.sp,
+                  ),
+
+                  SizedBox(height: 20.h),
+
+                  // Your Message (Editable)
+                  _label('Your Message'),
+                  SizedBox(height: 8.h),
+                  CustomTextField(
+                    controller: controller.messageController,
+                    maxLine: 5,
+                    hintText: 'Describe your issue or inquiry...',
+                    keyboardType: TextInputType.multiline,
+                    contentPaddingHorizontal: 16.w,
+                    contentPaddingVertical: 12.h,
+                  ),
+
+                  SizedBox(height: 40.h),
+                ],
               ),
+            ),
+          );
+        }),
 
-              SizedBox(height: 20.h),
-
-              /// Phone Number
-              _label('Phone Number'),
-              SizedBox(height: 8.h),
-
-              CustomTextField(
-
-                controller: phoneCtrl,
-                hintText: 'Enter Phone Number',
-                keyboardType: TextInputType.phone,
-                prefixIcon:          Padding(
-                    padding:  EdgeInsets.all(8.r),child: Icon(Icons.phone_in_talk_outlined,color: AppColors.primary3rdColor,)),
-              ),
-
-              SizedBox(height: 20.h),
-
-              /// Email
-              _label('Booking ID'),
-              SizedBox(height: 8.h),
-              CustomTextField(
-                controller: emailCtrl,
-                hintText: 'Enter Your booking ID (Optional)',
-                keyboardType: TextInputType.emailAddress,
-                prefixIcon:          Padding(
-                    padding:  EdgeInsets.all(8.r),child: Icon(Icons.book_online, color: AppColors.primary3rdColor)),
-              ),
-              SizedBox(height: 8.h,),
-              CustomText(
-                color: Colors.grey,
-                textAlign: TextAlign.start,text: "To find your Booking ID, go to Rides, select your ride, and you’ll \nsee the Booking ID in the ride details.",fontsize: 12.sp,),
-              SizedBox(height: 20.h),
-              _label('Your Message'),
-              SizedBox(height: 8.h,),
-              CustomTextField(
-                controller: emailCtrl,
-                maxLine: 4,
-                hintText: 'Enter Your booking ID (Optional)',
-                keyboardType: TextInputType.emailAddress,
-              ),
-              SizedBox(height: 40.h),
-              // CustomButtonCommon(title: "Save Change", onpress: (){} ,useGradient: true, )
-            ],
-          ),
-        ),
-
-        /// Save Button
-
+        // Submit Button
         bottomNavigationBar: Padding(
-            padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 24.h),
-            child: CustomButtonCommon(title: "Submit", onpress: (){
-              _showVerificationDialog(context);
-
-            },useGradient: true,)
-
+          padding: EdgeInsets.fromLTRB(20.w, 0, 20.w, 24.h),
+          child: Obx(() => controller.isSubmitting.value
+              ? const Center(child: CircularProgressIndicator(color: AppColors.primary3rdColor))
+              : CustomButtonCommon(
+                  title: "Submit",
+                  onpress: () async {
+                    final success = await controller.submitReport();
+                    if (success && context.mounted) {
+                      _showSuccessDialog(context);
+                    }
+                  },
+                  useGradient: true,
+                )),
         ),
       ),
     );
@@ -170,16 +206,15 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
     return Text(
       text,
       style: TextStyle(
-          fontFamily: 'Outfit',
-          fontSize: 13.sp,
-          fontWeight: FontWeight.w500,
-          color:Colors.black
+        fontFamily: 'Outfit',
+        fontSize: 13.sp,
+        fontWeight: FontWeight.w500,
+        color: Colors.black,
       ),
     );
   }
 
-
-  void _showVerificationDialog(BuildContext context) {
+  void _showSuccessDialog(BuildContext context) {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -246,7 +281,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                   SizedBox(height: 32.h),
                   // Title
                   Text(
-                    "You're Verified!",
+                    "Report Submitted!",
                     style: TextStyle(
                       fontSize: 28.sp,
                       fontFamily: "Outfit",
@@ -258,7 +293,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                   SizedBox(height: 12.h),
                   // Subtitle
                   Text(
-                    'You have successfully verified your account.',
+                    'Your report has been submitted successfully. Our support team will get back to you soon.',
                     style: TextStyle(
                       fontSize: 15.sp,
                       fontFamily: "Outfit",
@@ -269,7 +304,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 36.h),
-                  // Start Button
+                  // Go Back Button
                   Container(
                     width: double.infinity,
                     height: 60.h,
@@ -294,9 +329,8 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                     ),
                     child: ElevatedButton(
                       onPressed: () {
-                       Get.back();
-                        // Navigate to home or next screen
-                        print('Start Enjoying Split Ride');
+                        Get.back();
+                        Get.back();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
@@ -306,7 +340,7 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
                         ),
                       ),
                       child: Text(
-                        'Go Back Home',
+                        'Go Back',
                         style: TextStyle(
                           fontSize: 17.sp,
                           fontFamily: "Outfit",
@@ -325,5 +359,4 @@ class _HelpSupportScreenState extends State<HelpSupportScreen> {
       },
     );
   }
-
 }

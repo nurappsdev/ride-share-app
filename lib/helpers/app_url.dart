@@ -38,6 +38,16 @@ class AppUrl {
   static String userProfile = '$baseUrl/user/me';
   static String passengerOngoingRide = '$baseUrl/job/ongoing?limit=100000';
   static String notification = '$baseUrl/notification';
+  static String report = '$baseUrl/report';
+  
+  // Auth endpoints
+  static String resetPassword = '$baseUrl/auth/reset-password';
+  static String changePassword = '$baseUrl/auth/change-password';
+  
+  // Settings endpoints
+  static String privacyPolicy = '$baseUrl/setting/privacy-policy';
+  static String termsAndConditions = '$baseUrl/setting/terms-conditions';
+  static String aboutUs = '$baseUrl/setting/about-us';
 
   // static String userPaymentHistoryDetails({required String id}) {
   //   return '${baseUrl}v1/service-bookings/with-costs-summary/$id';

@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:split_ride/view/screen/driver/complete_profile_screen.dart';
 import '../view/screen/notification_screen.dart';
 import '../view/screen/screens.dart';
+import '../view/screen/user/reset_password_screen.dart';
 
 class AppRoutes {
   static const String splashScreen = "/SplashScreen.dart";
@@ -84,6 +85,7 @@ class AppRoutes {
     GetPage(name: driverMyRideScreen, page: () => MyRiedsDriverScreen()),
     GetPage(name: driverMyVehiclesScreen, page: () => DriverMyVehiclesScreen()),
     GetPage(name: vihicleAddScreen, page: () => VihicleAddScreen()),
+    GetPage(name: resetPassScreen, page: () => ChangePasswordScreen()),
     // GetPage(name: overViewScreen, page: () => OverViewScreen()),
 
     // GetPage(name: onBoardScreen, page: () => OnboardingScreen()),
