@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:split_ride/controllers/passenger_drawer_controller.dart';
+import 'package:split_ride/controllers/privacy_policy_controller.dart';
 import 'package:split_ride/helpers/app_url.dart';
 
 import '../../../routes/app_routes.dart';
@@ -202,12 +203,23 @@ class _CustomDrawerState extends State<CustomDrawer> {
                   },
                   child: _menu(Icons.person_outline, "Personal Info"),
                 ),
-                // _menu(Icons.lock_outline, "Login & Security"),
+                InkWell(
+                    onTap: () {
+                      Get.toNamed(
+                        AppRoutes.resetPassScreen,
+                        preventDuplicates: false,
+                      );
+                    },
+                    child: _menu(Icons.lock_outline, "Reset Password")),
                 InkWell(
                   onTap: () {
                     Get.toNamed(
                       AppRoutes.privacyPolicyAllScreen,
                       preventDuplicates: false,
+                      arguments: {
+                        'contentType': ContentType.termsAndConditions,
+                        'title': 'Terms & Conditions',
+                      },
                     );
                   },
                   child: _menu(
@@ -220,6 +232,23 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     Get.toNamed(
                       AppRoutes.privacyPolicyAllScreen,
                       preventDuplicates: false,
+                      arguments: {
+                        'contentType': ContentType.aboutUs,
+                        'title': 'About Us',
+                      },
+                    );
+                  },
+                  child: _menu( Icons.description_outlined, "About Us"),
+                ),
+                InkWell(
+                  onTap: () {
+                    Get.toNamed(
+                      AppRoutes.privacyPolicyAllScreen,
+                      preventDuplicates: false,
+                      arguments: {
+                        'contentType': ContentType.privacyPolicy,
+                        'title': 'Privacy Policy',
+                      },
                     );
                   },
                   child: _menu(Icons.shield_outlined, "Privacy"),
