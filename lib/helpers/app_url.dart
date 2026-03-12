@@ -4,9 +4,12 @@ class AppUrl {
   // static const String baseUrl = 'http://127.0.0.1:8080/api/v1';
   // static const String baseUrl = 'https://6c0hk6c2-8080.inc1.devtunnels.ms/api/v1';
   static const String baseUrl =
-      'https://zbs009tm-8080.asse.devtunnels.ms/api/v1';
+      'http://10.10.11.90:8080/api/v1';
+
+  static const String socketUrl =
+      'http://10.10.11.90:8080';
   static const String imageUploadUrl = '$baseUrl/upload';
-  static const String imageServeUrl = 'https://zbs009tm-8080.asse.devtunnels.ms/uploads';
+  static const String imageServeUrl = 'http://10.10.11.90:8080/uploads';
 
   static String registerUser = '$baseUrl/auth/register';
   static String login = '$baseUrl/auth/login';
