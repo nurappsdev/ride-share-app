@@ -23,6 +23,8 @@ class AppUrl {
   static String passengerRemoveSavedPlace =
       '$baseUrl/user-setting/remove-saved-place';
   static String createRide = '$baseUrl/job';
+  static String cancelRide = '$baseUrl/job/cancel';
+  static String providerJobReqUrl = '/job/provider/requested';
 
   static String rideUrl(String jobId) => '/job/$jobId';
 

@@ -212,13 +212,13 @@ class RideCard extends StatelessWidget {
   final double cancellationFee;
 
   const RideCard({
-    Key? key,
+    super.key,
     required this.ride,
     required this.isPastRide,
     required this.onCancel,
     required this.canCancel,
     required this.cancellationFee,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

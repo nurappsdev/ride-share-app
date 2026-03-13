@@ -1,91 +1,30 @@
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart'; // Used for formatting the dateTime
 import 'package:split_ride/routes/app_routes.dart';
 import 'package:split_ride/utils/app_colors.dart';
 import 'package:split_ride/utils/app_icons.dart';
 
+import '../../../controllers/passenger_ride_controller.dart';
 import '../../widgets/widgets.dart';
+// Import your controller and model
+// import 'package:split_ride/controllers/passenger_my_rides_controller.dart'; 
+// import 'package:split_ride/models/passenger_ongoing_rides.dart';
 
-
-class MyRiedsDriverScreen extends StatefulWidget {
+class MyRiedsDriverScreen extends StatelessWidget {
   const MyRiedsDriverScreen({Key? key}) : super(key: key);
 
   @override
-  State<MyRiedsDriverScreen> createState() => _MyRiedsDriverScreenState();
-}
-
-class _MyRiedsDriverScreenState extends State<MyRiedsDriverScreen> {
-  bool isUpcoming = true;
-
-  List<Map<String, dynamic>> upcomingRides = [
-    {
-      'pickupLocation': '1901 Thornridge Cir. Shiloh',
-      'dropLocation': '4140 Parker Rd. Allentown',
-      'bookingId': 'SR12B4E6',
-      'dateTime': '16 July 2023, 10:30 PM',
-      'driver': 'Jane Cooper',
-      'carSeats': '4',
-      'paymentStatus': 'Advance Paid',
-      'showCancel': true,
-    },
-    {
-      'pickupLocation': '1901 Thornridge Cir. Shiloh',
-      'dropLocation': '4140 Parker Rd. Allentown',
-      'bookingId': 'SR12B4E7',
-      'dateTime': '18 July 2023, 2:00 PM',
-      'driver': 'John Doe',
-      'carSeats': '3',
-      'paymentStatus': 'Pending',
-      'showCancel': false,
-    },
-    {
-      'pickupLocation': '1901 Thornridge Cir. Shiloh',
-      'dropLocation': '4140 Parker Rd. Allentown',
-      'bookingId': 'SR12B4E7',
-      'dateTime': '18 July 2023, 2:00 PM',
-      'driver': 'John Doe',
-      'carSeats': '3',
-      'paymentStatus': 'Pending',
-      'showCancel': false,
-    },
-  ];
-
-  List<Map<String, dynamic>> pastRides = [
-    {
-      'pickupLocation': '123 Main St, New York',
-      'dropLocation': '456 Park Ave, New York',
-      'bookingId': 'SR12B4E8',
-      'dateTime': '10 June 2023, 9:15 AM',
-      'driver': 'Robert Smith',
-      'carSeats': '4',
-      'paymentStatus': 'Payment Status',
-      'showCancel': false,
-    },
-    {
-      'pickupLocation': '789 Broadway, San Francisco',
-      'dropLocation': '321 Market St, San Francisco',
-      'bookingId': 'SR12B4E9',
-      'dateTime': '5 May 2023, 3:45 PM',
-      'driver': 'Emily Johnson',
-      'carSeats': '2',
-      'paymentStatus': 'Payment Status',
-      'showCancel': false,
-    },
-  ];
-
-  @override
   Widget build(BuildContext context) {
-
+    // Initialize the controller
+    final controller = Get.put(PassengerMyRidesController());
 
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5FF),
       appBar: AppBar(
         backgroundColor: Colors.white,
-
         elevation: 0,
         title: CustomText(
           text: 'My Rides',
@@ -106,32 +45,38 @@ class _MyRiedsDriverScreenState extends State<MyRiedsDriverScreen> {
       ),
       body: Column(
         children: [
+          // ================= TAB BUTTONS =================
           Padding(
             padding: EdgeInsets.all(12.r),
             child: Container(
-              decoration: BoxDecoration(borderRadius: BorderRadius.circular(34.r),color: Colors.grey[200]),
-              child: Row(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(34.r),
+                color: Colors.grey[200],
+              ),
+              child: Obx(() => Row(
                 children: [
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => setState(() => isUpcoming = true),
+                      onTap: () => controller.switchToUpcoming(),
                       child: Container(
                         padding: EdgeInsets.symmetric(vertical: 12.h),
                         decoration: BoxDecoration(
-                          gradient: isUpcoming
+                          gradient: controller.isUpcoming.value
                               ? const LinearGradient(
-                            colors: [ Color(0xFF45C4D9),
+                            colors: [
+                              Color(0xFF45C4D9),
                               Color(0xFF6B7FEC),
-                              Color(0xFFB565D8),],
+                              Color(0xFFB565D8),
+                            ],
                           )
                               : null,
-                          color: isUpcoming ? null : Colors.transparent,
+                          color: controller.isUpcoming.value ? null : Colors.transparent,
                           borderRadius: BorderRadius.circular(34.r),
                         ),
                         child: Center(
                           child: CustomText(
                             text: 'Scheduled Rides',
-                            color: isUpcoming ? Colors.white : AppColors.primary3rdColor,
+                            color: controller.isUpcoming.value ? Colors.white : AppColors.primary3rdColor,
                             fontsize: 14.sp,
                             fontWeight: FontWeight.w800,
                           ),
@@ -142,24 +87,26 @@ class _MyRiedsDriverScreenState extends State<MyRiedsDriverScreen> {
                   SizedBox(width: 12.w),
                   Expanded(
                     child: GestureDetector(
-                      onTap: () => setState(() => isUpcoming = false),
+                      onTap: () => controller.switchToPast(),
                       child: Container(
                         padding: EdgeInsets.symmetric(vertical: 12.h),
                         decoration: BoxDecoration(
-                          gradient: !isUpcoming
+                          gradient: !controller.isUpcoming.value
                               ? const LinearGradient(
-                            colors: [ Color(0xFF45C4D9),
+                            colors: [
+                              Color(0xFF45C4D9),
                               Color(0xFF6B7FEC),
-                              Color(0xFFB565D8),],
+                              Color(0xFFB565D8),
+                            ],
                           )
                               : null,
-                          color: !isUpcoming ? null : Colors.transparent,
+                          color: !controller.isUpcoming.value ? null : Colors.transparent,
                           borderRadius: BorderRadius.circular(25.w),
                         ),
                         child: Center(
                           child: CustomText(
                             text: 'Completed',
-                            color: !isUpcoming ? Colors.white : AppColors.primary3rdColor,
+                            color: !controller.isUpcoming.value ? Colors.white : AppColors.primary3rdColor,
                             fontsize: 14.sp,
                             fontWeight: FontWeight.w800,
                           ),
@@ -168,46 +115,76 @@ class _MyRiedsDriverScreenState extends State<MyRiedsDriverScreen> {
                     ),
                   ),
                 ],
-              ),
-            ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              padding: EdgeInsets.all(16.w),
-              itemCount: isUpcoming ? upcomingRides.length : pastRides.length,
-              itemBuilder: (context, index) {
-                final ride = isUpcoming ? upcomingRides[index] : pastRides[index];
-                return Padding(
-                  padding: EdgeInsets.only(
-                    bottom: index < (isUpcoming ? upcomingRides.length : pastRides.length) - 1 ? 16.h : 0,
-                  ),
-                  child: InkWell(
-                    onTap: (){
-                      Get.toNamed(AppRoutes.trackDriversScreen,preventDuplicates: false);
-                    },
-                    child: RideCards(
-                      pickupLocation: ride['pickupLocation'],
-                      dropLocation: ride['dropLocation'],
-                      bookingId: ride['bookingId'],
-                      dateTime: ride['dateTime'],
-                      driver: ride['driver'],
-                      carSeats: ride['carSeats'],
-                      paymentStatus: ride['paymentStatus'],
-                      showCancel: ride['showCancel'],
-                      isPastRide: !isUpcoming, // Show "Download invoice" only for past rides
-                    ),
-                  ),
-                );
-              },
+              )),
             ),
           ),
 
+          // ================= RIDES LIST =================
+          Expanded(
+            child: Obx(() {
+              // 1. Loading State
+              if (controller.isCurrentTabLoading) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              // 2. Empty State
+              if (controller.currentRides.isEmpty) {
+                return Center(
+                  child: CustomText(
+                    text: 'No rides found.',
+                    color: Colors.grey,
+                    fontsize: 16.sp,
+                  ),
+                );
+              }
+
+              // 3. Data State
+              return ListView.builder(
+                padding: EdgeInsets.all(16.w),
+                itemCount: controller.currentRides.length,
+                itemBuilder: (context, index) {
+                  final ride = controller.currentRides[index];
+
+                  // Format the DateTime for the UI
+                  String formattedDate = 'TBD';
+                  if (ride.dateTime != null) {
+                    formattedDate = DateFormat('dd MMMM yyyy, hh:mm a').format(ride.dateTime!.toLocal());
+                  }
+
+                  return Padding(
+                    padding: EdgeInsets.only(
+                      bottom: index < controller.currentRides.length - 1 ? 16.h : 0,
+                    ),
+                    child: InkWell(
+                      onTap: () {
+                        Get.toNamed(AppRoutes.trackDriversScreen, arguments: {'rideId': ride.jobId}, preventDuplicates: false);
+                      },
+                      child: RideCards(
+                        pickupLocation: ride.fromAddress ?? 'Unknown Location',
+                        dropLocation: ride.toAddress ?? 'Unknown Location',
+                        bookingId: ride.jobId ?? 'N/A',
+                        dateTime: formattedDate,
+                        driver: ride.userName ?? 'Unknown',
+                        carSeats: ride.seat?.toString() ?? 'N/A',
+                        paymentStatus: ride.status?.capitalizeFirst ?? 'Pending',
+                        showCancel: controller.isUpcoming.value,
+                        isPastRide: !controller.isUpcoming.value,
+                      ),
+                    ),
+                  );
+                },
+              );
+            }),
+          ),
         ],
       ),
     );
   }
 }
 
+// =============================================================================
+// RIDE CARDS WIDGET
+// =============================================================================
 class RideCards extends StatelessWidget {
   final String pickupLocation;
   final String dropLocation;
@@ -271,12 +248,15 @@ class RideCards extends StatelessWidget {
                             size: 20.w,
                           ),
                           SizedBox(width: 4.w),
-                          CustomText(
-                            text: pickupLocation,
-                            fontsize: 14.sp,
-                            fontWeight: FontWeight.w500,
+                          Expanded(
+                            child: CustomText(
+                              text: pickupLocation,
+                              fontsize: 14.sp,
+                              fontWeight: FontWeight.w500,
+                              maxline: 2,
+                              textAlign: TextAlign.start,
+                            ),
                           ),
-
                         ],
                       ),
                       SizedBox(height: 8.h),
@@ -288,16 +268,17 @@ class RideCards extends StatelessWidget {
                             size: 20.w,
                           ),
                           SizedBox(width: 4.w),
-                          CustomText(
-                            text: dropLocation,
-                            fontsize: 14.sp,
-                            fontWeight: FontWeight.w500,
+                          Expanded(
+                            child: CustomText(
+                              text: dropLocation,
+                              fontsize: 14.sp,
+                              fontWeight: FontWeight.w500,
+                              maxline: 2,
+                              textAlign: TextAlign.start,
+                            ),
                           ),
                         ],
                       ),
-                      SizedBox(height: 8.h),
-
-                      SizedBox(height: 8.h),
                     ],
                   ),
                 ),
@@ -315,25 +296,25 @@ class RideCards extends StatelessWidget {
               children: [
                 _buildInfoRow('Booking ID', bookingId),
                 SizedBox(height: 4.h),
-                Divider(color: Colors.grey[200],),
+                Divider(color: Colors.grey[200]),
                 SizedBox(height: 8.h),
                 _buildInfoRow('Date & Time', dateTime),
                 SizedBox(height: 4.h),
-                Divider(color: Colors.grey[200],),
+                Divider(color: Colors.grey[200]),
                 SizedBox(height: 8.h),
                 _buildInfoRow('Driver', driver),
                 SizedBox(height: 4.h),
-                Divider(color: Colors.grey[200],),
+                Divider(color: Colors.grey[200]),
                 SizedBox(height: 8.h),
                 _buildInfoRow('Car seats', carSeats),
                 SizedBox(height: 4.h),
-                Divider(color: Colors.grey[200],),
+                Divider(color: Colors.grey[200]),
                 SizedBox(height: 8.h),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     CustomText(
-                      text: 'Payment Status',
+                      text: 'Status',
                       color: Colors.grey,
                       fontsize: 14.sp,
                     ),
@@ -342,8 +323,6 @@ class RideCards extends StatelessWidget {
                         colors: [
                           Color(0xFF45C4D9),
                           Color(0xFF6B7FEC),
-                          Color(0xFFB565D8),
-                          Color(0xFFB565D8),
                           Color(0xFFB565D8),
                         ],
                         begin: Alignment.centerLeft,
@@ -376,8 +355,7 @@ class RideCards extends StatelessWidget {
                       const Spacer(),
                       TextButton(
                         onPressed: () {
-                          showCancelRideDialog(context,bookingId);
-
+                          showCancelRideDialog(context, bookingId);
                         },
                         child: CustomText(
                           text: 'Cancel',
@@ -415,7 +393,10 @@ class RideCards extends StatelessWidget {
       ],
     );
   }
-  // Function to show the cancel ride dialog with ScreenUtil
+
+  // ===========================================================================
+  // CANCEL RIDE DIALOG
+  // ===========================================================================
   void showCancelRideDialog(BuildContext context, String bookingId) {
     showDialog<bool>(
       context: context,
@@ -507,34 +488,56 @@ class RideCards extends StatelessWidget {
                 ),
                 SizedBox(height: 24.h),
 
-                // Cancel Button
-                SizedBox(
-                  width: double.infinity,
-                  height: 56.h,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(true);
-                      // Handle cancel ride logic here
-                      print('Ride cancelled');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28.r),
+                // Actions
+                Obx(() {
+                  final controller = Get.find<PassengerMyRidesController>();
+                  return SizedBox(
+                    width: double.infinity,
+                    height: 56.h,
+                    child: ElevatedButton(
+                      onPressed: controller.isCancelling.value
+                          ? null
+                          : () async {
+                        bool success = await controller.cancelRide(bookingId);
+                        if (success && context.mounted) {
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        elevation: 2,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(28.r),
+                        ),
+                      ),
+                      child: controller.isCancelling.value
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : CustomText(
+                        text: 'Cancel Ride',
+                        fontsize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
                       ),
                     ),
-                    child: CustomText(
-                      text: 'Cancel',
-                      fontsize: 16,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
+                  );
+                }),
                 SizedBox(height: 12.h),
 
+                // Keep Ride Button (Close dialog)
+                TextButton(
+                  onPressed: () {
+                    if (!Get.find<PassengerMyRidesController>().isCancelling.value) {
+                      Navigator.of(context).pop();
+                    }
+                  },
+                  child: CustomText(
+                    text: 'Keep Ride',
+                    fontsize: 16,
+                    color: Colors.grey,
+                    fontWeight: FontWeight.w600,
+                  ),
+                )
               ],
             ),
           ),
@@ -542,5 +545,4 @@ class RideCards extends StatelessWidget {
       },
     );
   }
-
 }

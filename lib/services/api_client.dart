@@ -46,7 +46,7 @@ class ApiClient extends GetxService {
   }
 
   //==========================================> Post Data <======================================
-  static Future<Response> postData(
+  static Future<dynamic> postData(
     String uri,
     dynamic body, {
     Map<String, String>? headers,
