@@ -5,9 +5,92 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:split_ride/routes/app_routes.dart';
+import 'package:split_ride/helpers/app_url.dart';
+import 'package:split_ride/helpers/prefs_helper.dart';
+import 'package:split_ride/services/network/network_caller.dart';
+import 'package:split_ride/utils/app_constant.dart';
+import 'package:split_ride/model/vehicle/vehicle_model.dart';
 
-class DriverMyVehiclesScreen extends StatelessWidget {
+class DriverMyVehiclesScreen extends StatefulWidget {
   const DriverMyVehiclesScreen({super.key});
+
+  @override
+  State<DriverMyVehiclesScreen> createState() => _DriverMyVehiclesScreenState();
+}
+
+class _DriverMyVehiclesScreenState extends State<DriverMyVehiclesScreen> {
+  List<VehicleModel> _vehicles = [];
+  bool _isLoading = false;
+  String? _errorMessage;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchVehicles();
+  }
+
+  Future<void> _fetchVehicles() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      final token = await PrefsHelper.getString(AppConstants.bearerToken);
+      
+      // First, fetch provider profile to get vehicles
+      final profileResponse = await NetworkCaller().getRequest(
+        '${AppUrl.baseUrl}/provider/profile',
+        headers: {
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (profileResponse.isSuccess && profileResponse.jsonResponse != null) {
+        final data = profileResponse.jsonResponse!['data'] ?? {};
+        final List<dynamic> vehiclesData = data['vehicles'] ?? [];
+        
+        // Fetch car model details for each vehicle
+        List<VehicleModel> loadedVehicles = [];
+        for (var vehicleData in vehiclesData) {
+          final vehicle = VehicleModel.fromJson(vehicleData);
+          
+          // Fetch car model details if carModelId exists
+          if (vehicle.carModelId != null) {
+            final carModelResponse = await NetworkCaller().getRequest(
+              '${AppUrl.baseUrl}/car-model/${vehicle.carModelId}',
+              headers: {
+                'Authorization': 'Bearer $token',
+              },
+            );
+            
+            if (carModelResponse.isSuccess && carModelResponse.jsonResponse != null) {
+              final carModelData = carModelResponse.jsonResponse!['data'] ?? carModelResponse.jsonResponse!;
+              vehicle.carModelName = carModelData['name'] ?? carModelData['model'] ?? 'Unknown';
+            }
+          }
+          
+          loadedVehicles.add(vehicle);
+        }
+        
+        setState(() {
+          _vehicles = loadedVehicles;
+        });
+      } else {
+        setState(() {
+          _errorMessage = profileResponse.errorMessage ?? 'Failed to load vehicles';
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Error: ${e.toString()}';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,27 +116,73 @@ class DriverMyVehiclesScreen extends StatelessWidget {
           )
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: 3,
-                itemBuilder: (context, index) {
-                  return _vehicleCard();
-                },
-              ),
-            ),
-            _addVehicleButton(),
-          ],
-        ),
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _errorMessage != null
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error_outline, size: 80.sp, color: Colors.red),
+                      SizedBox(height: 16.h),
+                      Text(
+                        _errorMessage!,
+                        style: TextStyle(
+                          fontFamily: 'Outfit',
+                          fontSize: 14.sp,
+                          color: Colors.red,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 24.h),
+                      ElevatedButton.icon(
+                        onPressed: _fetchVehicles,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                )
+              : Padding(
+                  padding: EdgeInsets.all(16.w),
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: _vehicles.isEmpty
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.directions_car_outlined, size: 80.sp, color: Colors.grey),
+                                    SizedBox(height: 16.h),
+                                    Text(
+                                      'No vehicles added yet',
+                                      style: TextStyle(
+                                        fontFamily: 'Outfit',
+                                        fontSize: 16.sp,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : ListView.builder(
+                                itemCount: _vehicles.length,
+                                itemBuilder: (context, index) {
+                                  final vehicle = _vehicles[index];
+                                  return _vehicleCard(vehicle);
+                                },
+                              ),
+                      ),
+                      _addVehicleButton(),
+                    ],
+                  ),
+                ),
     );
   }
 
   // 🔹 Vehicle Card
-  Widget _vehicleCard() {
+  Widget _vehicleCard(VehicleModel vehicle) {
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
       padding: EdgeInsets.all(14.w),
@@ -72,7 +201,7 @@ class DriverMyVehiclesScreen extends StatelessWidget {
         children: [
           // Car Image
           Image.asset(
-            'assets/images/carImg.png', // replace with your image
+            'assets/images/carImg.png',
             width: 110.w,
             height: 60.h,
             fit: BoxFit.contain,
@@ -85,7 +214,7 @@ class DriverMyVehiclesScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Honda Civic - 2021',
+                  '${vehicle.carModelName ?? 'Unknown'} - ${vehicle.year ?? 'N/A'}',
                   style: TextStyle(
                     fontFamily: 'Outfit',
                     fontWeight: FontWeight.w600,
@@ -95,9 +224,9 @@ class DriverMyVehiclesScreen extends StatelessWidget {
                 SizedBox(height: 8.h),
                 Row(
                   children: [
-                    _gradientChip('LEO 232'),
+                    _gradientChip(vehicle.licenseNo ?? 'N/A'),
                     SizedBox(width: 8.w),
-                    _gradientChip('4 seater'),
+                    _gradientChip('${vehicle.seat ?? 0} seater'),
                   ],
                 ),
               ],
