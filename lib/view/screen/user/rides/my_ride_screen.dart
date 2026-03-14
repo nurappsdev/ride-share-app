@@ -3,10 +3,11 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-  import 'package:split_ride/routes/app_routes.dart';
+import 'package:split_ride/routes/app_routes.dart';
 import 'package:split_ride/utils/app_colors.dart';
 import 'package:split_ride/utils/app_icons.dart';
 import 'package:split_ride/view/widgets/custom_loading.dart';
+import '../../../../controllers/passenger_home_controller.dart';
 import '../../../../controllers/passenger_ride_controller.dart';
 import '../../../../model/driver_registration/passenger_models/passenger_ongoing_rides.dart';
 import '../../../widgets/widgets.dart';
@@ -181,6 +182,12 @@ class PassengerMyRidesScreen extends StatelessWidget {
                   itemCount: rides.length,
                   itemBuilder: (context, index) {
                     final ride = rides[index];
+
+                    if (index == rides.length - 1 && controller.isUpcoming.value) {
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        controller.loadMoreOngoingRides();
+                      });
+                    }
                     return Padding(
                       padding: EdgeInsets.only(
                         bottom: index < rides.length - 1 ? 16.h : 0,
@@ -220,16 +227,39 @@ class RideCard extends StatelessWidget {
     required this.cancellationFee,
   });
 
+  // Helper for formatting date and time for the popup
+  String _getFormattedDate(DateTime? date) {
+    if (date == null) return 'N/A';
+    return DateFormat('dd/MM/yyyy').format(date);
+  }
+
+  String _getFormattedTime(DateTime? date) {
+    if (date == null) return 'N/A';
+    return DateFormat('h:mm a').format(date);
+  }
+
   @override
   Widget build(BuildContext context) {
     return InkWell(
       onTap: () {
-        // Navigate to track driver screen with ride details
-        Get.toNamed(
-          AppRoutes.trackDriversScreen,
-          preventDuplicates: false,
-          arguments: {'rideId': ride.jobId},
-        );
+        final currentStatus = ride.status?.toLowerCase() ?? '';
+
+        // EXACT LOGIC ROUTING BASED ON STATUS
+        if (currentStatus == 'paid') {
+          _showWaitingForDriverPopup(context);
+        }
+        else if (currentStatus == 'accepted' || currentStatus == 'picked' || currentStatus == 'completed') {
+          // 2. ACCEPTED: Driver is assigned -> Go to Tracking Screen
+          Get.toNamed(
+            AppRoutes.trackDriversScreen,
+            preventDuplicates: false,
+            arguments: {'rideId': ride.jobId},
+          );
+        }
+        else {
+          // 3. CREATED / PENDING: User hasn't paid yet -> Show Pay Now Popup
+          _showPaymentPopup(context, ride);
+        }
       },
       child: Container(
         decoration: BoxDecoration(
@@ -307,7 +337,6 @@ class RideCard extends StatelessWidget {
                         if (isPastRide)
                           InkWell(
                             onTap: () {
-                              // TODO: Download invoice
                               Get.snackbar(
                                 'Invoice',
                                 'Downloading invoice for ${ride.jobId}',
@@ -357,8 +386,11 @@ class RideCard extends StatelessWidget {
                     _formatDateTime(ride.dateTime),
                   ),
                   _buildDivider(),
-                  _buildInfoRow('Driver', ride.userName ?? 'Not Assigned'),
+
+                  // NOTE: I added logic here to show 'Not Assigned' if they are still waiting
+                  _buildInfoRow('Driver', (ride.status == 'created' || ride.status == 'paid') ? 'Not Assigned' : (ride.userName ?? 'Unknown')),
                   _buildDivider(),
+
                   _buildInfoRow('Car seats', '${ride.seat ?? 0}'),
                   _buildDivider(),
                   _buildInfoRow(
@@ -439,6 +471,256 @@ class RideCard extends StatelessWidget {
     );
   }
 
+  // ===========================================================================
+  // STATUS MAPPING HELPERS
+  // ===========================================================================
+
+  String _formatStatus(String? status) {
+    if (status == null) return 'Unknown';
+    switch (status.toLowerCase()) {
+      case 'created':
+        return 'Pending';    // Show Pending when created
+      case 'paid':
+        return 'Paid';       // Show Paid when waiting for driver
+      case 'accepted':
+        return 'Accepted';   // Show Accepted when driver assigned
+      case 'picked':
+        return 'Picked Up';
+      case 'completed':
+        return 'Completed';
+      case 'cancelled':
+        return 'Cancelled';
+      default:
+        return status.substring(0, 1).toUpperCase() + status.substring(1);
+    }
+  }
+
+  Color _getStatusColor(String? status) {
+    switch (status?.toLowerCase()) {
+      case 'created':
+        return const Color(0xFFFFA500); // Orange for pending
+      case 'paid':
+        return const Color(0xFFB565D8); // Purple for paid
+      case 'accepted':
+      case 'picked':
+        return const Color(0xFF5ED5F3); // Cyan for accepted/picked
+      case 'completed':
+        return const Color(0xFF4CAF50); // Green for completed
+      case 'cancelled':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  // ===========================================================================
+  // 1. PAYMENT POPUP DIALOG
+  // ===========================================================================
+  void _showPaymentPopup(BuildContext context, PassengerOngoingRidesModel ride) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+          insetPadding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 24.h),
+          child: Container(
+            padding: EdgeInsets.all(20.w),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24.r),
+            ),
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Header
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const SizedBox(width: 24), // Balance spacing
+                      Text('Pay Now', style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.bold, color: const Color(0xFF1F2937))),
+                      GestureDetector(
+                        onTap: () => Get.back(),
+                        child: const Icon(Icons.close, color: Colors.black87),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20.h),
+
+                  // Locations Card
+                  Container(
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(color: const Color(0xFFF4F8FB), borderRadius: BorderRadius.circular(12.r)),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Column(
+                          children: [
+                            Icon(Icons.play_arrow_outlined, size: 20.sp, color: Colors.grey[700]),
+                            Container(width: 1.w, height: 24.h, color: Colors.grey[400]), // Line connecting locations
+                            Icon(Icons.location_on_outlined, size: 20.sp, color: Colors.grey[700]),
+                          ],
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(ride.fromAddress ?? 'N/A', style: TextStyle(fontSize: 13.sp, color: Colors.black87), maxLines: 1, overflow: TextOverflow.ellipsis),
+                              SizedBox(height: 24.h),
+                              Text(ride.toAddress ?? 'N/A', style: TextStyle(fontSize: 13.sp, color: Colors.black87), maxLines: 1, overflow: TextOverflow.ellipsis),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 24.h),
+
+                  // Details List
+                  _buildPaymentRow('Ride Price', '€${ride.fare?.toStringAsFixed(2) ?? '0.00'}', true),
+                  SizedBox(height: 12.h),
+                  _buildPaymentRow('Charge', '€${ride.charge?.toStringAsFixed(2) ?? '0.00'}', true),
+                  SizedBox(height: 12.h),
+                  _buildPaymentRow('Pickup time', _getFormattedTime(ride.dateTime), false),
+                  SizedBox(height: 12.h),
+                  _buildPaymentRow('Pickup Date', _getFormattedDate(ride.dateTime), false),
+
+                  Padding(padding: EdgeInsets.symmetric(vertical: 16.h), child: const Divider(height: 1)),
+
+                  // Total Amount
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Total Amount', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+                      Text('€${ride.totalFare?.toStringAsFixed(2) ?? '0.00'}', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: const Color(0xFF3B82F6))),
+                    ],
+                  ),
+                  SizedBox(height: 24.h),
+
+                  // Disclaimer
+                  Container(
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(color: const Color(0xFFF4F8FB), borderRadius: BorderRadius.circular(12.r)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Disclaimer:', style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.black87)),
+                        SizedBox(height: 8.h),
+                        Text(
+                          'Payment must be made at least 2 hours in advance. Cancellation is allowed up to 1 hour before the scheduled pickup. Within 5-24 hours get 50% and you will Get driver is on the way or not message.',
+                          style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.w600, color: Colors.black87, height: 1.5),
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 24.h),
+
+                  // Pay Now Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50.h,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Get.back(); // Close Dialog
+                        Get.find<PassengerHomeController>().makePayment(payId: ride.jobId!);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.r)),
+                      ),
+                      child: Ink(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(colors: [Color(0xFF45C4D9), Color(0xFFB565D8)]),
+                          borderRadius: BorderRadius.circular(25.r),
+                        ),
+                        child: Center(
+                          child: Text('Pay Now', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: Colors.white)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildPaymentRow(String label, String value, bool isValueBlue) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(label, style: TextStyle(fontSize: 14.sp, color: Colors.grey[700])),
+        Text(
+            value,
+            style: TextStyle(
+              fontSize: 14.sp,
+              fontWeight: FontWeight.w600,
+              color: isValueBlue ? const Color(0xFF3B82F6) : Colors.black87,
+            )
+        ),
+      ],
+    );
+  }
+
+  // ===========================================================================
+  // 2. WAITING FOR DRIVER POPUP DIALOG
+  // ===========================================================================
+  void _showWaitingForDriverPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24.r)),
+          child: Container(
+            padding: EdgeInsets.all(24.w),
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24.r)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: EdgeInsets.all(16.w),
+                  decoration: const BoxDecoration(color: Color(0xFFF3E8FF), shape: BoxShape.circle),
+                  child: Icon(Icons.hourglass_empty_rounded, size: 40.sp, color: const Color(0xFFB565D8)),
+                ),
+                SizedBox(height: 20.h),
+                Text(
+                  'Waiting for Driver',
+                  style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.bold, color: Colors.black87),
+                ),
+                SizedBox(height: 12.h),
+                Text(
+                  'Your payment was successful! Please wait while a driver accepts your ride request.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14.sp, color: Colors.grey[600], height: 1.5),
+                ),
+                SizedBox(height: 24.h),
+                SizedBox(
+                  width: double.infinity,
+                  height: 50.h,
+                  child: OutlinedButton(
+                    onPressed: () => Get.back(),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: Color(0xFFB565D8)),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.r)),
+                    ),
+                    child: Text('Okay', style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.w600, color: const Color(0xFFB565D8))),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // --- Existing Helper Methods ---
   Widget _buildInfoRow(String label, String value) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4.h),
@@ -477,30 +759,6 @@ class RideCard extends StatelessWidget {
     return DateFormat('dd MMM yyyy, hh:mm a').format(dateTime);
   }
 
-  String _formatStatus(String? status) {
-    if (status == null) return 'Unknown';
-    return status.substring(0, 1).toUpperCase() + status.substring(1);
-  }
-
-  Color _getStatusColor(String? status) {
-    switch (status?.toLowerCase()) {
-      case 'created':
-      case 'requested':
-        return const Color(0xFFFFA500); // Orange
-      case 'accepted':
-        return const Color(0xFF5ED5F3); // Cyan
-      case 'picked':
-        return const Color(0xFF6B7FEC); // Blue
-      case 'completed':
-      case 'paid':
-        return const Color(0xFF4CAF50); // Green
-      case 'cancelled':
-        return Colors.red;
-      default:
-        return Colors.grey;
-    }
-  }
-
   void _showCancelRideDialog(
       BuildContext context,
       String bookingId,
@@ -527,7 +785,6 @@ class RideCard extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Icon
                 Container(
                   width: 80.w,
                   height: 80.h,
@@ -535,162 +792,78 @@ class RideCard extends StatelessWidget {
                     color: Colors.red,
                     shape: BoxShape.circle,
                     boxShadow: [
-                      BoxShadow(
-                        color: Colors.red.withOpacity(0.3),
-                        blurRadius: 10.r,
-                        offset: Offset(0, 4.h),
-                      ),
+                      BoxShadow(color: Colors.red.withOpacity(0.3), blurRadius: 10.r, offset: Offset(0, 4.h)),
                     ],
                   ),
                   child: Container(
                     margin: EdgeInsets.all(16.w),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.white, width: 3.w),
-                    ),
-                    child: Center(
-                      child: CustomText(
-                        text: '?',
-                        fontsize: 32.sp,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
+                    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: Colors.white, width: 3.w)),
+                    child: Center(child: CustomText(text: '?', fontsize: 32.sp, fontWeight: FontWeight.bold, color: Colors.white)),
                   ),
                 ),
                 SizedBox(height: 24.h),
-
-                // Title
-                CustomText(
-                  text: 'Cancel Ride?',
-                  fontsize: 24.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+                CustomText(text: 'Cancel Ride?', fontsize: 24.sp, fontWeight: FontWeight.bold, color: Colors.black87),
                 SizedBox(height: 12.h),
-
-                // Booking ID
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    CustomText(
-                      text: 'Booking ID: ',
-                      fontsize: 14.sp,
-                      fontWeight: FontWeight.normal,
-                      color: Colors.grey,
-                    ),
-                    CustomText(
-                      text: bookingId,
-                      fontsize: 14.sp,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary3rdColor,
-                    ),
+                    CustomText(text: 'Booking ID: ', fontsize: 14.sp, fontWeight: FontWeight.normal, color: Colors.grey),
+                    CustomText(text: bookingId, fontsize: 14.sp, fontWeight: FontWeight.w600, color: AppColors.primary3rdColor),
                   ],
                 ),
                 SizedBox(height: 16.h),
-
-                // Cancellation Fee Info
                 Container(
                   padding: EdgeInsets.all(12.w),
-                  decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12.r),
-                  ),
+                  decoration: BoxDecoration(color: Colors.red.withOpacity(0.1), borderRadius: BorderRadius.circular(12.r)),
                   child: Column(
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          CustomText(
-                            text: 'Cancellation Fee:',
-                            fontsize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          CustomText(
-                            text: '${cancellationFee.toStringAsFixed(0)}%',
-                            fontsize: 14.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
-                          ),
+                          CustomText(text: 'Cancellation Fee:', fontsize: 14.sp, fontWeight: FontWeight.w500),
+                          CustomText(text: '${cancellationFee.toStringAsFixed(0)}%', fontsize: 14.sp, fontWeight: FontWeight.bold, color: Colors.red),
                         ],
                       ),
                       SizedBox(height: 4.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          CustomText(
-                            text: 'Refund Amount:',
-                            fontsize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                          ),
-                          CustomText(
-                            text: '€${refundAmount.toStringAsFixed(2)}',
-                            fontsize: 14.sp,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green,
-                          ),
+                          CustomText(text: 'Refund Amount:', fontsize: 14.sp, fontWeight: FontWeight.w500),
+                          CustomText(text: '€${refundAmount.toStringAsFixed(2)}', fontsize: 14.sp, fontWeight: FontWeight.bold, color: Colors.green),
                         ],
                       ),
                     ],
                   ),
                 ),
                 SizedBox(height: 16.h),
-
-                // Description
                 CustomText(
-                  text:
-                  'Cancellation charges: >24hrs: 0%, 2-24hrs: 50%, <2hrs: 100% of ride amount.',
-                  fontsize: 13.sp,
-                  fontWeight: FontWeight.normal,
-                  color: Colors.grey,
-                  textAlign: TextAlign.center,
-                  maxline: 3,
+                  text: 'Cancellation charges: >24hrs: 0%, 2-24hrs: 50%, <2hrs: 100% of ride amount.',
+                  fontsize: 13.sp, fontWeight: FontWeight.normal, color: Colors.grey, textAlign: TextAlign.center, maxline: 3,
                 ),
                 SizedBox(height: 24.h),
-
-                // Cancel Button
                 SizedBox(
-                  width: double.infinity,
-                  height: 56.h,
+                  width: double.infinity, height: 56.h,
                   child: ElevatedButton(
                     onPressed: () {
                       Navigator.of(context).pop();
                       onConfirm();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(28.r),
-                      ),
+                      backgroundColor: Colors.red, foregroundColor: Colors.white, elevation: 2,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
                     ),
-                    child: CustomText(
-                      text: 'Confirm Cancellation',
-                      fontsize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
-                    ),
+                    child: CustomText(text: 'Confirm Cancellation', fontsize: 16.sp, fontWeight: FontWeight.w600, color: Colors.white),
                   ),
                 ),
                 SizedBox(height: 12.h),
-
-                // Keep Ride Button
                 OutlinedButton(
                   onPressed: () => Navigator.of(context).pop(),
                   style: OutlinedButton.styleFrom(
                     minimumSize: Size(double.infinity, 56.h),
                     side: BorderSide(color: AppColors.primary3rdColor, width: 2),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28.r),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28.r)),
                   ),
-                  child: CustomText(
-                    text: 'Keep My Ride',
-                    fontsize: 16.sp,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primary3rdColor,
-                  ),
+                  child: CustomText(text: 'Keep My Ride', fontsize: 16.sp, fontWeight: FontWeight.w600, color: AppColors.primary3rdColor),
                 ),
               ],
             ),
