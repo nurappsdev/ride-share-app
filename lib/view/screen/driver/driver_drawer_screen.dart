@@ -3,20 +3,42 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:split_ride/controllers/auth_controller/driver_document_upload_controller.dart';
 import 'package:split_ride/controllers/driver_drawer_controller.dart';
 
 import '../../../controllers/passenger_drawer_controller.dart';
+import '../../../helpers/app_url.dart';
 import '../../../routes/app_routes.dart';
 
-class DriverDrawerScreen extends StatelessWidget {
+class DriverDrawerScreen extends StatefulWidget {
   const DriverDrawerScreen({super.key});
 
   @override
+  State<DriverDrawerScreen> createState() => _DriverDrawerScreenState();
+}
+
+class _DriverDrawerScreenState extends State<DriverDrawerScreen> {
+
+  late DriverDrawerController driverDrawerController;
+  late PassengerDrawerController passengerDrawerController;
+
+  @override
+  void initState() {
+    super.initState();
+    driverDrawerController = Get.put(DriverDrawerController());
+    passengerDrawerController = Get.put(PassengerDrawerController());
+    // Refresh user data when drawer opens
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      passengerDrawerController.refreshUserProfile();
+    });
+  }
+
+  @override
+  void dispose() {
+    // Don't delete controller as it may be used elsewhere
+    super.dispose();
+  }
+  @override
   Widget build(BuildContext context) {
-    final DriverDrawerController driverDrawerController = Get.put(
-      DriverDrawerController(),
-    );
     return Stack(
       children: [
         // 🔥 TRANSPARENT + BLUR BACKGROUND
@@ -55,57 +77,120 @@ class DriverDrawerScreen extends StatelessWidget {
         children: [
           SizedBox(height: 50.h),
 
-          // Profile Card
           Padding(
             padding: EdgeInsets.all(16.w),
-            child: Container(
-              padding: EdgeInsets.all(12.w),
-              decoration: BoxDecoration(
-                color: const Color(0xFFF6ECFF),
-                borderRadius: BorderRadius.circular(14.r),
-              ),
-              child: Row(
-                children: [
-                  CircleAvatar(
-                    radius: 26.r,
-                    backgroundColor: Colors.purple[100],
-                    child: Icon(
-                      Icons.person,
-                      color: const Color(0xFF6552EC),
-                      size: 28.sp,
-                    ),
+            child: Obx(() {
+              if (passengerDrawerController.isLoadingUser.value) {
+                // Loading state
+                return Container(
+                  padding: EdgeInsets.all(12.w),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF6ECFF),
+                    borderRadius: BorderRadius.circular(14.r),
                   ),
-                  SizedBox(width: 12.w),
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     children: [
-                      Text(
-                        'Kimmy Natasa',
-                        style: TextStyle(
-                          fontSize: 18.sp,
-                          fontFamily: 'Outfit',
-                          fontWeight: FontWeight.w600,
+                      CircleAvatar(
+                        radius: 26.r,
+                        backgroundColor: Colors.purple[100],
+                        child: Icon(
+                          Icons.person,
+                          color: const Color(0xFF6552EC),
+                          size: 28.sp,
                         ),
                       ),
-                      ShaderMask(
-                        shaderCallback: (bounds) => const LinearGradient(
-                          colors: [Color(0xFF45C4D9), Color(0xFF6B7FEC)],
-                        ).createShader(bounds),
-                        child: Text(
-                          'Verified',
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontFamily: 'Outfit',
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
+                      SizedBox(width: 12.w),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            width: 120.w,
+                            height: 18.h,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF6552EC).withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(4.r),
+                            ),
                           ),
-                        ),
+                          SizedBox(height: 4.h),
+                          Container(
+                            width: 80.w,
+                            height: 14.h,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF6552EC).withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(4.r),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
-              ),
-            ),
+                );
+              }
+
+              // User data loaded
+              return Container(
+                padding: EdgeInsets.all(12.w),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFF6ECFF),
+                  borderRadius: BorderRadius.circular(14.r),
+                ),
+                child: Row(
+                  children: [
+                    // Profile Image or Avatar
+                    CircleAvatar(
+                      radius: 26.r,
+                      backgroundColor: Colors.purple[100],
+                      backgroundImage: passengerDrawerController.userProfileImage != null &&
+                          passengerDrawerController.userProfileImage!.isNotEmpty
+                          ? NetworkImage('${AppUrl.imageServeUrl}/${passengerDrawerController.userProfileImage}')
+                          : null,
+                      child: passengerDrawerController.userProfileImage == null ||
+                          passengerDrawerController.userProfileImage!.isEmpty
+                          ? Icon(
+                        Icons.person,
+                        color: const Color(0xFF6552EC),
+                        size: 28.sp,
+                      )
+                          : null,
+                    ),
+                    SizedBox(width: 12.w),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            passengerDrawerController.userName,
+                            style: TextStyle(
+                              fontSize: 18.sp,
+                              fontFamily: 'Outfit',
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF2D3748),
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          SizedBox(height: 4.h),
+                          ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              colors: [Color(0xFF45C4D9), Color(0xFF6B7FEC)],
+                            ).createShader(bounds),
+                            child: Text(
+                              'Verified',
+                              style: TextStyle(
+                                fontSize: 14.sp,
+                                fontFamily: 'Outfit',
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
           ),
 
           const Divider(),
@@ -193,10 +278,7 @@ class DriverDrawerScreen extends StatelessWidget {
             child: Column(
               children: [
                 InkWell(
-                  onTap: () {
-                    _showVerificationDialog(context);
-                  },
-
+                  onTap: _showLogoutDialog,
                   child: _action(Icons.logout, "Log out"),
                 ),
                 SizedBox(height: 12.h),
@@ -244,160 +326,137 @@ class DriverDrawerScreen extends StatelessWidget {
       ],
     );
   }
-}
 
-void _showVerificationDialog(BuildContext context) {
-  showGeneralDialog(
-    context: context,
-    barrierDismissible: false,
-    barrierLabel: "Verification",
-    barrierColor: Colors.black.withOpacity(0.25),
-    // soft dim
-    transitionDuration: const Duration(milliseconds: 10),
-    pageBuilder: (_, __, ___) {
-      return BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
-        child: Center(child: _logoutDialog(context)),
-      );
-    },
-  );
-}
+  void _showLogoutDialog() {
+    showGeneralDialog(
+      context: context,
+      barrierDismissible: false,
+      barrierLabel: "Logout",
+      barrierColor: Colors.black.withOpacity(0.25),
+      transitionDuration: const Duration(milliseconds: 10),
+      pageBuilder: (_, __, ___) {
+        return BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 1, sigmaY: 1),
+          child: Center(child: _buildLogoutDialog()),
+        );
+      },
+    );
+  }
 
-Widget _logoutDialog(BuildContext context) {
-  return Padding(
-    padding: EdgeInsets.all(16.r),
-    child: Container(
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(26.r),
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          /// Logout Icon
-          Container(
-            height: 70.w,
-            width: 70.w,
-            decoration: const BoxDecoration(
-              color: Color(0xFFFF3B30),
-              shape: BoxShape.circle,
+  Widget _buildLogoutDialog() {
+    return Padding(
+      padding: EdgeInsets.all(16.r),
+      child: Container(
+        padding: EdgeInsets.all(20.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(26.r),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              height: 70.w,
+              width: 70.w,
+              decoration: const BoxDecoration(
+                color: Color(0xFFFF3B30),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(Icons.logout_rounded, color: Colors.white, size: 34.sp),
             ),
-            child: Icon(Icons.logout_rounded, color: Colors.white, size: 34.sp),
-          ),
-
-          SizedBox(height: 16.h),
-
-          /// Title
-          Text(
-            'Logout?',
-            style: TextStyle(
-              fontSize: 20.sp,
-
-              decoration: TextDecoration.none,
-              fontWeight: FontWeight.w600,
-              fontFamily: 'Outfit',
-
-              color: const Color(0xFF2B2B2B),
+            SizedBox(height: 16.h),
+            Text(
+              'Logout?',
+              style: TextStyle(
+                fontSize: 20.sp,
+                decoration: TextDecoration.none,
+                fontWeight: FontWeight.w600,
+                fontFamily: 'Outfit',
+                color: const Color(0xFF2B2B2B),
+              ),
             ),
-          ),
-
-          SizedBox(height: 6.h),
-
-          /// Subtitle
-          Text(
-            'Are you sure you want to log out of SplitRide?',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14.sp,
-
-              decoration: TextDecoration.none,
-              fontFamily: 'Outfit',
-              color: const Color(0xFF8A8A8A),
+            SizedBox(height: 6.h),
+            Text(
+              'Are you sure you want to log out of SplitRide?',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14.sp,
+                decoration: TextDecoration.none,
+                fontFamily: 'Outfit',
+                color: const Color(0xFF8A8A8A),
+              ),
             ),
-          ),
-
-          SizedBox(height: 22.h),
-
-          /// Buttons
-          Row(
-            children: [
-              /// Cancel
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => Get.back(),
-                  child: Container(
-                    height: 48.h,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFF45C4D9),
-                          Color(0xFF6B7FEC),
-                          Color(0xFF5c58eb),
-                          Color(0xFFB565D8),
-                        ],
+            SizedBox(height: 22.h),
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: Container(
+                      height: 48.h,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFF45C4D9),
+                            Color(0xFF6B7FEC),
+                            Color(0xFF5c58eb),
+                            Color(0xFFB565D8),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(24.r),
                       ),
-                      borderRadius: BorderRadius.circular(24.r),
-                    ),
-                    child: Text(
-                      'Cancel',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.sp,
-
-                        decoration: TextDecoration.none,
-                        fontFamily: 'Outfit',
-                        fontWeight: FontWeight.w500,
+                      child: Text(
+                        'Cancel',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16.sp,
+                          decoration: TextDecoration.none,
+                          fontFamily: 'Outfit',
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-
-              SizedBox(width: 12.w),
-
-              /// Logout
-              Expanded(
-                child: GestureDetector(
-                  onTap: () async {
-                    await Get.find<DriverDrawerController>()
-                        .handlePassengerLogout();
-                    // Get.toNamed(AppRoutes.signInScreen,preventDuplicates: false);
-                    /// logout logic
-                  },
-                  child: Container(
-                    height: 48.h,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFF3B30),
-                      borderRadius: BorderRadius.circular(24.r),
-                    ),
-                    child: Text(
-                      'Logout',
-
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16.sp,
-
-                        decoration: TextDecoration.none,
-                        fontFamily: 'Outfit',
-                        fontWeight: FontWeight.w500,
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () async {
+                      Navigator.of(context).pop();
+                      await driverDrawerController.handlePassengerLogout();
+                    },
+                    child: Container(
+                      height: 48.h,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF3B30),
+                        borderRadius: BorderRadius.circular(24.r),
+                      ),
+                      child: Text(
+                        'Logout',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 16.sp,
+                          decoration: TextDecoration.none,
+                          fontFamily: 'Outfit',
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
+    );
+  }
 
-Widget _deleteAccountDialog(BuildContext context) {
-  return DeleteAccountDialogContent();
+  Widget _deleteAccountDialog(BuildContext context) {
+    return DeleteAccountDialogContent();
+  }
 }
 
 class DeleteAccountDialogContent extends StatefulWidget {
@@ -427,7 +486,6 @@ class _DeleteAccountDialogContentState
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
 
     return Padding(
       padding: EdgeInsets.all(16.r),
@@ -549,7 +607,7 @@ class _DeleteAccountDialogContentState
                       ),
                     ),
                   );
-                }).toList(),
+                }),
                 SizedBox(height: 16.h),
 
                 // Action Buttons

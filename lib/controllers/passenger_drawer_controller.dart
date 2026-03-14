@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:split_ride/helpers/logger_util.dart';
+import 'package:split_ride/helpers/prefs_helper.dart';
 import 'package:split_ride/model/driver_registration/login_both/login_model.dart';
 import 'package:split_ride/routes/app_routes.dart';
 import 'package:split_ride/view/widgets/toast_manager.dart';
@@ -14,16 +15,16 @@ class PassengerDrawerController extends GetxController {
   final RxBool loader = false.obs;
   final RxBool resendOtpLoader = false.obs;
   final RxBool isLoadingUser = false.obs;
-  
+
   /// User data from backend
   final Rxn<LoginUserModel> userModel = Rxn<LoginUserModel>();
-  
+
   /// Get user name (with fallback)
   String get userName => userModel.value?.name ?? 'Guest User';
-  
+
   /// Get user email (with fallback)
   String get userEmail => userModel.value?.email ?? '';
-  
+
   /// Get user profile image (with fallback)
   String? get userProfileImage => userModel.value?.profileImage;
 
@@ -37,7 +38,7 @@ class PassengerDrawerController extends GetxController {
   Future<void> refreshUserProfile() async {
     // Don't fetch if already loading
     if (isLoadingUser.value) return;
-    
+
     await fetchUserProfile();
   }
 
@@ -45,20 +46,21 @@ class PassengerDrawerController extends GetxController {
   Future<void> fetchUserProfile() async {
     try {
       isLoadingUser.value = true;
-      
+
       final String token = await SecureStorageService().read(
         AppConstants.accessToken,
       ) ?? '';
-      
+
       final NetworkResponse response = await NetworkCaller().getRequest(
         AppUrl.userProfile,
         headers: {'Authorization': 'Bearer $token'},
       );
-      
+
       if (response.isSuccess) {
         final userData = response.jsonResponse?['data'] ?? {};
         userModel.value = LoginUserModel.fromJson(userData);
         LoggerUtils.debug('User profile fetched: ${userModel.value?.name}');
+        LoggerUtils.debug('User profile fetched: ${userModel.value}');
       } else {
         LoggerUtils.error(
           'Failed to fetch user profile: ${response.jsonResponse?['message']}',
@@ -71,12 +73,28 @@ class PassengerDrawerController extends GetxController {
     }
   }
 
-  handlePassengerLogout( ) async {
+  handlePassengerLogout() async {
     try {
       loader.value = true;
 
+      // Clear secure storage (tokens)
       await SecureStorageService().clear();
+      
+      // Clear shared preferences (user data)
+      await PrefsHelper.remove(AppConstants.bearerToken);
+      await PrefsHelper.remove(AppConstants.resetPasswordToken);
+      await PrefsHelper.remove(AppConstants.email);
+      await PrefsHelper.remove(AppConstants.userId);
+      await PrefsHelper.remove(AppConstants.name);
+      await PrefsHelper.remove(AppConstants.role);
+      await PrefsHelper.remove(AppConstants.step);
+      await PrefsHelper.remove(AppConstants.status);
+      await PrefsHelper.remove(AppConstants.isLogged);
+      
+      // Clear user data
       userModel.value = null;
+      
+      // Navigate to role screen
       Get.offAllNamed(AppRoutes.roleScreen);
       Toast.showInfo('Successfully Logged out');
     } catch (e) {
@@ -85,7 +103,7 @@ class PassengerDrawerController extends GetxController {
       loader.value = false;
     }
   }
-  
+
   @override
   void onClose() {
     userModel.value = null;
