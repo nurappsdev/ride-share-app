@@ -8,6 +8,7 @@ import 'package:split_ride/view/widgets/custom_button_common.dart';
 import '../../../controllers/driver_available_ride_controller.dart';
 import '../../../model/provider_requested_ride_model.dart';
 import '../../../utils/utils.dart';
+import '../../../helpers/app_url.dart'; // Make sure this is imported for the image URL
 import '../../widgets/address_card.dart';
 import 'driver_drawer_screen.dart';
 import 'passenger_details_screen.dart';
@@ -203,10 +204,27 @@ class DriverAvailableRideScreen extends StatelessWidget {
                   }
 
                   return ListView.builder(
-                    controller: scrollController, // Important for scrolling sheet
+                    controller: scrollController,
                     padding: EdgeInsets.all(16.r),
-                    itemCount: controller.requestedRides.length,
+                    // Add 1 to itemCount if we are loading more to show the spinner at the bottom
+                    itemCount: controller.requestedRides.length + (controller.isMoreLoading.value ? 1 : 0),
                     itemBuilder: (context, index) {
+
+                      // 1. Check if we reached the bottom to show the loader
+                      if (index == controller.requestedRides.length) {
+                        return Padding(
+                          padding: EdgeInsets.symmetric(vertical: 20.h),
+                          child: const Center(child: CircularProgressIndicator()),
+                        );
+                      }
+
+                      // 2. Pagination Trigger: Load more when we get near the end of the list
+                      if (index == controller.requestedRides.length - 1) {
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          controller.loadMore();
+                        });
+                      }
+
                       final ride = controller.requestedRides[index];
                       return InkWell(
                         onTap: () {
@@ -236,7 +254,7 @@ class RideBookingCard extends StatelessWidget {
     if (dateTimeString == null) return '--:--';
     try {
       DateTime dt = DateTime.parse(dateTimeString).toLocal();
-      return DateFormat('hh:mm a').format(dt); // e.g., 10:30 PM
+      return DateFormat('hh:mm a').format(dt);
     } catch (e) {
       return '--:--';
     }
@@ -244,14 +262,12 @@ class RideBookingCard extends StatelessWidget {
 
   // Format Image properly
   String _getImageUrl(String? path) {
-    if (path == null || path.isEmpty) return 'https://i.pravatar.cc/150?img=12'; // Fallback
+    if (path == null || path.isEmpty) return 'https://i.pravatar.cc/150?img=12';
     if (path.startsWith('http')) return path;
 
-    // Replace with your actual media base URL logic
-    // String baseDomain = AppUrl.baseUrl.replaceAll('/api/v1', '');
-    // return "$baseDomain/$path"; 
-
-    return path; // Temporary, update to your backend image URL logic
+    // Build the media URL from the Base URL
+    String baseDomain = AppUrl.baseUrl.replaceAll('/api/v1', '');
+    return "$baseDomain/uploads/$path"; // Adjust '/uploads/' if your server uses a different media path
   }
 
   @override
@@ -281,6 +297,9 @@ class RideBookingCard extends StatelessWidget {
                   radius: 24.r,
                   backgroundColor: Colors.grey[300],
                   backgroundImage: NetworkImage(_getImageUrl(ride.userProfile)),
+                  onBackgroundImageError: (exception, stackTrace) {
+                    debugPrint('Error loading image: $exception');
+                  },
                 ),
                 SizedBox(width: 12.w),
                 // Passenger Name and Rating
@@ -309,7 +328,7 @@ class RideBookingCard extends StatelessWidget {
                           ),
                           SizedBox(width: 4.w),
                           Text(
-                            '${ride.avgRating?.toStringAsFixed(1) ?? '0.0'}',
+                            ride.avgRating?.toStringAsFixed(1) ?? '0.0',
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontFamily: "Outfit",
@@ -357,7 +376,7 @@ class RideBookingCard extends StatelessWidget {
                   ),
                   Text(
                     ride.jobId != null && ride.jobId!.length > 8
-                        ? ride.jobId!.substring(ride.jobId!.length - 8).toUpperCase() // Display short hash
+                        ? ride.jobId!.substring(ride.jobId!.length - 8).toUpperCase()
                         : ride.jobId ?? 'N/A',
                     style: TextStyle(
                       fontSize: 14.sp,
@@ -413,7 +432,7 @@ class RideBookingCard extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 4.h),
-                    DashedLine( // Assumes you have this widget in your project
+                    DashedLine(
                       height: 28.h,
                       color: Colors.grey.shade400,
                     ),
@@ -535,40 +554,106 @@ class RideBookingCard extends StatelessWidget {
             padding: EdgeInsets.all(16.r),
             child: Row(
               children: [
-                // Decline Button
+                // ================= DECLINE BUTTON =================
                 Expanded(
-                  child: Container(
-                    height: 50.h,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE8D5F5),
-                      borderRadius: BorderRadius.circular(24.r),
-                    ),
-                    child: TextButton(
-                      onPressed: () {
-                        // TODO: Implement decline logic
-                      },
-                      child: Text(
-                        'Decline',
-                        style: TextStyle(
-                          fontSize: 16.sp,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: "Outfit",
-                          color: const Color(0xFF7C3AED),
+                  child: Obx(() {
+                    final controller = Get.find<DriverAvailableRidesController>();
+                    final bool isDeclining = controller.decliningTrId.value == ride.trId;
+
+                    // Loading State for Decline
+                    if (isDeclining) {
+                      return Container(
+                        height: 50.h,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFE8D5F5),
+                          borderRadius: BorderRadius.circular(24.r),
+                        ),
+                        child: const Center(
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(
+                              color: Color(0xFF7C3AED),
+                              strokeWidth: 3,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+
+                    // Normal Decline Button
+                    return Container(
+                      height: 50.h,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFE8D5F5),
+                        borderRadius: BorderRadius.circular(24.r),
+                      ),
+                      child: TextButton(
+                        onPressed: () async {
+                          if (ride.trId == null) return;
+
+                          // Call Decline API
+                          await controller.declineRide(ride.trId!);
+                        },
+                        child: Text(
+                          'Decline',
+                          style: TextStyle(
+                            fontSize: 16.sp,
+                            fontWeight: FontWeight.w600,
+                            fontFamily: "Outfit",
+                            color: const Color(0xFF7C3AED),
+                          ),
                         ),
                       ),
-                    ),
-                  ),
+                    );
+                  }),
                 ),
                 SizedBox(width: 12.w),
-                // Accept Button
+
+                // ================= ACCEPT BUTTON =================
                 Expanded(
-                    child: CustomButtonCommon(
+                  child: Obx(() {
+                    final controller = Get.find<DriverAvailableRidesController>();
+                    final bool isAccepting = controller.acceptingTrId.value == ride.trId;
+
+                    // Loading State for Accept
+                    if (isAccepting) {
+                      return Container(
+                        height: 50.h,
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFF45C4D9), Color(0xFFB565D8)],
+                          ),
+                          borderRadius: BorderRadius.circular(24.r),
+                        ),
+                        child: const Center(
+                          child: SizedBox(
+                            width: 24,
+                            height: 24,
+                            child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+                          ),
+                        ),
+                      );
+                    }
+
+                    // Normal Accept Button
+                    return CustomButtonCommon(
                       title: 'Accept',
-                      onpress: () {
-                        _showVerificationDialog(context);
-                      },
                       useGradient: true,
-                    )
+                      onpress: () async {
+                        // 🚨 THE FIX: Check for BOTH IDs before calling
+                        if (ride.jobId == null || ride.trId == null) return;
+
+                        // Call Accept API with jobId AND trId
+                        bool success = await controller.acceptRide(ride.jobId!, ride.trId!);
+
+                        // Show Dialog on Success
+                        if (success) {
+                          _showVerificationDialog(context);
+                        }
+                      },
+                    );
+                  }),
                 ),
               ],
             ),
