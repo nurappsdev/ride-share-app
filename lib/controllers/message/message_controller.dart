@@ -4,18 +4,16 @@ import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
-import 'package:split_ride/services/api_client.dart';
 import 'package:split_ride/helpers/logger_util.dart';
 import 'package:split_ride/helpers/prefs_helper.dart';
 import 'package:split_ride/utils/app_constant.dart';
 import 'package:split_ride/helpers/app_url.dart';
 
+// NEW: Import NetworkCaller
+import 'package:split_ride/services/network/network_caller.dart';
+
 import '../../datasource/chat_socket_datasource.dart';
 import '../../model/message/message_model.dart';
-
-// Import your models and data source here
-// import 'package:split_ride/models/message_model.dart';
-// import 'package:split_ride/datasource/chat_socket_datasource.dart';
 
 class ChatDriverController extends GetxController {
   final ChatSocketDataSource socketDataSource = Get.find<ChatSocketDataSource>();
@@ -275,6 +273,7 @@ class ChatDriverController extends GetxController {
     }
   }
 
+  // 🚨 FIXED: Now uses NetworkCaller and AppUrl to fetch messages
   Future<void> getMessages({bool isPagination = false}) async {
     if (isPagination && (!hasMore || isLoadingMore)) return;
 
@@ -289,17 +288,25 @@ class ChatDriverController extends GetxController {
     update();
 
     try {
-      String url = "/message/$otherUserId?page=$_page&limit=20";
-      final response = await ApiClient.getData(url);
+      // 1. Get Token
+      String token = await PrefsHelper.getString(AppConstants.bearerToken) ?? '';
 
-      if (response.statusCode == 200) {
-        final msgResponse = MessageResponse.fromJson(response.body);
+      // 2. Use full DevTunnel AppUrl
+      String url = "${AppUrl.baseUrl}/message/$otherUserId?page=$_page&limit=20";
 
+      // 3. Use NetworkCaller
+      final response = await NetworkCaller().getRequest(
+        url,
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      // 4. Safely check success
+      if (response.isSuccess && response.jsonResponse != null) {
+        final msgResponse = MessageResponse.fromJson(response.jsonResponse!);
+
+        // Capture Thread ID
         if (msgResponse.extra?.threadId != null) {
           threadId = msgResponse.extra!.threadId!;
-
-          // NOTE: If your backend requires you to join a room to listen, do it here:
-          // socketDataSource.joinRoom(threadId);
         }
 
         pagination = msgResponse.pagination;
@@ -314,6 +321,8 @@ class ChatDriverController extends GetxController {
         } else {
           messages = msgResponse.data ?? [];
         }
+      } else {
+        LoggerUtils.error("Failed to load messages: Status ${response.statusCode}");
       }
     } catch (e, stack) {
       LoggerUtils.error("Error loading API messages: $e", e, stack);
