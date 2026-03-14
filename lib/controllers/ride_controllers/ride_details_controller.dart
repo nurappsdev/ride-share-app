@@ -4,15 +4,19 @@ import 'package:split_ride/model/ride/ride_details_model.dart';
 import 'package:split_ride/services/api_client.dart';
 import 'package:split_ride/helpers/logger_util.dart';
 
+import '../../helpers/prefs_helper.dart';
+import '../../utils/app_constant.dart';
+
 class RideDetailsController extends GetxController {
   bool isLoadingRideDetails = false;
 
   RideData? rideDetails;
+  String userRole = 'provider';
 
   @override
   void onInit() {
     super.onInit();
-
+    _loadUserRole();
     if (Get.arguments != null && Get.arguments['rideId'] != null) {
       String jobId = Get.arguments['rideId'].toString();
 
@@ -21,6 +25,12 @@ class RideDetailsController extends GetxController {
       LoggerUtils.error("No rideId found in Get.arguments!");
     }
   }
+
+  Future<void> _loadUserRole() async {
+    userRole = await PrefsHelper.getString(AppConstants.role);
+    update();
+  }
+
 
   Future<void> getRideDetails(String jobId) async {
     isLoadingRideDetails = true;

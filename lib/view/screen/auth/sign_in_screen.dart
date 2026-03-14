@@ -26,7 +26,7 @@ class SignInScreen extends StatelessWidget {
                 // Logo Section
                 Column(
                   children: [
-                    Image.asset('${AppImages.appLogo2}', height: 45.h),
+                    Image.asset(AppImages.appLogo2, height: 45.h),
                     SizedBox(height: 4.h),
                   ],
                 ),

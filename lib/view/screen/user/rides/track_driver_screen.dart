@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:split_ride/controllers/ride_controllers/ride_details_controller.dart';
 import 'package:split_ride/routes/app_routes.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../utils/utils.dart';
 import '../../../widgets/address_card.dart';
@@ -39,6 +40,7 @@ class TrackDriverScreen extends StatelessWidget {
             }
 
             final rideData = controller.rideDetails;
+            final isProvider = controller.userRole == 'provider';
 
             // Getting the OTHER USER'S data
             final otherUserName = rideData?.otherUser?.name ?? 'Unknown User';
@@ -113,8 +115,9 @@ class TrackDriverScreen extends StatelessWidget {
                               child: Icon(Icons.close, size: 20.sp),
                             ),
                           ),
+                          // DYNAMIC: App Bar Title
                           Text(
-                            'Track Driver',
+                            isProvider ? 'Track Passenger' : 'Track Driver',
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -288,7 +291,7 @@ class TrackDriverScreen extends StatelessWidget {
                                     flex: 3,
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      CrossAxisAlignment.start,
                                       children: [
                                         Container(
                                           width: 70.w,
@@ -355,7 +358,7 @@ class TrackDriverScreen extends StatelessWidget {
                                     flex: 2,
                                     child: Column(
                                       crossAxisAlignment:
-                                          CrossAxisAlignment.end,
+                                      CrossAxisAlignment.end,
                                       children: [
                                         Icon(
                                           Icons.directions_car,
@@ -392,7 +395,7 @@ class TrackDriverScreen extends StatelessWidget {
                                         // SHOWING RIDE TYPE AND SEATS HERE
                                         CustomText(
                                           text:
-                                              '${rideData?.seat ?? 0} Seats • ${rideData?.type?.capitalizeFirst ?? "Ride"}',
+                                          '${rideData?.seat ?? 0} Seats • ${rideData?.type?.capitalizeFirst ?? "Ride"}',
                                           fontsize: 9,
                                           fontWeight: FontWeight.w600,
                                           color: const Color(0xFF7C3AED),
@@ -416,9 +419,9 @@ class TrackDriverScreen extends StatelessWidget {
                           // Location Details
                           AddressCard(
                             fromLocation:
-                                rideData?.fromAddress ?? 'Unknown Pickup',
+                            rideData?.fromAddress ?? 'Unknown Pickup',
                             toLocation:
-                                rideData?.toAddress ?? 'Unknown Dropoff',
+                            rideData?.toAddress ?? 'Unknown Dropoff',
                           ),
                           SizedBox(height: 20.h),
 
@@ -448,7 +451,18 @@ class TrackDriverScreen extends StatelessWidget {
                                     ],
                                   ),
                                   child: ElevatedButton(
-                                    onPressed: () {},
+                                    onPressed: () {
+                                      // Navigate to Chat Screen
+                                      Get.toNamed(
+                                        AppRoutes.driverChatingScreen,
+                                        arguments: {
+                                          'otherUserId': rideData?.otherUser?.id,
+                                          'driverName': otherUserName,
+                                          'driverEmail': rideData?.otherUser?.email ?? '--',
+                                          'driverPhone': otherUserPhone,
+                                        },
+                                      );
+                                    },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: Colors.transparent,
                                       shadowColor: Colors.transparent,
@@ -460,7 +474,7 @@ class TrackDriverScreen extends StatelessWidget {
                                     ),
                                     child: Row(
                                       mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                      MainAxisAlignment.center,
                                       children: [
                                         Icon(
                                           Icons.chat_bubble_outline,
@@ -468,8 +482,11 @@ class TrackDriverScreen extends StatelessWidget {
                                           color: Colors.white,
                                         ),
                                         SizedBox(width: 8.w),
+                                        // DYNAMIC: Chat Button Text
                                         CustomText(
-                                          text: 'Chat with your driver',
+                                          text: isProvider
+                                              ? 'Chat with your passenger'
+                                              : 'Chat with your driver',
                                           fontsize: 14,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -480,34 +497,44 @@ class TrackDriverScreen extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(width: 12.w),
-                              Container(
-                                width: 56.w,
-                                height: 56.h,
-                                decoration: BoxDecoration(
-                                  gradient: const LinearGradient(
-                                    begin: Alignment.topLeft,
-                                    end: Alignment.bottomRight,
-                                    colors: [
-                                      Color(0xFF45C4D9),
-                                      Color(0xFF6B7FEC),
-                                      Color(0xFFB565D8),
+                              GestureDetector(
+                                onTap: () async {
+                                  if (otherUserPhone.isNotEmpty && otherUserPhone != '--') {
+                                    final Uri launchUri = Uri(scheme: 'tel', path: otherUserPhone);
+                                    if (await canLaunchUrl(launchUri)) {
+                                      await launchUrl(launchUri);
+                                    }
+                                  }
+                                },
+                                child: Container(
+                                  width: 56.w,
+                                  height: 56.h,
+                                  decoration: BoxDecoration(
+                                    gradient: const LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        Color(0xFF45C4D9),
+                                        Color(0xFF6B7FEC),
+                                        Color(0xFFB565D8),
+                                      ],
+                                    ),
+                                    shape: BoxShape.circle,
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: const Color(
+                                          0xFF3B82F6,
+                                        ).withOpacity(0.3),
+                                        blurRadius: 12.r,
+                                        offset: Offset(0, 4.h),
+                                      ),
                                     ],
                                   ),
-                                  shape: BoxShape.circle,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(
-                                        0xFF3B82F6,
-                                      ).withOpacity(0.3),
-                                      blurRadius: 12.r,
-                                      offset: Offset(0, 4.h),
-                                    ),
-                                  ],
-                                ),
-                                child: Icon(
-                                  Icons.phone,
-                                  color: Colors.white,
-                                  size: 24.sp,
+                                  child: Icon(
+                                    Icons.phone,
+                                    color: Colors.white,
+                                    size: 24.sp,
+                                  ),
                                 ),
                               ),
                             ],

@@ -47,7 +47,8 @@ class SignInController extends GetxController {
       if (!formKey.currentState!.validate()) {
         return;
       }
-      final String currentRole = await GetStorageModel().read(AppConstants.currentRole) ?? '';
+      final String currentRole =
+          await GetStorageModel().read(AppConstants.currentRole) ?? '';
       final Map<String, dynamic> registrationForm = <String, dynamic>{
         "role": currentRole,
         "email": emailTEController.text.trim(),
@@ -64,13 +65,25 @@ class SignInController extends GetxController {
           postResponse.jsonResponse?['data']['user'],
         );
 
+        //SAVE THE USER ROLE
+        final String userRole =
+            postResponse.jsonResponse?['data']?['user']?['role'] ?? "";
+        await PrefsHelper.setString(AppConstants.role, userRole);
+
         // SAVE THE USER ID
-        final userId = postResponse.jsonResponse?['data']?['user']?['_id'] ?? '';
+        final userId =
+            postResponse.jsonResponse?['data']?['user']?['_id'] ?? '';
         await PrefsHelper.setString(AppConstants.userId, userId);
 
         // Save the Tokens
-        await PrefsHelper.setString(AppConstants.bearerToken, postResponse.jsonResponse?['data']?['tokens']?['accessToken'] ?? '');
-        await SecureStorageService().write(AppConstants.accessToken, postResponse.jsonResponse?['data']?['tokens']?['accessToken'] ?? '');
+        await PrefsHelper.setString(
+          AppConstants.bearerToken,
+          postResponse.jsonResponse?['data']?['tokens']?['accessToken'] ?? '',
+        );
+        await SecureStorageService().write(
+          AppConstants.accessToken,
+          postResponse.jsonResponse?['data']?['tokens']?['accessToken'] ?? '',
+        );
 
         // ===> FIX: Await socket initialization FIRST, then connect user
         await _connectSocket(userId);
@@ -130,7 +143,9 @@ class SignInController extends GetxController {
       final chatDataSource = ChatSocketDataSource(socketClient);
       chatDataSource.connectUser(userId);
 
-      LoggerUtils.info("✅ AuthController: Socket Connected and User emitted for $userId");
+      LoggerUtils.info(
+        "✅ AuthController: Socket Connected and User emitted for $userId",
+      );
     } catch (e) {
       LoggerUtils.error("❌ AuthController: Socket Connection Failed - $e");
     }
