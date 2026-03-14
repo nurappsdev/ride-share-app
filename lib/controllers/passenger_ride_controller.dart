@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:split_ride/helpers/app_url.dart';
 import 'package:split_ride/helpers/logger_util.dart';
 import 'package:split_ride/helpers/secured_storage.dart';
+import 'package:split_ride/services/api_client.dart';
  import 'package:split_ride/services/network/network_caller.dart';
 import 'package:split_ride/services/network/network_response.dart';
 import 'package:split_ride/utils/app_constant.dart';
@@ -135,10 +136,12 @@ class PassengerMyRidesController extends GetxController {
       final String token =
           await SecureStorageService().read(AppConstants.accessToken) ?? '';
 
-      final NetworkResponse response = await NetworkCaller().putRequest(
-        // '${AppUrl.cancelRide}/$jobId', // Add this to AppUrl: /job/{id}/cancel
-        '${AppUrl.imageUploadUrl}/$jobId', // Add this to AppUrl: /job/{id}/cancel
+      final  response = await ApiClient.postData(
+        '${AppUrl.cancelRide}/$jobId', // Add this to AppUrl: /job/{id}/cancel
+        // '/job/cancel/$jobId',
+       {},
         headers: {'Authorization': 'Bearer $token'},
+
       );
 
       if (response.isSuccess) {

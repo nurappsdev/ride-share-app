@@ -1,23 +1,32 @@
 import 'package:get/get.dart';
 import 'package:split_ride/helpers/app_url.dart';
+import 'package:split_ride/helpers/prefs_helper.dart';
 import 'package:split_ride/services/api_client.dart';
 import 'package:split_ride/helpers/logger_util.dart';
 
 import '../../model/driver/driver_model.dart';
+import '../../utils/app_constant.dart';
 
 class DriverDetailsController extends GetxController {
   bool isLoading = false;
   DriverModel? driverDetails;
+  String userRole = 'user';
 
   @override
   void onInit() {
     super.onInit();
+    _loadUserRole();
     if (Get.arguments != null && Get.arguments['driverId'] != null) {
       String driverId = Get.arguments['driverId'].toString();
       getDriverDetails(driverId);
     } else {
       LoggerUtils.error("No driverId found in Get.arguments!");
     }
+  }
+
+  Future<void> _loadUserRole() async {
+    userRole = await PrefsHelper.getString(AppConstants.role);
+    update(); // Update the UI once the role is loaded
   }
 
   Future<void> getDriverDetails(String driverId) async {

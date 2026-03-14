@@ -1,79 +1,27 @@
-
-
-
-
-
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
-import 'package:split_ride/routes/app_routes.dart';
-import 'package:split_ride/utils/app_colors.dart';
-import 'package:split_ride/utils/app_image.dart';
+import 'package:intl/intl.dart';
 import 'package:split_ride/view/widgets/custom_button_common.dart';
+import '../../../controllers/driver_available_ride_controller.dart';
+import '../../../model/provider_requested_ride_model.dart';
 import '../../../utils/utils.dart';
 import '../../widgets/address_card.dart';
-import '../screens.dart';
 import 'driver_drawer_screen.dart';
 import 'passenger_details_screen.dart';
 
-class DriverAvailableRideScreen extends StatefulWidget {
+
+class DriverAvailableRideScreen extends StatelessWidget {
   const DriverAvailableRideScreen({super.key});
 
-  @override
-  State<DriverAvailableRideScreen> createState() => _DriverAvailableRideScreenState();
-}
-
-class _DriverAvailableRideScreenState extends State<DriverAvailableRideScreen> {
-  final List<RideBooking> bookings = [
-    RideBooking(
-      driverName: 'Bernard Alvarado',
-      driverImage: 'https://i.pravatar.cc/150?img=12',
-      rating: 4.8,
-      reviewCount: 293,
-      bookingId: 'SR1284E6',
-      pickupLocation: 'Parateek Wisteria Sector 77, Noid...',
-      dropLocation: 'HCL Technologies Sector 126, Rai...',
-      distance: 8.7,
-      pickupTime: '16:28',
-      fare: 15.00,
-    ),
-    RideBooking(
-      driverName: 'Bernard Alvarado',
-      driverImage: 'https://i.pravatar.cc/150?img=12',
-      rating: 4.8,
-      reviewCount: 293,
-      bookingId: 'SR1284E7',
-      pickupLocation: 'Parateek Wisteria Sector 77, Noid...',
-      dropLocation: 'HCL Technologies Sector 126, Rai...',
-      distance: 8.7,
-      pickupTime: '17:30',
-      fare: 18.00,
-    ),
-    RideBooking(
-      driverName: 'Bernard Alvarado',
-      driverImage: 'https://i.pravatar.cc/150?img=12',
-      rating: 4.8,
-      reviewCount: 293,
-      bookingId: 'SR1284E8',
-      pickupLocation: 'Parateek Wisteria Sector 77, Noid...',
-      dropLocation: 'HCL Technologies Sector 126, Rai...',
-      distance: 8.7,
-      pickupTime: '18:45',
-      fare: 20.00,
-    ),
-  ];
-
-
-  // Function to show drawer
-  void _showCustomDrawer() {
+  void _showCustomDrawer(BuildContext context) {
     Navigator.of(context).push(
       PageRouteBuilder(
         opaque: false,
         barrierColor: Colors.transparent,
-        pageBuilder: (_, __, ___) =>  DriverDrawerScreen(),
+        pageBuilder: (_, __, ___) => const DriverDrawerScreen(),
         transitionsBuilder: (context, animation, secondaryAnimation, child) {
           const begin = Offset(-1.0, 0.0);
           const end = Offset.zero;
@@ -85,8 +33,12 @@ class _DriverAvailableRideScreenState extends State<DriverAvailableRideScreen> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
+    // Initialize Controller
+    final controller = Get.put(DriverAvailableRidesController());
+
     return Scaffold(
       body: Stack(
         children: [
@@ -96,9 +48,7 @@ class _DriverAvailableRideScreenState extends State<DriverAvailableRideScreen> {
             decoration: BoxDecoration(
               color: const Color(0xFFF5F5F5),
               image: DecorationImage(
-                image: AssetImage(
-                    "${AppImages.mapDriverImg}"
-                ),
+                image: AssetImage("${AppImages.mapDriverImg}"),
                 fit: BoxFit.cover,
               ),
             ),
@@ -117,7 +67,7 @@ class _DriverAvailableRideScreenState extends State<DriverAvailableRideScreen> {
                   children: [
                     // Menu Button
                     GestureDetector(
-                      onTap: _showCustomDrawer,
+                      onTap: () => _showCustomDrawer(context),
                       child: Container(
                         width: 44.w,
                         height: 44.h,
@@ -138,11 +88,10 @@ class _DriverAvailableRideScreenState extends State<DriverAvailableRideScreen> {
                             ),
                           ],
                         ),
-                        child:    Padding(
+                        child: Padding(
                           padding: const EdgeInsets.all(12.0),
                           child: SvgPicture.asset(AppIcons.menuIcon),
                         ),
-
                       ),
                     ),
 
@@ -154,7 +103,7 @@ class _DriverAvailableRideScreenState extends State<DriverAvailableRideScreen> {
                         fontSize: 18.sp,
                         fontWeight: FontWeight.bold,
                         fontFamily: "Outfit",
-                        color: Color(0xFF2D3748),
+                        color: const Color(0xFF2D3748),
                       ),
                     ),
 
@@ -175,7 +124,7 @@ class _DriverAvailableRideScreenState extends State<DriverAvailableRideScreen> {
                       ),
                       child: Icon(
                         Icons.notifications_outlined,
-                        color: Color(0xFF2D3748),
+                        color: const Color(0xFF2D3748),
                         size: 24.r,
                       ),
                     ),
@@ -239,17 +188,36 @@ class _DriverAvailableRideScreenState extends State<DriverAvailableRideScreen> {
                     ),
                   ],
                 ),
-                child: ListView.builder(
-                  padding: EdgeInsets.all(16.r),
-                  itemCount: bookings.length,
-                  itemBuilder: (context, index) {
-                    return InkWell(
-                       onTap: (){
-                         showPassengerDetails(context);
-                       },
-                        child: RideBookingCard(booking: bookings[index]));
-                  },
-                ),
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (controller.requestedRides.isEmpty) {
+                    return Center(
+                      child: Text(
+                        'No requested rides available.',
+                        style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                      ),
+                    );
+                  }
+
+                  return ListView.builder(
+                    controller: scrollController, // Important for scrolling sheet
+                    padding: EdgeInsets.all(16.r),
+                    itemCount: controller.requestedRides.length,
+                    itemBuilder: (context, index) {
+                      final ride = controller.requestedRides[index];
+                      return InkWell(
+                        onTap: () {
+                          // Pass details to Passenger Details Screen if needed
+                          showPassengerDetails(context);
+                        },
+                        child: RideBookingCard(ride: ride),
+                      );
+                    },
+                  );
+                }),
               );
             },
           ),
@@ -259,37 +227,32 @@ class _DriverAvailableRideScreenState extends State<DriverAvailableRideScreen> {
   }
 }
 
-
-class RideBooking {
-  final String driverName;
-  final String driverImage;
-  final double rating;
-  final int reviewCount;
-  final String bookingId;
-  final String pickupLocation;
-  final String dropLocation;
-  final double distance;
-  final String pickupTime;
-  final double fare;
-
-  RideBooking({
-    required this.driverName,
-    required this.driverImage,
-    required this.rating,
-    required this.reviewCount,
-    required this.bookingId,
-    required this.pickupLocation,
-    required this.dropLocation,
-    required this.distance,
-    required this.pickupTime,
-    required this.fare,
-  });
-}
-
 class RideBookingCard extends StatelessWidget {
-  final RideBooking booking;
+  final ProviderRequestedRideModel ride;
 
-  const RideBookingCard({Key? key, required this.booking}) : super(key: key);
+  const RideBookingCard({Key? key, required this.ride}) : super(key: key);
+
+  String _formatTime(String? dateTimeString) {
+    if (dateTimeString == null) return '--:--';
+    try {
+      DateTime dt = DateTime.parse(dateTimeString).toLocal();
+      return DateFormat('hh:mm a').format(dt); // e.g., 10:30 PM
+    } catch (e) {
+      return '--:--';
+    }
+  }
+
+  // Format Image properly
+  String _getImageUrl(String? path) {
+    if (path == null || path.isEmpty) return 'https://i.pravatar.cc/150?img=12'; // Fallback
+    if (path.startsWith('http')) return path;
+
+    // Replace with your actual media base URL logic
+    // String baseDomain = AppUrl.baseUrl.replaceAll('/api/v1', '');
+    // return "$baseDomain/$path"; 
+
+    return path; // Temporary, update to your backend image URL logic
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -308,42 +271,45 @@ class RideBookingCard extends StatelessWidget {
       ),
       child: Column(
         children: [
-          // Driver Info Section
+          // Passenger Info Section
           Padding(
             padding: EdgeInsets.all(16.r),
             child: Row(
               children: [
-                // Driver Avatar
+                // Passenger Avatar
                 CircleAvatar(
                   radius: 24.r,
-                  backgroundImage: NetworkImage(booking.driverImage),
+                  backgroundColor: Colors.grey[300],
+                  backgroundImage: NetworkImage(_getImageUrl(ride.userProfile)),
                 ),
                 SizedBox(width: 12.w),
-                // Driver Name and Rating
+                // Passenger Name and Rating
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        booking.driverName,
+                        ride.userName ?? 'Unknown Passenger',
                         style: TextStyle(
                           fontFamily: "Outfit",
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                           color: Colors.black,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 4),
                       Row(
                         children: [
-                           Icon(
+                          Icon(
                             Icons.star,
-                            color: Color(0xFFFFA726),
+                            color: const Color(0xFFFFA726),
                             size: 16.r,
                           ),
                           SizedBox(width: 4.w),
                           Text(
-                            '${booking.rating}',
+                            '${ride.avgRating?.toStringAsFixed(1) ?? '0.0'}',
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontFamily: "Outfit",
@@ -352,7 +318,7 @@ class RideBookingCard extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            ' (${booking.reviewCount})',
+                            ' (${ride.totalRating ?? 0})',
                             style: TextStyle(
                               fontFamily: "Outfit",
                               fontSize: 14.sp,
@@ -370,12 +336,12 @@ class RideBookingCard extends StatelessWidget {
 
           // Booking ID Section
           Padding(
-            padding:  EdgeInsets.all(8.r),
+            padding: EdgeInsets.all(8.r),
             child: Container(
               padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
-              decoration:  BoxDecoration(
-                color: Color(0xFFF3E8FF),
-                borderRadius: BorderRadius.all(Radius.circular(12.r))
+              decoration: BoxDecoration(
+                  color: const Color(0xFFF3E8FF),
+                  borderRadius: BorderRadius.all(Radius.circular(12.r))
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -390,12 +356,14 @@ class RideBookingCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    booking.bookingId,
+                    ride.jobId != null && ride.jobId!.length > 8
+                        ? ride.jobId!.substring(ride.jobId!.length - 8).toUpperCase() // Display short hash
+                        : ride.jobId ?? 'N/A',
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontFamily: "Outfit",
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF7C3AED),
+                      color: const Color(0xFF7C3AED),
                     ),
                   ),
                 ],
@@ -413,7 +381,7 @@ class RideBookingCard extends StatelessWidget {
                 Column(
                   children: [
                     Text(
-                      '${booking.distance}',
+                      ride.distance != null ? ride.distance!.toStringAsFixed(1) : '0.0',
                       style: TextStyle(
                         fontSize: 16.sp,
                         fontFamily: "Outfit",
@@ -432,10 +400,8 @@ class RideBookingCard extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(width: 12),
+
                 // Location dots and lines
-
-
-
                 Column(
                   children: [
                     Container(
@@ -447,7 +413,7 @@ class RideBookingCard extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 4.h),
-                    DashedLine(
+                    DashedLine( // Assumes you have this widget in your project
                       height: 28.h,
                       color: Colors.grey.shade400,
                     ),
@@ -455,18 +421,19 @@ class RideBookingCard extends StatelessWidget {
                     Icon(
                       Icons.location_on,
                       size: 12.sp,
-                      color: Color(0xFFe85f4c),
+                      color: const Color(0xFFe85f4c),
                     ),
                   ],
                 ),
                 const SizedBox(width: 12),
+
                 // Locations
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        booking.pickupLocation,
+                        ride.fromAddress ?? 'Unknown Location',
                         style: TextStyle(
                           fontSize: 13.sp,
                           color: Colors.black87,
@@ -477,7 +444,7 @@ class RideBookingCard extends StatelessWidget {
                       ),
                       SizedBox(height: 24.h),
                       Text(
-                        booking.dropLocation,
+                        ride.toAddress ?? 'Unknown Location',
                         style: TextStyle(
                           fontSize: 13.sp,
                           color: Colors.black87,
@@ -513,12 +480,12 @@ class RideBookingCard extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.access_time_filled,
-                        color: Color(0xFF7C3AED),
+                        color: const Color(0xFF7C3AED),
                         size: 18.r,
                       ),
                       SizedBox(width: 6.w),
                       Text(
-                        'Pick up @ ${booking.pickupTime}',
+                        'Pick up @ ${_formatTime(ride.dateTime)}',
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontWeight: FontWeight.w600,
@@ -543,12 +510,12 @@ class RideBookingCard extends StatelessWidget {
                     children: [
                       Icon(
                         Icons.currency_exchange_rounded,
-                        color: Color(0xFF2196F3),
+                        color: const Color(0xFF2196F3),
                         size: 18.r,
                       ),
                       SizedBox(width: 6.w),
                       Text(
-                        '€ ${booking.fare.toStringAsFixed(2)}',
+                        '€ ${ride.fare?.toStringAsFixed(2) ?? '0.00'}',
                         style: TextStyle(
                           fontSize: 13.sp,
                           fontFamily: "Outfit",
@@ -577,14 +544,16 @@ class RideBookingCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(24.r),
                     ),
                     child: TextButton(
-                      onPressed: () {},
-                      child:  Text(
+                      onPressed: () {
+                        // TODO: Implement decline logic
+                      },
+                      child: Text(
                         'Decline',
                         style: TextStyle(
                           fontSize: 16.sp,
                           fontWeight: FontWeight.w600,
                           fontFamily: "Outfit",
-                          color: Color(0xFF7C3AED),
+                          color: const Color(0xFF7C3AED),
                         ),
                       ),
                     ),
@@ -593,9 +562,13 @@ class RideBookingCard extends StatelessWidget {
                 SizedBox(width: 12.w),
                 // Accept Button
                 Expanded(
-                  child:CustomButtonCommon(title: 'Accept', onpress: (){
-                    _showVerificationDialog(context);
-                  },useGradient: true,)
+                    child: CustomButtonCommon(
+                      title: 'Accept',
+                      onpress: () {
+                        _showVerificationDialog(context);
+                      },
+                      useGradient: true,
+                    )
                 ),
               ],
             ),
@@ -606,19 +579,17 @@ class RideBookingCard extends StatelessWidget {
   }
 }
 
+// Dialog Logic
 void _showVerificationDialog(BuildContext context) {
   showGeneralDialog(
     context: context,
     barrierDismissible: false,
     barrierLabel: "Verification",
-    barrierColor: Colors.black.withOpacity(0.25), // soft dim
+    barrierColor: Colors.black.withOpacity(0.25),
     transitionDuration: const Duration(milliseconds: 10),
     pageBuilder: (_, __, ___) {
       return BackdropFilter(
-        filter: ImageFilter.blur(
-          sigmaX: 2,
-          sigmaY: 2,
-        ),
+        filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
         child: Center(
           child: _verificationCard(context),
         ),
@@ -645,7 +616,6 @@ Widget _verificationCard(BuildContext context) {
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        /// Gradient Success Icon
         Container(
           width: 100.w,
           height: 100.w,
@@ -668,9 +638,7 @@ Widget _verificationCard(BuildContext context) {
             color: Colors.white,
           ),
         ),
-
         SizedBox(height: 24.h),
-
         Text(
           "Ride Accepted",
           textAlign: TextAlign.center,
@@ -678,31 +646,28 @@ Widget _verificationCard(BuildContext context) {
             fontSize: 22.sp,
             fontFamily: "Outfit",
             fontWeight: FontWeight.w700,
-
             decoration: TextDecoration.none,
             color: const Color(0xFF2D3748),
           ),
         ),
-
         SizedBox(height: 12.h),
-
         Text(
-          "Reach the location by 10:25 PM to pick up the passenger",
+          "Reach the location in time to pick up the passenger",
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14.sp,
             fontFamily: "Outfit",
             color: Colors.grey[600],
             height: 1.5,
-
             decoration: TextDecoration.none,
           ),
         ),
-
         SizedBox(height: 28.h),
-
-        /// Button
-        CustomButtonCommon(title:  "View The Map", onpress: (){Get.back();},useGradient: true,),
+        CustomButtonCommon(
+          title: "View The Map",
+          onpress: () { Get.back(); },
+          useGradient: true,
+        ),
       ],
     ),
   );
