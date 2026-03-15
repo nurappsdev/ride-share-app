@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,6 +9,7 @@ import 'package:split_ride/helpers/app_url.dart';
 import 'package:split_ride/services/network/network_caller.dart';
 import 'package:split_ride/utils/app_constant.dart';
 import '../../../helpers/secured_storage.dart';
+import '../../../routes/app_routes.dart';
 import '../../widgets/widgets.dart';
 
 class DriverProfileEditScreen extends StatefulWidget {
@@ -364,7 +366,7 @@ class _DriverProfileEditScreenState extends State<DriverProfileEditScreen> {
         actions: [
           IconButton(
             icon: Icon(Icons.notifications_outlined, color: Colors.black, size: 24.sp),
-            onPressed: () {},
+            onPressed: () => Get.toNamed(AppRoutes.notificationScreen),
           ),
         ],
       ),
