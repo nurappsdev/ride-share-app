@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
@@ -35,7 +34,7 @@ class VehicleDetailsModel {
     return {
       'carModelId': selectedCarType.value?.id,
       'licenseNo': vehicleLicenceCtrl.text,
-      'year': manufacturingYearCtrl.text,
+      'year': int.tryParse(manufacturingYearCtrl.text) ?? 0,
       'seat': selectedSeats.value,
     };
   }
@@ -331,6 +330,9 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
 
     LoggerUtils.debug('Vehicles Data: $vehicles');
 
+    // Save vehicles data to controller
+    controller.setVehiclesData(vehicles);
+
     // Navigate to next screen
     Get.toNamed(AppRoutes.driverDocScreen, preventDuplicates: false);
   }
@@ -353,6 +355,7 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
               Expanded(
                 child: SingleChildScrollView(
                   child: Container(
+                    height: 1000.h,
                     decoration: const BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.only(
@@ -443,7 +446,7 @@ class _VehicleDetailsScreenState extends State<VehicleDetailsScreen> {
                               entry.key,
                               entry.value,
                             );
-                          }).toList(),
+                          }),
 
                           SizedBox(height: 20.h),
 

@@ -112,7 +112,7 @@ class _DriverMyVehiclesScreenState extends State<DriverMyVehiclesScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {},
+            onPressed: () => Get.toNamed(AppRoutes.notificationScreen),
           )
         ],
       ),
@@ -269,7 +269,12 @@ class _DriverMyVehiclesScreenState extends State<DriverMyVehiclesScreen> {
     return
       InkWell(
         onTap: (){
-          Get.toNamed(AppRoutes.vihicleAddScreen,preventDuplicates: false);
+          final route = Get.toNamed(AppRoutes.vihicleAddScreen,preventDuplicates: false);
+          route?.then((result) {
+            if (result == true) {
+              _fetchVehicles();
+            }
+          });
         },
         child: Container(
         margin: EdgeInsets.only(top: 10.h, bottom: 20.h),

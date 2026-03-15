@@ -125,23 +125,26 @@ class TrackDriverScreen extends StatelessWidget {
                               color: const Color(0xFF2D3748),
                             ),
                           ),
-                          Container(
-                            width: 44.w,
-                            height: 44.h,
-                            decoration: BoxDecoration(
-                              color: Colors.white,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
-                                  blurRadius: 8.r,
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.notifications_outlined,
-                              color: Color(0xFF2D3748),
-                              size: 24,
+                          InkWell(
+                            onTap:() => Get.toNamed(AppRoutes.notificationScreen),
+                            child: Container(
+                              width: 44.w,
+                              height: 44.h,
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 8.r,
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.notifications_outlined,
+                                color: Color(0xFF2D3748),
+                                size: 24,
+                              ),
                             ),
                           ),
                         ],

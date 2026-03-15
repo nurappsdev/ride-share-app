@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:split_ride/view/widgets/custom_button_common.dart';
 import '../../../controllers/driver_available_ride_controller.dart';
 import '../../../model/provider_requested_ride_model.dart';
+import '../../../routes/app_routes.dart';
 import '../../../utils/utils.dart';
 import '../../../helpers/app_url.dart'; // Make sure this is imported for the image URL
 import '../../widgets/address_card.dart';
@@ -109,24 +110,27 @@ class DriverAvailableRideScreen extends StatelessWidget {
                     ),
 
                     // Notification Button
-                    Container(
-                      width: 44.w,
-                      height: 44.h,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(34.r),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.06),
-                            blurRadius: 10,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: Icon(
-                        Icons.notifications_outlined,
-                        color: const Color(0xFF2D3748),
-                        size: 24.r,
+                    InkWell(
+                      onTap: () => Get.toNamed(AppRoutes.notificationScreen),
+                      child: Container(
+                        width: 44.w,
+                        height: 44.h,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(34.r),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.06),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.notifications_outlined,
+                          color: const Color(0xFF2D3748),
+                          size: 24.r,
+                        ),
                       ),
                     ),
                   ],
