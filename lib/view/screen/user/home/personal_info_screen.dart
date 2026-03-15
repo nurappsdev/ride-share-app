@@ -4,13 +4,16 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:split_ride/controllers/personal_info_controller.dart';
+import 'package:split_ride/routes/app_routes.dart';
 import 'package:split_ride/utils/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import '../../../widgets/widgets.dart';
 
 class PersonalInfoScreen extends StatelessWidget {
-  const PersonalInfoScreen({super.key});
+  final bool showBackButton;
+  
+  const PersonalInfoScreen({super.key, this.showBackButton = true});
 
   @override
   Widget build(BuildContext context) {
@@ -21,8 +24,17 @@ class PersonalInfoScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-          // leading: SizedBox.shrink(),
-          automaticallyImplyLeading: false,
+          leading: showBackButton
+              ? IconButton(
+                  icon: const Icon(
+                    Icons.arrow_back_ios,
+                    color: Colors.black87,
+                    size: 20,
+                  ),
+                  onPressed: () => Navigator.of(context).maybePop(),
+                )
+              : null,
+          automaticallyImplyLeading: !showBackButton,
           backgroundColor: Colors.white,
           elevation: 0,
           title: Text(
@@ -42,7 +54,7 @@ class PersonalInfoScreen extends StatelessWidget {
                 size: 22.sp,
                 color: Colors.black,
               ),
-              onPressed: () {},
+              onPressed: () => Get.toNamed(AppRoutes.notificationScreen),
             ),
           ],
         ),

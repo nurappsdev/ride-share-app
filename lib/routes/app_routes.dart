@@ -67,7 +67,11 @@ class AppRoutes {
     GetPage(name: driverChatingScreen, page: () => ChatDriverScreen()),
     GetPage(name: driverReviewScreen, page: () => GetReviewScreen()),
     GetPage(name: createReviewScreen, page: () => PassengerReviewSubmit()),
-    GetPage(name: personalInfoScreen, page: () => PersonalInfoScreen()),
+    GetPage(name: personalInfoScreen, page: () {
+      final args = Get.arguments as Map<String, dynamic>?;
+      final showBackButton = args?['showBackButton'] as bool? ?? true;
+      return PersonalInfoScreen(showBackButton: showBackButton);
+    }),
     GetPage(name: privacyPolicyAllScreen, page: () => PrivacyPolicyAllScreen()),
     GetPage(name: helpAndSupportScreen, page: () => HelpSupportScreen()),
     GetPage(name: completeProfileScreen, page: () => CompleteProfileScreen()),
