@@ -1,10 +1,11 @@
 import 'package:get/get.dart';
 import 'package:split_ride/helpers/app_url.dart';
-import 'package:split_ride/services/api_client.dart';
 import 'package:split_ride/helpers/logger_util.dart';
+import 'package:split_ride/helpers/prefs_helper.dart';
+import 'package:split_ride/utils/app_constant.dart';
+import 'package:split_ride/services/network/network_caller.dart';
 
 import '../model/review_model.dart';
-// import 'package:split_ride/models/review_model.dart'; // Import your model
 
 class DriverReviewController extends GetxController {
   bool isLoading = false;
@@ -26,7 +27,6 @@ class DriverReviewController extends GetxController {
 
   Future<void> fetchReviews({bool isLoadMore = false}) async {
     if (isLoadMore) {
-      // Prevent loading if we already reached the last page
       if (currentPage >= (pagination?.totalPages ?? 1)) return;
       isMoreLoading = true;
       currentPage++;
@@ -38,12 +38,17 @@ class DriverReviewController extends GetxController {
     update();
 
     try {
-      // Adding ?page= query parameter for pagination
-      String url = "${AppUrl.getReviewUrl(currentDriverId)}?page=$currentPage";
-      final response = await ApiClient.getData(url);
+      final String token = await PrefsHelper.getString(AppConstants.bearerToken) ?? '';
 
-      if (response.statusCode == 200) {
-        final reviewResponse = ReviewResponse.fromJson(response.body);
+      String url = "${AppUrl.baseUrl}${AppUrl.getReviewUrl(currentDriverId)}?page=$currentPage";
+
+      final response = await NetworkCaller().getRequest(
+        url,
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.isSuccess && response.jsonResponse != null) {
+        final reviewResponse = ReviewResponse.fromJson(response.jsonResponse!);
 
         if (isLoadMore) {
           reviews.addAll(reviewResponse.data ?? []);
@@ -58,6 +63,10 @@ class DriverReviewController extends GetxController {
       }
     } catch (e, stackTrace) {
       LoggerUtils.error("Error fetching reviews: $e", e, stackTrace);
+
+      if (isLoadMore && currentPage > 1) {
+        currentPage--;
+      }
     } finally {
       isLoading = false;
       isMoreLoading = false;

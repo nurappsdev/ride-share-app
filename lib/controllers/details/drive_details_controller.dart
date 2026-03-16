@@ -1,8 +1,10 @@
 import 'package:get/get.dart';
 import 'package:split_ride/helpers/app_url.dart';
 import 'package:split_ride/helpers/prefs_helper.dart';
-import 'package:split_ride/services/api_client.dart';
 import 'package:split_ride/helpers/logger_util.dart';
+
+// 🚨 NEW: Import NetworkCaller
+import 'package:split_ride/services/network/network_caller.dart';
 
 import '../../model/driver/driver_model.dart';
 import '../../utils/app_constant.dart';
@@ -34,12 +36,20 @@ class DriverDetailsController extends GetxController {
     update();
 
     try {
-      final response = await ApiClient.getData(
-        AppUrl.driveDetailsUrl(driverId),
+      // 1. Get the token manually
+      final String token = await PrefsHelper.getString(AppConstants.bearerToken) ?? '';
+
+      // 2. 🚨 THE FIX: Use NetworkCaller and prepend AppUrl.baseUrl to the path
+      String url = "${AppUrl.baseUrl}${AppUrl.driveDetailsUrl(driverId)}";
+
+      final response = await NetworkCaller().getRequest(
+        url,
+        headers: {'Authorization': 'Bearer $token'},
       );
 
-      if (response.statusCode == 200) {
-        final responseData = response.body['data'];
+      // 3. Safely check for success using NetworkCaller syntax
+      if (response.isSuccess && response.jsonResponse != null) {
+        final responseData = response.jsonResponse!['data'];
 
         if (responseData != null) {
           driverDetails = DriverModel.fromJson(responseData);
@@ -49,7 +59,7 @@ class DriverDetailsController extends GetxController {
         }
       } else {
         LoggerUtils.error(
-          "Failed to fetch driver details. Status: ${response.statusCode}",
+          "Failed to fetch driver details. Status: ${response.statusCode}, Message: ${response.jsonResponse?['message']}",
         );
       }
     } catch (e, stackTrace) {
