@@ -78,7 +78,10 @@ class AppRoutes {
     GetPage(name: vehicleDetailsScreen, page: () => VehicleDetailsScreen()),
     GetPage(name: driverDocScreen, page: () => DriverDocumentRegistrationScreen()),
     GetPage(name: driverAvailableScreen, page: () => DriverAvailableRideScreen()),
-    GetPage(name: driverTrackRidesScreen, page: () => DriverTrackRidesScreen()),
+    GetPage(name: driverTrackRidesScreen, page: () {
+      final jobId = Get.arguments as String? ?? '';
+      return DriverTrackRidesScreen(jobId: jobId);
+    }),
     GetPage(name: passengerDetailsReviewScreen, page: () => PassengerReviewScreen()),
     GetPage(name: passengerChatingScreen, page: () => ChatingPassenger()),
     GetPage(name: passengerRideEndScreen, page: () => PassengerRideEndScreen()),
