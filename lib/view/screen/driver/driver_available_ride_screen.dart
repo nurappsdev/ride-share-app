@@ -233,7 +233,7 @@ class DriverAvailableRideScreen extends StatelessWidget {
                       return InkWell(
                         onTap: () {
                           // Pass details to Passenger Details Screen if needed
-                          showPassengerDetails(context);
+                          showPassengerDetails(context, ride);
                         },
                         child: RideBookingCard(ride: ride),
                       );
@@ -649,12 +649,9 @@ class RideBookingCard extends StatelessWidget {
                         if (ride.jobId == null || ride.trId == null) return;
 
                         // Call Accept API with jobId AND trId
-                        bool success = await controller.acceptRide(ride.jobId!, ride.trId!);
+                        await controller.acceptRide(ride.jobId!, ride.trId!);
 
-                        // Show Dialog on Success
-                        if (success) {
-                          _showVerificationDialog(context);
-                        }
+                        showPassengerDetails(context, ride);
                       },
                     );
                   }),
@@ -666,98 +663,4 @@ class RideBookingCard extends StatelessWidget {
       ),
     );
   }
-}
-
-// Dialog Logic
-void _showVerificationDialog(BuildContext context) {
-  showGeneralDialog(
-    context: context,
-    barrierDismissible: false,
-    barrierLabel: "Verification",
-    barrierColor: Colors.black.withOpacity(0.25),
-    transitionDuration: const Duration(milliseconds: 10),
-    pageBuilder: (_, __, ___) {
-      return BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 2, sigmaY: 2),
-        child: Center(
-          child: _verificationCard(context),
-        ),
-      );
-    },
-  );
-}
-
-Widget _verificationCard(BuildContext context) {
-  return Container(
-    margin: EdgeInsets.symmetric(horizontal: 24.w),
-    padding: EdgeInsets.all(32.w),
-    decoration: BoxDecoration(
-      color: Colors.white,
-      borderRadius: BorderRadius.circular(32.r),
-      boxShadow: [
-        BoxShadow(
-          color: Colors.black.withOpacity(0.12),
-          blurRadius: 30,
-          offset: const Offset(0, 10),
-        ),
-      ],
-    ),
-    child: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 100.w,
-          height: 100.w,
-          decoration: const BoxDecoration(
-            shape: BoxShape.circle,
-            gradient: LinearGradient(
-              colors: [
-                Color(0xFF45C4D9),
-                Color(0xFF6B7FEC),
-                Color(0xFF5c58eb),
-                Color(0xFFB565D8),
-              ],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-          child: Icon(
-            Icons.check,
-            size: 60.sp,
-            color: Colors.white,
-          ),
-        ),
-        SizedBox(height: 24.h),
-        Text(
-          "Ride Accepted",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 22.sp,
-            fontFamily: "Outfit",
-            fontWeight: FontWeight.w700,
-            decoration: TextDecoration.none,
-            color: const Color(0xFF2D3748),
-          ),
-        ),
-        SizedBox(height: 12.h),
-        Text(
-          "Reach the location in time to pick up the passenger",
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontFamily: "Outfit",
-            color: Colors.grey[600],
-            height: 1.5,
-            decoration: TextDecoration.none,
-          ),
-        ),
-        SizedBox(height: 28.h),
-        CustomButtonCommon(
-          title: "View The Map",
-          onpress: () { Get.back(); },
-          useGradient: true,
-        ),
-      ],
-    ),
-  );
 }

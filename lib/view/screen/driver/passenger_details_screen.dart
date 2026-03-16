@@ -5,13 +5,33 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:split_ride/helpers/app_url.dart';
 import 'package:split_ride/routes/app_routes.dart';
 import 'package:split_ride/view/widgets/custom_button_common.dart';
 
-import '../../../controllers/nurbhai_payment_controller.dart';
-import '../screens.dart';
+import '../../../model/provider_requested_ride_model.dart';
 
-void showPassengerDetails(BuildContext context) {
+String _formatTime(String dateTimeString) {
+  try {
+    DateTime dt = DateTime.parse(dateTimeString).toLocal();
+    return DateFormat('hh:mm a').format(dt);
+  } catch (e) {
+    return '--:--';
+  }
+}
+
+// Format Image properly
+String _getImageUrl(String? path) {
+  if (path == null || path.isEmpty) return 'https://i.pravatar.cc/150?img=12';
+  if (path.startsWith('http')) return path;
+
+  // Build the media URL from the Base URL
+  String baseDomain = AppUrl.baseUrl.replaceAll('/api/v1', '');
+  return "$baseDomain/uploads/$path"; // Adjust '/uploads/' if your server uses a different media path
+}
+
+void showPassengerDetails(BuildContext context, ProviderRequestedRideModel ride) {
   showModalBottomSheet(
     context: context,
     isScrollControlled: true,
@@ -58,7 +78,7 @@ void showPassengerDetails(BuildContext context) {
                       CircleAvatar(
                         radius: 40.r,
                         backgroundImage: NetworkImage(
-                          'https://i.pravatar.cc/150?img=12',
+                          (_getImageUrl(ride.userProfile)),
                         ),
                       ),
                       SizedBox(height: 12.h),
@@ -67,7 +87,7 @@ void showPassengerDetails(BuildContext context) {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            'Bernard Alvarado',
+                            ride.userName ?? 'Unknown Passenger',
                             style: TextStyle(
                               fontSize: 16.sp,
                               fontWeight: FontWeight.w600,
@@ -83,7 +103,7 @@ void showPassengerDetails(BuildContext context) {
                           ),
                           SizedBox(width: 4.w),
                           Text(
-                            '4.9',
+                            ride.avgRating?.toStringAsFixed(1) ?? '0.0',
                             style: TextStyle(
                               fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
@@ -106,33 +126,35 @@ void showPassengerDetails(BuildContext context) {
                     Container(
                       padding: EdgeInsets.all(10.r),
                     decoration: BoxDecoration(borderRadius: BorderRadius.all(Radius.circular(12.r)),  color: Color(0xffe6f3ff), ),
-        
+
                       child: Column(
                         children: [
                           _buildDetailRow(
                             'Ride Price',
-                            '€60',
+                            '€ ${ride.fare?.toStringAsFixed(2) ?? '0.00'}',
                             valueColor: const Color(0xFF7C3AED),
                           ),
                           SizedBox(height: 4.h),
                           Divider(color: Colors.white,),
                           SizedBox(height: 4.h),
-        
+
                           // Booking ID
                           _buildDetailRow(
                             'Booking ID',
-                            'SR1284E6',
+                            ride.jobId != null && ride.jobId!.length > 8
+                                ? ride.jobId!.substring(ride.jobId!.length - 8).toUpperCase()
+                                : ride.jobId ?? 'N/A',
                           ),
                           SizedBox(height: 4.h),
                           Divider(color: Colors.white,),
                           SizedBox(height: 4.h),
-        
+
                           // Passenger
                           _buildPassengerRow(
                             'Passenger',
-                            'Devon Lane',
-                            '+1 234 567 8901',
-                            'https://i.pravatar.cc/150?img=33',
+                            ride.userName ?? 'Unknown Passenger',
+                            ride.userPhone ?? 'N/A',
+                            _getImageUrl(ride.userProfile),
                           ),
                           SizedBox(height: 4.h),
                           Divider(color: Colors.white,),
@@ -141,16 +163,16 @@ void showPassengerDetails(BuildContext context) {
                           // Pickup
                           _buildDetailRow(
                             'Pickup',
-                            'Parateek Wisteria\nSector 77, Niod...',
+                            ride.fromAddress ?? 'Unknown Location',
                           ),
                           SizedBox(height: 4.h),
                           Divider(color: Colors.white,),
                           SizedBox(height: 4.h),
-        
+
                           // Drop Off
                           _buildDetailRow(
                             'Drop Off',
-                            'HCL Technologies\nSector 126, Rai...',
+                            ride.toAddress ?? 'Unknown Location',
                           ),
                           SizedBox(height: 4.h),
                           Divider(color: Colors.white,),
@@ -159,8 +181,12 @@ void showPassengerDetails(BuildContext context) {
                           // Luggage
                           _buildDetailRow(
                             'Luggage',
-                            'Suitcase',
-                            subtitle: 'Luggage Description by user',
+                            ride.luggages != null && ride.luggages!.isNotEmpty
+                                ? ride.luggages!.join(', ')
+                                : 'N/A',
+                            subtitle: ride.luggages != null && ride.luggages!.isNotEmpty
+                                ? '${ride.luggages!.length} item(s)'
+                                : 'No luggage information',
                           ),
                         ],
                       ),
@@ -190,7 +216,7 @@ void showPassengerDetails(BuildContext context) {
                           ),
                           SizedBox(height: 8.h),
                           Text(
-                            'Please enter with your change or transfer to the account on the headrest.',
+                            'No passenger note available.',
                             style: TextStyle(
                               fontSize: 13.sp,
                               fontFamily: 'Outfit',
@@ -205,7 +231,8 @@ void showPassengerDetails(BuildContext context) {
         
                     // Accept Ride Button
                     CustomButtonCommon(title:   'Accept Ride', onpress: (){
-                      _showVerificationDialog(context);
+                      Navigator.pop(context);
+                      _showVerificationDialog(context, ride);
                     }, useGradient: true,),
                     SizedBox(height: 24.h),
                   ],
@@ -335,7 +362,7 @@ Widget _buildPassengerRow(
 }
 
 
-void _showVerificationDialog(BuildContext context) {
+void _showVerificationDialog(BuildContext context, ProviderRequestedRideModel ride) {
   showGeneralDialog(
     context: context,
     barrierDismissible: false,
@@ -350,14 +377,14 @@ void _showVerificationDialog(BuildContext context) {
           sigmaY: 2,
         ),
         child: Center(
-          child: _verificationCard(context),
+          child: _verificationCard(context, ride),
         ),
       );
     },
   );
 }
 
-Widget _verificationCard(BuildContext context) {
+Widget _verificationCard(BuildContext context, ProviderRequestedRideModel ride) {
   return Container(
     margin: EdgeInsets.symmetric(horizontal: 24.w),
     padding: EdgeInsets.all(32.w),
@@ -417,7 +444,7 @@ Widget _verificationCard(BuildContext context) {
         SizedBox(height: 12.h),
 
         Text(
-          "Reach the location by 10:25 PM to pick up the passenger",
+          "Reach the location by ${ride.dateTime != null ? _formatTime(ride.dateTime!) : 'time'} to pick up the passenger",
           textAlign: TextAlign.center,
           style: TextStyle(
             fontSize: 14.sp,
@@ -432,7 +459,12 @@ Widget _verificationCard(BuildContext context) {
         SizedBox(height: 28.h),
 
         /// Button
-        CustomButtonCommon(title:  "View The Map", onpress: (){Get.toNamed(AppRoutes.driverTrackRidesScreen);},useGradient: true,),
+        CustomButtonCommon(title:  "View The Map", onpress: (){
+          Get.offAllNamed(
+            AppRoutes.driverTrackRidesScreen,
+            arguments: ride.jobId ?? '',
+          );
+        },useGradient: true,),
       ],
     ),
   );

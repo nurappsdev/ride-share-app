@@ -47,14 +47,14 @@ class DriverAvailableRidesController extends GetxController {
         url,
         headers: {'Authorization': 'Bearer $token'},
       );
-
+      LoggerUtils.info('$response');
       // 4. Safely check for success using NetworkCaller syntax
       if (response.isSuccess && response.jsonResponse != null) {
         final responseData = response.jsonResponse!;
 
         // Extract Data
         final List<dynamic> data = responseData['data'] ?? [];
-
+        LoggerUtils.info('$data');
         // Extract Pagination Info
         if (responseData['pagination'] != null) {
           _totalPages = responseData['pagination']['totalPages'] ?? 1;
