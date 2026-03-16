@@ -53,6 +53,12 @@ class SignUpController extends GetxController {
           AppConstants.verificationToken,
           postResponse.jsonResponse?['data']['verificationToken'] ?? '',
         );
+        
+        // Save phone number to SecureStorage
+        await SecureStorageService().write(
+          'phone',
+          phoneNumberTEController.text.trim(),
+        );
 
         Get.toNamed(
           AppRoutes.OTPVerifyScreen,

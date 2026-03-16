@@ -119,7 +119,6 @@ class _PassengerHomeScreenState extends State<PassengerHomeScreen> {
                     ),
                     InkWell(
                       onTap: (){
-
                         Get.toNamed(AppRoutes.notificationScreen);
                       },
                       child: Container(

@@ -38,8 +38,7 @@ class PassengerMyRidesScreen extends StatelessWidget {
               color: Colors.black,
               size: 24.w,
             ),
-            onPressed: () {
-            },
+            onPressed: () => Get.toNamed(AppRoutes.notificationScreen),
           ),
         ],
       ),

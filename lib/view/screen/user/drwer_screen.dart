@@ -199,6 +199,7 @@ class _CustomDrawerState extends State<CustomDrawer> {
                     Get.toNamed(
                       AppRoutes.personalInfoScreen,
                       preventDuplicates: false,
+                      arguments: {'showBackButton': true},
                     );
                   },
                   child: _menu(Icons.person_outline, "Personal Info"),

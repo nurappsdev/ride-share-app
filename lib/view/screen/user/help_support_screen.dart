@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
+import 'package:split_ride/routes/app_routes.dart';
 import 'package:split_ride/controllers/help_support_controller.dart';
 import 'package:split_ride/utils/app_colors.dart';
 import 'package:split_ride/view/widgets/custom_loading.dart';
@@ -37,7 +38,7 @@ class HelpSupportScreen extends StatelessWidget {
           actions: [
             IconButton(
               icon: Icon(Icons.notifications_none, size: 22.sp, color: Colors.black),
-              onPressed: () {},
+              onPressed: () => Get.toNamed(AppRoutes.notificationScreen),
             ),
           ],
         ),

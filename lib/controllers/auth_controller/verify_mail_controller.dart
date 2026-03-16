@@ -10,6 +10,7 @@ import 'package:split_ride/view/widgets/toast_manager.dart';
 
 import '../../helpers/app_url.dart';
 import '../../helpers/get_storage.dart';
+import '../../helpers/prefs_helper.dart';
 import '../../helpers/secured_storage.dart';
 import '../../services/network/network_caller.dart';
 import '../../services/network/network_response.dart';
@@ -51,6 +52,11 @@ class EmailVerifyController extends GetxController {
               );
         await SecureStorageService().write(
           AppConstants.accessToken,
+          postResponse.jsonResponse?['data']['accessToken'] ?? '',
+        );
+
+        await PrefsHelper.setString(
+          AppConstants.bearerToken,
           postResponse.jsonResponse?['data']['accessToken'] ?? '',
         );
         Toast.show(message: postResponse.jsonResponse?['message']);

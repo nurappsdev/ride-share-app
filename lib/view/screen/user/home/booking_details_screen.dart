@@ -3,6 +3,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
+import 'package:split_ride/routes/app_routes.dart';
 
 import '../../../widgets/address_card.dart';
 import '../../screens.dart';
@@ -34,7 +36,7 @@ class BookingDetailsScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.notifications_none, size: 22.sp, color: Colors.black),
-            onPressed: () {},
+            onPressed: () => Get.toNamed(AppRoutes.notificationScreen),
           ),
         ],
       ),
