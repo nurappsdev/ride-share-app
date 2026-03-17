@@ -1,23 +1,58 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
-import 'package:split_ride/controllers/ride_controllers/ride_details_controller.dart';
-import 'package:split_ride/routes/app_routes.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
+import 'package:split_ride/controllers/track_driver_screen_controller.dart';
+import 'package:split_ride/routes/app_routes.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../../utils/utils.dart';
 import '../../../widgets/address_card.dart';
 import '../../../widgets/widgets.dart';
 
-class TrackDriverScreen extends StatelessWidget {
+class TrackDriverScreen extends StatefulWidget {
   const TrackDriverScreen({super.key});
+
+  @override
+  State<TrackDriverScreen> createState() => _TrackDriverScreenState();
+}
+
+class _TrackDriverScreenState extends State<TrackDriverScreen> {
+  late TrackDriverScreenController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(TrackDriverScreenController());
+  }
+
+  @override
+  void dispose() {
+    Get.delete<TrackDriverScreenController>();
+    super.dispose();
+  }
 
   String _estimateTime(double? distanceInKm) {
     if (distanceInKm == null || distanceInKm <= 0) return '0 Mins';
     double timeInHours = distanceInKm / 30.0;
     int timeInMinutes = (timeInHours * 60).round();
     if (timeInMinutes < 1) timeInMinutes = 1;
+    
+    // Convert to hours
+    int totalHours = (timeInMinutes / 60).round();
+    
+    // If more than 24 hours, show in days
+    if (totalHours >= 24) {
+      int days = (totalHours / 24).ceil();
+      return '$days ${days == 1 ? "Day" : "Days"}';
+    }
+    
+    // If more than 60 minutes, show in hours
+    if (timeInMinutes >= 60) {
+      int hours = (timeInMinutes / 60).ceil();
+      return '$hours ${hours == 1 ? "Hour" : "Hours"}';
+    }
+    
     return '$timeInMinutes Mins';
   }
 
@@ -33,102 +68,87 @@ class TrackDriverScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        body: GetBuilder<RideDetailsController>(
-          builder: (controller) {
-            if (controller.isLoadingRideDetails) {
-              return const Center(child: CircularProgressIndicator());
-            }
+        body: Obx(() {
+          if (controller.isLoading.value) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-            final rideData = controller.rideDetails;
-            final isProvider = controller.userRole == 'provider';
+          final isProvider = controller.userRole.value == 'provider';
+          final otherUserName = controller.otherUserName.value;
+          final otherUserPhone = controller.otherUserPhone.value;
+          final carName = controller.carModelName.value;
+          final distance = controller.distance.value;
 
-            // Getting the OTHER USER'S data
-            final otherUserName = rideData?.otherUser?.name ?? 'Unknown User';
-            final otherUserPhone = rideData?.otherUser?.phone ?? '--';
-
-            // Getting Car Data
-            final carName = rideData?.carModel?.name ?? 'Standard Car';
-            final distance = rideData?.distance;
-
-            return Stack(
-              children: [
-                // Map Background
-                Container(
-                  width: double.infinity,
-                  height: double.infinity,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [
-                        Colors.grey[200]!,
-                        Colors.grey[100]!,
-                        Colors.grey[200]!,
-                      ],
-                    ),
+          return Stack(
+            children: [
+              // Google Map
+              SizedBox.expand(
+                child: GoogleMap(
+                  initialCameraPosition: CameraPosition(
+                    target: controller.fromLat.value != 0.0
+                        ? LatLng(controller.fromLat.value, controller.fromLng.value)
+                        : const LatLng(37.7749, -122.4194),
+                    zoom: 12,
                   ),
-                  child: Stack(
-                    children: [
-                      Container(
-                        height: 400.h,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFF5F5F5),
-                          image: DecorationImage(
-                            image: AssetImage("${AppImages.trackImg}"),
-                            fit: BoxFit.cover,
+                  onMapCreated: (GoogleMapController mapController) {
+                    controller.mapController = mapController;
+                    controller.isMapCreated.value = true;
+                  },
+                  markers: controller.markers,
+                  polylines: controller.polylines,
+                  myLocationEnabled: true,
+                  myLocationButtonEnabled: false,
+                  zoomControlsEnabled: false,
+                  mapToolbarEnabled: false,
+                ),
+              ),
+
+              // Top App Bar Area
+              Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: SafeArea(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 20.w,
+                      vertical: 16.h,
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.pop(context),
+                          child: Container(
+                            width: 40.w,
+                            height: 40.h,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.1),
+                                  blurRadius: 8.r,
+                                ),
+                              ],
+                            ),
+                            child: Icon(Icons.close, size: 20.sp),
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                ),
-
-                // Top App Bar Area
-                Positioned(
-                  top: 0,
-                  left: 0,
-                  right: 0,
-                  child: SafeArea(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 20.w,
-                        vertical: 16.h,
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          GestureDetector(
-                            onTap: () => Navigator.pop(context),
-                            child: Container(
-                              width: 40.w,
-                              height: 40.h,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 8.r,
-                                  ),
-                                ],
-                              ),
-                              child: Icon(Icons.close, size: 20.sp),
-                            ),
+                        // DYNAMIC: App Bar Title
+                        Text(
+                          isProvider ? 'Track Passengers' : 'Track Driver',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: "Outfit",
+                            color: const Color(0xFF2D3748),
                           ),
-                          // DYNAMIC: App Bar Title
-                          Text(
-                            isProvider ? 'Track Passenger' : 'Track Driver',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              fontFamily: "Outfit",
-                              color: const Color(0xFF2D3748),
-                            ),
-                          ),
-                          InkWell(
-                            onTap:() => Get.toNamed(AppRoutes.notificationScreen),
-                            child: Container(
-                              width: 44.w,
+                        ),
+                        InkWell(
+                          onTap:() => Get.toNamed(AppRoutes.notificationScreen),
+                          child: Container(
+                            width: 44.w,
                               height: 44.h,
                               decoration: BoxDecoration(
                                 color: Colors.white,
@@ -153,130 +173,130 @@ class TrackDriverScreen extends StatelessWidget {
                   ),
                 ),
 
-                // Map Control Buttons
-                Positioned(
-                  top: 300.h,
-                  right: 20.w,
-                  child: Container(
-                    width: 48.w,
-                    height: 48.h,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFF45C4D9),
-                          Color(0xFF6B7FEC),
-                          Color(0xFFB565D8),
-                        ],
-                      ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF6B7FEC).withOpacity(0.3),
-                          blurRadius: 15,
-                          offset: const Offset(0, 4),
-                        ),
+              // Map Control Buttons
+              Positioned(
+                top: 300.h,
+                right: 20.w,
+                child: Container(
+                  width: 48.w,
+                  height: 48.h,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color(0xFF45C4D9),
+                        Color(0xFF6B7FEC),
+                        Color(0xFFB565D8),
                       ],
                     ),
-                    child: const Icon(
-                      Icons.my_location,
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF6B7FEC).withOpacity(0.3),
+                        blurRadius: 15,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: const Icon(
+                    Icons.my_location,
                       color: Colors.white,
                       size: 24,
                     ),
                   ),
                 ),
 
-                Positioned(
-                  top: 380.h,
-                  right: 20.w,
-                  child: Container(
-                    width: 56.w,
-                    height: 56.h,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)],
+              Positioned(
+                top: 380.h,
+                right: 20.w,
+                child: Container(
+                  width: 56.w,
+                  height: 56.h,
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)],
+                    ),
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0xFF7C3AED).withOpacity(0.4),
+                        blurRadius: 12.r,
+                        offset: Offset(0, 4.h),
                       ),
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color(0xFF7C3AED).withOpacity(0.4),
-                          blurRadius: 12.r,
-                          offset: Offset(0, 4.h),
-                        ),
-                      ],
-                    ),
-                    child: Icon(
-                      Icons.navigation,
-                      color: Colors.white,
-                      size: 24.sp,
-                    ),
+                    ],
+                  ),
+                  child: Icon(
+                    Icons.navigation,
+                    color: Colors.white,
+                    size: 24.sp,
                   ),
                 ),
+              ),
 
-                // Bottom Card Container
-                Positioned(
-                  bottom: 0,
-                  left: 0,
-                  right: 0,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(32.r),
-                        topRight: Radius.circular(32.r),
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.1),
-                          blurRadius: 20.r,
-                          offset: Offset(0, -5.h),
-                        ),
-                      ],
+              // Bottom Card Container
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(32.r),
+                      topRight: Radius.circular(32.r),
                     ),
-                    child: Padding(
-                      padding: EdgeInsets.all(20.w),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          // Arrival Info Card
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Row(
-                                children: [
-                                  CustomText(
-                                    text: 'Arriving in  ',
-                                    fontsize: 14.sp,
-                                    fontWeight: FontWeight.w700,
-                                    color: Colors.grey[600],
-                                  ),
-                                  CustomText(
-                                    text: _estimateTime(distance),
-                                    fontsize: 20.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF7C3AED),
-                                  ),
-                                ],
-                              ),
-                              CustomText(
-                                text: _estimateArrivalTime(distance),
-                                fontsize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.black87,
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 20.h),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 20.r,
+                        offset: Offset(0, -5.h),
+                      ),
+                    ],
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.all(20.w),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Arrival Info Card
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                CustomText(
+                                  text: 'Arriving in  ',
+                                  fontsize: 14.sp,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.grey[600],
+                                ),
+                                CustomText(
+                                  text: _estimateTime(distance),
+                                  fontsize: 20.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: const Color(0xFF7C3AED),
+                                ),
+                              ],
+                            ),
+                            CustomText(
+                              text: _estimateArrivalTime(distance),
+                              fontsize: 14,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 20.h),
 
-                          // Driver & Vehicle Info
-                          InkWell(
-                            onTap: () {
-                              Get.toNamed(
-                                AppRoutes.driverDetailsScreen,
-                                preventDuplicates: false,
-                                arguments: {
-                                  'driverId': rideData?.otherUser?.id,
+                        // Driver & Vehicle Info
+                        InkWell(
+                          onTap: () {
+                            Get.toNamed(
+                              AppRoutes.driverDetailsScreen,
+                              preventDuplicates: false,
+                              arguments: {
+                                  'driverId': controller.otherUserId.value,
                                 },
                               );
                             },
@@ -398,7 +418,7 @@ class TrackDriverScreen extends StatelessWidget {
                                         // SHOWING RIDE TYPE AND SEATS HERE
                                         CustomText(
                                           text:
-                                          '${rideData?.seat ?? 0} Seats • ${rideData?.type?.capitalizeFirst ?? "Ride"}',
+                                          '${controller.seats.value} Seats • ${controller.rideType.value.capitalizeFirst ?? "Ride"}',
                                           fontsize: 9,
                                           fontWeight: FontWeight.w600,
                                           color: const Color(0xFF7C3AED),
@@ -422,9 +442,9 @@ class TrackDriverScreen extends StatelessWidget {
                           // Location Details
                           AddressCard(
                             fromLocation:
-                            rideData?.fromAddress ?? 'Unknown Pickup',
+                            controller.fromAddress.value,
                             toLocation:
-                            rideData?.toAddress ?? 'Unknown Dropoff',
+                            controller.toAddress.value,
                           ),
                           SizedBox(height: 20.h),
 
@@ -459,9 +479,9 @@ class TrackDriverScreen extends StatelessWidget {
                                       Get.toNamed(
                                         AppRoutes.driverChatingScreen,
                                         arguments: {
-                                          'otherUserId': rideData?.otherUser?.id,
+                                          'otherUserId': controller.otherUserId.value,
                                           'driverName': otherUserName,
-                                          'driverEmail': rideData?.otherUser?.email ?? '--',
+                                          'driverEmail': controller.otherUserEmail.value,
                                           'driverPhone': otherUserPhone,
                                         },
                                       );
@@ -488,9 +508,9 @@ class TrackDriverScreen extends StatelessWidget {
                                         // DYNAMIC: Chat Button Text
                                         CustomText(
                                           text: isProvider
-                                              ? 'Chat with your passenger'
-                                              : 'Chat with your driver',
-                                          fontsize: 14,
+                                              ? 'Chat passenger'
+                                              : 'Chat driver',
+                                          fontsize: 10,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                         ),
@@ -499,6 +519,45 @@ class TrackDriverScreen extends StatelessWidget {
                                   ),
                                 ),
                               ),
+                              SizedBox(width: 12.w),
+                              // Picked Up / Review Status
+                              Obx(() {
+                                final status = controller.rideStatus.value;
+                                return Container(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: 12.w,
+                                    vertical: 12.h,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF3E8FF),
+                                    borderRadius: BorderRadius.circular(12.r),
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(
+                                        status == 'picked' || status == 'paid'
+                                            ? Icons.check_circle
+                                            : Icons.rate_review,
+                                        color: const Color(0xFF8B5CF6),
+                                        size: 18.sp,
+                                      ),
+                                      SizedBox(width: 4.w),
+                                      Text(
+                                        status == 'picked' || status == 'paid'
+                                            ? 'Picked Up'
+                                            : 'Review',
+                                        style: TextStyle(
+                                          color: const Color(0xFF8B5CF6),
+                                          fontSize: 12.sp,
+                                          fontWeight: FontWeight.w600,
+                                          fontFamily: "Outfit",
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }),
                               SizedBox(width: 12.w),
                               GestureDetector(
                                 onTap: () async {
@@ -549,9 +608,8 @@ class TrackDriverScreen extends StatelessWidget {
                 ),
               ],
             );
-          },
+          }),
         ),
-      ),
-    );
+      );
   }
 }
