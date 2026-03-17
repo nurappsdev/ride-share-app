@@ -158,6 +158,7 @@ class MyRiedsDriverScreen extends StatelessWidget {
                     child: InkWell(
                       onTap: () {
                         Get.toNamed(AppRoutes.trackDriversScreen, arguments: {'rideId': ride.jobId}, preventDuplicates: false);
+                      //  Get.toNamed(AppRoutes.driverTrackRidesScreen, arguments: {'jobId': ride.jobId}, preventDuplicates: false);
                       },
                       child: RideCards(
                         pickupLocation: ride.fromAddress ?? 'Unknown Location',
