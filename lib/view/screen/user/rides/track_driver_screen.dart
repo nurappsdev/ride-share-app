@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:split_ride/controllers/ride_controllers/ride_details_controller.dart';
 import 'package:split_ride/routes/app_routes.dart';
@@ -74,7 +75,7 @@ class TrackDriverScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           color: const Color(0xFFF5F5F5),
                           image: DecorationImage(
-                            image: AssetImage("${AppImages.trackImg}"),
+                            image: AssetImage(AppImages.trackImg),
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -126,10 +127,12 @@ class TrackDriverScreen extends StatelessWidget {
                             ),
                           ),
                           InkWell(
-                            onTap:() => Get.toNamed(AppRoutes.notificationScreen),
+                            onTap: () =>
+                                Get.toNamed(AppRoutes.notificationScreen),
                             child: Container(
                               width: 44.w,
                               height: 44.h,
+                              padding: EdgeInsets.all(8.r),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 shape: BoxShape.circle,
@@ -140,10 +143,8 @@ class TrackDriverScreen extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              child: const Icon(
-                                Icons.notifications_outlined,
-                                color: Color(0xFF2D3748),
-                                size: 24,
+                              child: SvgPicture.asset(
+                                'assets/icons/NotificationIcon.svg',
                               ),
                             ),
                           ),
@@ -294,18 +295,19 @@ class TrackDriverScreen extends StatelessWidget {
                                     flex: 3,
                                     child: Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Container(
                                           width: 70.w,
                                           height: 70.h,
-                                          decoration: BoxDecoration(
+                                          // 1. The padding acts as your border width!
+                                          padding: EdgeInsets.all(3.w),
+                                          decoration: const BoxDecoration(
                                             shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: const Color(0xFF22D3EE),
-                                              width: 3.w,
-                                            ),
-                                            gradient: const LinearGradient(
+                                            // 2. The gradient goes on the OUTER container
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
                                               colors: [
                                                 Color(0xFF45C4D9),
                                                 Color(0xFF6B7FEC),
@@ -313,14 +315,21 @@ class TrackDriverScreen extends StatelessWidget {
                                               ],
                                             ),
                                           ),
-                                          child: ClipOval(
-                                            child: Container(
-                                              color: Colors.grey[300],
-                                              // TODO: You can use CachedNetworkImage here with otherUser.profileImage later
-                                              child: Icon(
-                                                Icons.person,
-                                                size: 40.sp,
-                                                color: Colors.grey[600],
+                                          child: Container(
+                                            // 3. An inner container to hold your image and block the gradient from filling the middle
+                                            decoration: const BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              color: Colors.white, // Inner background behind the image
+                                            ),
+                                            child: ClipOval(
+                                              child: Container(
+                                                color: Colors.grey[300],
+                                                // TODO: You can use CachedNetworkImage here with otherUser.profileImage later
+                                                child: Icon(
+                                                  Icons.person,
+                                                  size: 40.sp,
+                                                  color: Colors.grey[600],
+                                                ),
                                               ),
                                             ),
                                           ),
@@ -343,6 +352,7 @@ class TrackDriverScreen extends StatelessWidget {
                                               size: 11.sp,
                                               color: const Color(0xFF7C3AED),
                                             ),
+                                            // SvgPicture.asset('assets/icons/phone.svg'),
                                             SizedBox(width: 4.w),
                                             CustomText(
                                               text: otherUserPhone,
@@ -361,12 +371,17 @@ class TrackDriverScreen extends StatelessWidget {
                                     flex: 2,
                                     child: Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.end,
+                                          CrossAxisAlignment.end,
                                       children: [
-                                        Icon(
-                                          Icons.directions_car,
-                                          color: Colors.black87,
-                                          size: 40.sp,
+                                        // Icon(
+                                        //   Icons.directions_car,
+                                        //   color: Colors.black87,
+                                        //   size: 40.sp,
+                                        // ),
+                                        SvgPicture.asset(
+                                          'assets/icons/Car.svg',
+                                          height: 35.h,
+                                          width: 35.w,
                                         ),
                                         SizedBox(height: 4.h),
                                         Container(
@@ -398,7 +413,7 @@ class TrackDriverScreen extends StatelessWidget {
                                         // SHOWING RIDE TYPE AND SEATS HERE
                                         CustomText(
                                           text:
-                                          '${rideData?.seat ?? 0} Seats • ${rideData?.type?.capitalizeFirst ?? "Ride"}',
+                                              '${rideData?.seat ?? 0} Seats • ${rideData?.type?.capitalizeFirst ?? "Ride"}',
                                           fontsize: 9,
                                           fontWeight: FontWeight.w600,
                                           color: const Color(0xFF7C3AED),
@@ -422,9 +437,9 @@ class TrackDriverScreen extends StatelessWidget {
                           // Location Details
                           AddressCard(
                             fromLocation:
-                            rideData?.fromAddress ?? 'Unknown Pickup',
+                                rideData?.fromAddress ?? 'Unknown Pickup',
                             toLocation:
-                            rideData?.toAddress ?? 'Unknown Dropoff',
+                                rideData?.toAddress ?? 'Unknown Dropoff',
                           ),
                           SizedBox(height: 20.h),
 
@@ -459,9 +474,12 @@ class TrackDriverScreen extends StatelessWidget {
                                       Get.toNamed(
                                         AppRoutes.driverChatingScreen,
                                         arguments: {
-                                          'otherUserId': rideData?.otherUser?.id,
+                                          'otherUserId':
+                                              rideData?.otherUser?.id,
                                           'driverName': otherUserName,
-                                          'driverEmail': rideData?.otherUser?.email ?? '--',
+                                          'driverEmail':
+                                              rideData?.otherUser?.email ??
+                                              '--',
                                           'driverPhone': otherUserPhone,
                                         },
                                       );
@@ -477,12 +495,15 @@ class TrackDriverScreen extends StatelessWidget {
                                     ),
                                     child: Row(
                                       mainAxisAlignment:
-                                      MainAxisAlignment.center,
+                                          MainAxisAlignment.center,
                                       children: [
-                                        Icon(
-                                          Icons.chat_bubble_outline,
-                                          size: 20.sp,
-                                          color: Colors.white,
+                                        // Icon(
+                                        //   Icons.chat_bubble_outline,
+                                        //   size: 20.sp,
+                                        //   color: Colors.white,
+                                        // ),
+                                        SvgPicture.asset(
+                                          'assets/icons/Chat.svg',
                                         ),
                                         SizedBox(width: 8.w),
                                         // DYNAMIC: Chat Button Text
@@ -502,8 +523,12 @@ class TrackDriverScreen extends StatelessWidget {
                               SizedBox(width: 12.w),
                               GestureDetector(
                                 onTap: () async {
-                                  if (otherUserPhone.isNotEmpty && otherUserPhone != '--') {
-                                    final Uri launchUri = Uri(scheme: 'tel', path: otherUserPhone);
+                                  if (otherUserPhone.isNotEmpty &&
+                                      otherUserPhone != '--') {
+                                    final Uri launchUri = Uri(
+                                      scheme: 'tel',
+                                      path: otherUserPhone,
+                                    );
                                     if (await canLaunchUrl(launchUri)) {
                                       await launchUrl(launchUri);
                                     }
@@ -512,18 +537,20 @@ class TrackDriverScreen extends StatelessWidget {
                                 child: Container(
                                   width: 56.w,
                                   height: 56.h,
+                                  padding: EdgeInsets.all(16.r),
                                   decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Color(0xFF45C4D9),
-                                        Color(0xFF6B7FEC),
-                                        Color(0xFFB565D8),
-                                      ],
-                                    ),
+                                    // gradient: const LinearGradient(
+                                    //   begin: Alignment.topLeft,
+                                    //   end: Alignment.bottomRight,
+                                    //   colors: [
+                                    //     Color(0xFF45C4D9),
+                                    //     Color(0xFF6B7FEC),
+                                    //     Color(0xFFB565D8),
+                                    //   ],
+                                    // ),
                                     shape: BoxShape.circle,
-                                    boxShadow: [
+                                    color: Color(0xFFE6F3FF),
+                                    /*  boxShadow: [
                                       BoxShadow(
                                         color: const Color(
                                           0xFF3B82F6,
@@ -531,12 +558,15 @@ class TrackDriverScreen extends StatelessWidget {
                                         blurRadius: 12.r,
                                         offset: Offset(0, 4.h),
                                       ),
-                                    ],
+                                    ],*/
                                   ),
-                                  child: Icon(
-                                    Icons.phone,
-                                    color: Colors.white,
-                                    size: 24.sp,
+                                  // child: Icon(
+                                  //   Icons.phone,
+                                  //   color: Colors.white,
+                                  //   size: 24.sp,
+                                  // ),
+                                  child: SvgPicture.asset(
+                                    'assets/icons/phone.svg',
                                   ),
                                 ),
                               ),
