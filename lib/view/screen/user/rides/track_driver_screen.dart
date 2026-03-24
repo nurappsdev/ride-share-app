@@ -56,6 +56,12 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
     return '$timeInMinutes Mins';
   }
 
+  String formatToLocalTime(String utcTime) {
+    DateTime parsedUtc = DateTime.parse(utcTime);
+    DateTime localTime = parsedUtc.toLocal();
+
+    return DateFormat('hh:mm a').format(localTime); // 08:30 PM
+  }
   String _estimateArrivalTime(double? distanceInKm) {
     if (distanceInKm == null || distanceInKm <= 0) return '--:--';
     double timeInHours = distanceInKm / 30.0;
@@ -78,7 +84,8 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
           final otherUserPhone = controller.otherUserPhone.value;
           final carName = controller.carModelName.value;
           final distance = controller.distance.value;
-
+          final dateTime = controller.dateTime.value;
+print("role role --- ${isProvider}");
           return Stack(
             children: [
               // Google Map
@@ -279,8 +286,9 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
                                 ),
                               ],
                             ),
+
                             CustomText(
-                              text: _estimateArrivalTime(distance),
+                              text: formatToLocalTime(controller.dateTime.value.toString()),
                               fontsize: 14,
                               fontWeight: FontWeight.w600,
                               color: Colors.black87,
@@ -500,7 +508,7 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
                                       MainAxisAlignment.center,
                                       children: [
                                         Icon(
-                                          Icons.chat_bubble_outline,
+                                          Icons.message_outlined,
                                           size: 20.sp,
                                           color: Colors.white,
                                         ),
@@ -508,9 +516,9 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
                                         // DYNAMIC: Chat Button Text
                                         CustomText(
                                           text: isProvider
-                                              ? 'Chat passenger'
-                                              : 'Chat driver',
-                                          fontsize: 10,
+                                              ? 'Chat'
+                                              : 'Chat driver with your driver',
+                                          fontsize: 12.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
                                         ),
@@ -521,43 +529,67 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
                               ),
                               SizedBox(width: 12.w),
                               // Picked Up / Review Status
-                              Obx(() {
+                              isProvider ? Obx(() {
                                 final status = controller.rideStatus.value;
-                                return Container(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: 12.w,
-                                    vertical: 12.h,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFFF3E8FF),
-                                    borderRadius: BorderRadius.circular(12.r),
-                                  ),
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Icon(
-                                        status == 'picked' || status == 'paid'
-                                            ? Icons.check_circle
-                                            : Icons.rate_review,
-                                        color: const Color(0xFF8B5CF6),
-                                        size: 18.sp,
+                                return GestureDetector(
+                                  onTap: () {
+                                    if (status == 'picked') {
+                                      // Already picked up, do nothing
+                                      return;
+                                    }
+                                    // Call the pickup API
+                                    controller.markAsPickedUp();
+                                  },
+                                  child: Container(
+                                    height: 56.h,
+                                    padding: EdgeInsets.all(1.4.w), // 🔥 border thickness
+                                    decoration: BoxDecoration(
+                                      gradient: const LinearGradient(
+                                        colors: [
+                                          Color(0xFF45C4D9),
+                                          Color(0xFF6B7FEC),
+                                          Color(0xFFB565D8),
+                                        ],
                                       ),
-                                      SizedBox(width: 4.w),
-                                      Text(
-                                        status == 'picked' || status == 'paid'
-                                            ? 'Picked Up'
-                                            : 'Review',
-                                        style: TextStyle(
-                                          color: const Color(0xFF8B5CF6),
-                                          fontSize: 12.sp,
-                                          fontWeight: FontWeight.w600,
-                                          fontFamily: "Outfit",
-                                        ),
+                                      borderRadius: BorderRadius.circular(30.r),
+                                    ),
+                                    child: Container(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 10.w,
+                                        vertical: 6.h,
                                       ),
-                                    ],
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF5F3FF), // inner bg
+                                        borderRadius: BorderRadius.circular(30.r),
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          Icon(
+                                            status == 'picked' || status == 'accepted'
+                                                ? Icons.check
+                                                : Icons.rate_review,
+                                            color: const Color(0xFF8B5CF6),
+                                            size: 18.sp,
+                                          ),
+                                          SizedBox(width: 4.w),
+                                          Text(
+                                            status == 'accepted'
+                                                ? 'Pick Up'
+                                                :status == 'picked' ? "Picked Up" :'Review',
+                                            style: TextStyle(
+                                              color: const Color(0xFF8B5CF6),
+                                              fontSize: 12.sp,
+                                              fontWeight: FontWeight.w600,
+                                              fontFamily: "Outfit",
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
                                   ),
                                 );
-                              }),
+                              }):SizedBox.shrink(),
                               SizedBox(width: 12.w),
                               GestureDetector(
                                 onTap: () async {
