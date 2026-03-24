@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:split_ride/helpers/helpers.dart';
 import 'package:split_ride/helpers/logger_util.dart';
 import 'package:split_ride/helpers/secured_storage.dart';
 import 'package:split_ride/utils/app_constant.dart';
@@ -73,8 +74,17 @@ class TrackDriverScreenController extends GetxController {
   }
 
   Future<void> _loadUserRole() async {
-    // Load user role from prefs if needed
-    userRole.value = 'provider'; // Default, can be updated from prefs
+    try {
+      final savedRole = await PrefsHelper.getString(AppConstants.role);
+      if (savedRole != null && savedRole.isNotEmpty) {
+        userRole.value = savedRole;
+      } else {
+        userRole.value = 'provider'; // Fallback default
+      }
+    } catch (e) {
+      LoggerUtils.error('Error loading user role: $e');
+      userRole.value = 'provider'; // Fallback default
+    }
   }
 
   void setRideId(String id) {
@@ -99,7 +109,7 @@ class TrackDriverScreenController extends GetxController {
         headers: {'Authorization': 'Bearer $token'},
       );
 
-      LoggerUtils.info('Ride Details Response: $response');
+      LoggerUtils.info('Ride Details Response: ${response.jsonResponse}');
 
       if (response.isSuccess && response.jsonResponse != null) {
         final responseData = response.jsonResponse!;
@@ -304,4 +314,60 @@ class TrackDriverScreenController extends GetxController {
     final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
     return '$displayHour:$minute $period';
   }
+
+  /// Mark ride as picked up
+  Future<void> markAsPickedUp() async {
+    if (rideId.value.isEmpty) {
+      LoggerUtils.error('Ride ID is empty');
+      return;
+    }
+
+    isLoading.value = true;
+
+    try {
+      final String token = await SecureStorageService().read(AppConstants.accessToken) ?? '';
+
+      final response = await NetworkCaller().postRequest(
+        '${AppUrl.baseUrl}/job/${rideId.value}/pickup',
+        body: {},
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      LoggerUtils.info('Pickup Response: ${response.jsonResponse}');
+
+      if (response.isSuccess && response.jsonResponse != null) {
+        // Update status to 'picked'
+        status.value = 'picked';
+        Get.snackbar(
+          'Success',
+          'Passenger picked up successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        final errorMessage = response.jsonResponse?['message'] ?? 'Failed to mark as picked up';
+        LoggerUtils.error('Failed to mark pickup: $errorMessage');
+        Get.snackbar(
+          'Error',
+          errorMessage,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      LoggerUtils.error('Error marking pickup: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to mark as picked up',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 }
