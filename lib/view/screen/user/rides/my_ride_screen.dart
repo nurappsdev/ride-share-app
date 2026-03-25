@@ -35,11 +35,7 @@ class PassengerMyRidesScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(
-              Icons.notifications_outlined,
-              color: Colors.black,
-              size: 24.w,
-            ),
+            icon: SvgPicture.asset('assets/icons/NotificationIcon.svg'),
             onPressed: () => Get.toNamed(AppRoutes.notificationScreen),
           ),
         ],
@@ -282,7 +278,7 @@ class RideCard extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
-          color: const Color(0xFFF4F5F7),
+          color: const Color(0xFFFAFAFA),
           borderRadius: BorderRadius.circular(20.r),
         ),
         child: Column(

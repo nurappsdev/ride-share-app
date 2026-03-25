@@ -319,7 +319,7 @@ class TrackDriverScreen extends StatelessWidget {
                                             // 3. An inner container to hold your image and block the gradient from filling the middle
                                             decoration: const BoxDecoration(
                                               shape: BoxShape.circle,
-                                              color: Colors.white, // Inner background behind the image
+                                              color: Colors.white,
                                             ),
                                             child: ClipOval(
                                               child: Container(
