@@ -466,49 +466,62 @@ class _DriverTrackRidesScreenState extends State<DriverTrackRidesScreen> {
       children: [
         // Chat Button with gradient
         Expanded(
-          child: Container(
-            height: 56.h,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF45C4D9),
-                  Color(0xFF6B7FEC),
-                  Color(0xFF5c58eb),
-                  Color(0xFFB565D8),
-                ],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              borderRadius: BorderRadius.circular(28.r),
-            ),
-            child: ElevatedButton(
-              onPressed: _showChatFeature,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28.r),
+          child: InkWell(
+            onTap: (){
+  Get.toNamed(
+    AppRoutes.driverChatingScreen,
+    arguments: {
+      'otherUserId': controller.otherUserId.value,
+      'driverName': controller.otherUserName.value,
+      'driverEmail': controller.otherUserEmail.value,
+      'driverPhone': controller.otherUserPhone.value,
+    },
+  );
+},
+            child: Container(
+              height: 56.h,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF45C4D9),
+                    Color(0xFF6B7FEC),
+                    Color(0xFF5c58eb),
+                    Color(0xFFB565D8),
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
                 ),
+                borderRadius: BorderRadius.circular(28.r),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.chat_bubble_outline,
-                    color: Colors.white,
-                    size: 20.sp,
+              child: ElevatedButton(
+                onPressed: _showChatFeature,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(28.r),
                   ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    'Chat',
-                    style: TextStyle(
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.chat_bubble_outline,
                       color: Colors.white,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: "Outfit",
+                      size: 20.sp,
                     ),
-                  ),
-                ],
+                    SizedBox(width: 8.w),
+                    Text(
+                      'Chat',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: "Outfit",
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

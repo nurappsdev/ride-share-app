@@ -21,12 +21,21 @@ class PassengerMyRidesScreen extends StatelessWidget {
       PassengerMyRidesController(),
     );
 
+    // Check if coming from driver drawer (provider role)
+    final isFromProvider = Get.arguments?['isProvider'] ?? false;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5FF),
       appBar: AppBar(
         backgroundColor: Colors.white,
         automaticallyImplyLeading: false,
         elevation: 0,
+        leading: isFromProvider
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
+                onPressed: () => Navigator.pop(context),
+              )
+            : null,
         title: CustomText(
           text: 'My Rides',
           color: Colors.black,

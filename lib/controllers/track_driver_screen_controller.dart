@@ -370,4 +370,127 @@ class TrackDriverScreenController extends GetxController {
     }
   }
 
+  /// Mark ride as completed
+  Future<void> markAsCompleted() async {
+    if (rideId.value.isEmpty) {
+      LoggerUtils.error('Ride ID is empty');
+      return;
+    }
+
+    isLoading.value = true;
+
+    try {
+      final String token = await SecureStorageService().read(AppConstants.accessToken) ?? '';
+
+      final response = await NetworkCaller().postRequest(
+        '${AppUrl.baseUrl}/job/${rideId.value}/complete',
+        body: {},
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      LoggerUtils.info('Complete Response: ${response.jsonResponse}');
+
+      if (response.isSuccess && response.jsonResponse != null) {
+        // Update status to 'completed'
+        status.value = 'completed';
+        Get.snackbar(
+          'Success',
+          'Ride completed successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        final errorMessage = response.jsonResponse?['message'] ?? 'Failed to complete ride';
+        LoggerUtils.error('Failed to complete ride: $errorMessage');
+        Get.snackbar(
+          'Error',
+          errorMessage,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      LoggerUtils.error('Error marking completed: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to complete ride',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /// Submit review for a ride
+  Future<void> submitReview({
+    required String userId,
+    required int rating,
+    required String comment,
+  }) async {
+    if (rideId.value.isEmpty) {
+      LoggerUtils.error('Ride ID is empty');
+      Get.snackbar(
+        'Error',
+        'Ride ID is missing',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    isLoading.value = true;
+
+    try {
+      final String token = await SecureStorageService().read(AppConstants.accessToken) ?? '';
+
+      final response = await NetworkCaller().postRequest(
+        '${AppUrl.baseUrl}/review',
+        body: {
+          'userId': userId,
+          'rating': rating,
+          'comment': comment,
+        },
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      LoggerUtils.info('Review Response: ${response.jsonResponse}');
+
+      if (response.isSuccess && response.jsonResponse != null) {
+        Get.snackbar(
+          'Success',
+          'Review submitted successfully',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        final errorMessage = response.jsonResponse?['message'] ?? 'Failed to submit review';
+        LoggerUtils.error('Failed to submit review: $errorMessage');
+        Get.snackbar(
+          'Error',
+          errorMessage,
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      LoggerUtils.error('Error submitting review: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to submit review',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 }
