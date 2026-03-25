@@ -79,7 +79,13 @@ class AppRoutes {
     GetPage(name: driverDocScreen, page: () => DriverDocumentRegistrationScreen()),
     GetPage(name: driverAvailableScreen, page: () => DriverAvailableRideScreen()),
     GetPage(name: driverTrackRidesScreen, page: () {
-      final jobId = Get.arguments as String? ?? '';
+      final args = Get.arguments;
+      String jobId = '';
+      if (args is String) {
+        jobId = args;
+      } else if (args is Map<String, dynamic>) {
+        jobId = args['jobId'] as String? ?? args['rideId'] as String? ?? '';
+      }
       return DriverTrackRidesScreen(jobId: jobId);
     }),
     GetPage(name: passengerDetailsReviewScreen, page: () => PassengerReviewScreen()),

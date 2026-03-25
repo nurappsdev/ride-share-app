@@ -207,37 +207,42 @@ class DriverAvailableRideScreen extends StatelessWidget {
                     );
                   }
 
-                  return ListView.builder(
-                    controller: scrollController,
-                    padding: EdgeInsets.all(16.r),
-                    // Add 1 to itemCount if we are loading more to show the spinner at the bottom
-                    itemCount: controller.requestedRides.length + (controller.isMoreLoading.value ? 1 : 0),
-                    itemBuilder: (context, index) {
+                  return RefreshIndicator(
+                    onRefresh: () => controller.refresh(),
+                    color: const Color(0xFF7C3AED),
+                    backgroundColor: Colors.white,
+                    child: ListView.builder(
+                      controller: scrollController,
+                      padding: EdgeInsets.all(16.r),
+                      // Add 1 to itemCount if we are loading more to show the spinner at the bottom
+                      itemCount: controller.requestedRides.length + (controller.isMoreLoading.value ? 1 : 0),
+                      itemBuilder: (context, index) {
 
-                      // 1. Check if we reached the bottom to show the loader
-                      if (index == controller.requestedRides.length) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(vertical: 20.h),
-                          child: const Center(child: CircularProgressIndicator()),
+                        // 1. Check if we reached the bottom to show the loader
+                        if (index == controller.requestedRides.length) {
+                          return Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20.h),
+                            child: const Center(child: CircularProgressIndicator()),
+                          );
+                        }
+
+                        // 2. Pagination Trigger: Load more when we get near the end of the list
+                        if (index == controller.requestedRides.length - 1) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            controller.loadMore();
+                          });
+                        }
+
+                        final ride = controller.requestedRides[index];
+                        return InkWell(
+                          onTap: () {
+                            // Pass details to Passenger Details Screen if needed
+                            showPassengerDetails(context, ride);
+                          },
+                          child: RideBookingCard(ride: ride),
                         );
-                      }
-
-                      // 2. Pagination Trigger: Load more when we get near the end of the list
-                      if (index == controller.requestedRides.length - 1) {
-                        WidgetsBinding.instance.addPostFrameCallback((_) {
-                          controller.loadMore();
-                        });
-                      }
-
-                      final ride = controller.requestedRides[index];
-                      return InkWell(
-                        onTap: () {
-                          // Pass details to Passenger Details Screen if needed
-                          showPassengerDetails(context, ride);
-                        },
-                        child: RideBookingCard(ride: ride),
-                      );
-                    },
+                      },
+                    ),
                   );
                 }),
               );

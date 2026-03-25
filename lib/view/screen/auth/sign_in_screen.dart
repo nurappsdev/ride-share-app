@@ -230,7 +230,7 @@ class SignInScreen extends StatelessWidget {
 
                           CustomTextField(
                             controller: signInController.passwordTEController,
-                            hintText: 'Enter your phone number',
+                            hintText: 'Enter your password',
                             hinTextColor: const Color(0xFFB8B8B8),
                             hinTextSize: 14.sp,
                             filColor: const Color(0xFFF7FAFC),
