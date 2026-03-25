@@ -81,10 +81,12 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
 
           final isProvider = controller.userRole.value == 'provider';
           final otherUserName = controller.otherUserName.value;
+          final otherUserEmail = controller.otherUserEmail.value;
           final otherUserPhone = controller.otherUserPhone.value;
           final carName = controller.carModelName.value;
           final distance = controller.distance.value;
-          final dateTime = controller.dateTime.value;
+          final status = controller.rideStatus.value;
+          final driverImage = controller.profileImageUrl;
 print("role role --- ${isProvider}");
           return Stack(
             children: [
@@ -300,13 +302,7 @@ print("role role --- ${isProvider}");
                         // Driver & Vehicle Info
                         InkWell(
                           onTap: () {
-                            Get.toNamed(
-                              AppRoutes.driverDetailsScreen,
-                              preventDuplicates: false,
-                              arguments: {
-                                  'driverId': controller.otherUserId.value,
-                                },
-                              );
+
                             },
                             child: Container(
                               padding: EdgeInsets.all(16.w),
@@ -345,11 +341,7 @@ print("role role --- ${isProvider}");
                                             child: Container(
                                               color: Colors.grey[300],
                                               // TODO: You can use CachedNetworkImage here with otherUser.profileImage later
-                                              child: Icon(
-                                                Icons.person,
-                                                size: 40.sp,
-                                                color: Colors.grey[600],
-                                              ),
+                                              child: Image.network(driverImage,fit: BoxFit.cover,)
                                             ),
                                           ),
                                         ),
@@ -367,14 +359,14 @@ print("role role --- ${isProvider}");
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             Icon(
-                                              Icons.phone,
+                                              Icons.email_outlined,
                                               size: 11.sp,
                                               color: const Color(0xFF7C3AED),
                                             ),
                                             SizedBox(width: 4.w),
                                             CustomText(
-                                              text: otherUserPhone,
-                                              fontsize: 11,
+                                              text: otherUserEmail,
+                                              fontsize: 12.sp,
                                               fontWeight: FontWeight.normal,
                                               color: Colors.black,
                                             ),
@@ -432,12 +424,88 @@ print("role role --- ${isProvider}");
                                           color: const Color(0xFF7C3AED),
                                         ),
                                         SizedBox(height: 4.h),
-                                        CustomText(
-                                          text: 'View profile',
-                                          fontsize: 9,
-                                          fontWeight: FontWeight.normal,
-                                          color: const Color(0xFF7C3AED),
+                                        InkWell(
+                                          onTap: (){
+                                            Get.toNamed(
+                                              AppRoutes.driverDetailsScreen,
+                                              preventDuplicates: false,
+                                              arguments: {
+                                                'driverId': controller.otherUserId.value,
+                                              },
+                                            );
+                                          },
+                                          child: Container(
+                                            padding: EdgeInsets.all(1.4.w), // 🔥 border thickness
+                                            decoration: BoxDecoration(
+                                              gradient: const LinearGradient(
+                                                colors: [
+                                                  Color(0xFF45C4D9),
+                                                  Color(0xFF6B7FEC),
+                                                  Color(0xFFB565D8),
+                                                ],
+                                              ),
+                                              borderRadius: BorderRadius.circular(30.r),
+                                            ),
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 10.w,
+                                                vertical: 6.h,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFF5F3FF), // inner bg
+                                                borderRadius: BorderRadius.circular(30.r),
+                                              ),
+                                              child: CustomText(
+                                                text: 'View driver profile',
+                                                fontsize: 9,
+                                                fontWeight: FontWeight.normal,
+                                                color: const Color(0xFF7C3AED),
+                                              ),
+                                            ),
+                                          ),
                                         ),
+                                        SizedBox(height: 6.h,),
+                                        Row(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Icon(
+                                              Icons.phone,
+                                              size: 11.sp,
+                                              color: const Color(0xFF7C3AED),
+                                            ),
+                                            SizedBox(width: 4.w),
+                                            CustomText(
+                                              text: otherUserPhone,
+                                              fontsize: 11,
+                                              fontWeight: FontWeight.normal,
+                                              color: Colors.black,
+                                            ),
+                                          ],
+                                        ),
+                                      SizedBox(height: 6.h,),
+                                      !isProvider && status == "picked" ?  Container(
+                                          padding: EdgeInsets.symmetric(
+                                            horizontal: 10.w,
+                                            vertical: 5.h,
+                                          ),
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFE8F8EE), // 🔥 light green bg
+                                            borderRadius: BorderRadius.circular(16.r),
+                                            border: Border.all(
+                                              color: const Color(0xFF22C55E), // 🔥 green border
+                                              width: 1,
+                                            ),
+                                          ),
+                                          child: Text(
+                                            'Complete',
+                                            style: TextStyle(
+                                              color: const Color(0xFF16A34A), // 🔥 text green
+                                              fontSize: 11.sp,
+                                              fontWeight: FontWeight.w600,
+                                              fontFamily: "Outfit",
+                                            ),
+                                          ),
+                                        ):SizedBox.shrink()
                                       ],
                                     ),
                                   ),
