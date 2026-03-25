@@ -550,7 +550,7 @@ class _PassengerAndDateTimeWidget extends StatelessWidget {
           icon,
           color: iconColor,
           size: 16.sp,
-          fontWeight: FontWeight.w900,
+        //  weight: FontWeight.w900,
         ),
       ),
     );

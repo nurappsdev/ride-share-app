@@ -88,6 +88,9 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
           final distance = controller.distance.value;
           final status = controller.rideStatus.value;
           final driverImage = controller.profileImageUrl;
+          final farePrice = controller.fare.value;
+          final totalFare = controller.totalFare.value;
+
 print("role role --- ${isProvider}");
           return Stack(
             children: [
@@ -490,7 +493,20 @@ print("role role --- ${isProvider}");
                                           ],
                                         ),
                                       SizedBox(height: 6.h,),
-                                      !isProvider && status == "picked" ?  Container(
+                                      !isProvider && status == "picked" ?  GestureDetector(
+                                        onTap: () {
+                                          showDialog(
+                                            context: context,
+                                            barrierDismissible: true,
+                                            builder: (_) => FareBreakdownDialog(
+                                              controller: controller,
+                                              fare: farePrice,
+                                              totalFare: totalFare,
+                                            ),
+                                          );
+                                        //  controller.markAsCompleted();
+                                        },
+                                        child: Container(
                                           padding: EdgeInsets.symmetric(
                                             horizontal: 10.w,
                                             vertical: 5.h,
@@ -512,7 +528,8 @@ print("role role --- ${isProvider}");
                                               fontFamily: "Outfit",
                                             ),
                                           ),
-                                        ):SizedBox.shrink()
+                                        ),
+                                      ):SizedBox.shrink()
                                       ],
                                     ),
                                   ),
@@ -591,8 +608,8 @@ print("role role --- ${isProvider}");
                                         // DYNAMIC: Chat Button Text
                                         CustomText(
                                           text: isProvider
-                                              ? 'Chat'
-                                              : 'Chat driver with your driver',
+                                              ? 'Chat Passengers'
+                                              : 'Chat with your driver',
                                           fontsize: 12.sp,
                                           fontWeight: FontWeight.bold,
                                           color: Colors.white,
@@ -612,8 +629,21 @@ print("role role --- ${isProvider}");
                                       // Already picked up, do nothing
                                       return;
                                     }
-                                    // Call the pickup API
-                                    controller.markAsPickedUp();
+                                    if (status == 'accepted') {
+                                      // Call the pickup API
+                                      controller.markAsPickedUp();
+                                    } else {
+                                      // Show Review Bottom Sheet
+                                      showModalBottomSheet(
+                                        context: context,
+                                        isScrollControlled: true,
+                                        backgroundColor: Colors.transparent,
+                                        builder: (context) => RideReviewBottomSheet(
+                                          controller: controller,
+                                          otherUserId: controller.otherUserId.value,
+                                        ),
+                                      );
+                                    }
                                   },
                                   child: Container(
                                     height: 56.h,
@@ -727,5 +757,459 @@ print("role role --- ${isProvider}");
           }),
         ),
       );
+  }
+}
+
+class FareBreakdownDialog extends StatelessWidget {
+  final TrackDriverScreenController controller;
+  final double fare;
+  final double totalFare;
+
+  const FareBreakdownDialog({
+    super.key,
+    required this.controller,
+    required this.fare,
+    required this.totalFare,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      insetPadding: EdgeInsets.symmetric(horizontal: 20.w),
+      child: Container(
+        padding: EdgeInsets.all(20.w),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24.r),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            /// Top Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                SizedBox(width: 24.w),
+                Text(
+                  "Fare Breakdown",
+                  style: TextStyle(
+                    fontSize: 18.sp,
+                    fontWeight: FontWeight.w600,
+                    fontFamily: "Outfit",
+                    color: Colors.black,
+                  ),
+                ),
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Icon(Icons.close, size: 20.sp),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 20.h),
+
+            /// Fare Row
+            _row("Fare", "\$${fare.toStringAsFixed(2)}"),
+            SizedBox(height: 12.h),
+
+            _row("Booking Fee", "\$100.00"),
+
+            SizedBox(height: 16.h),
+
+            /// Divider
+            Divider(color: Colors.grey.shade300),
+
+            SizedBox(height: 12.h),
+
+            /// Total
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Total Fare",
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontFamily: "Outfit",
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF2563EB),
+                  ),
+                ),
+                Text(
+                  "\$${totalFare.toStringAsFixed(2)}",
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontFamily: "Outfit",
+                    fontWeight: FontWeight.w600,
+                    color: const Color(0xFF2563EB),
+                  ),
+                ),
+              ],
+            ),
+
+            SizedBox(height: 24.h),
+
+            /// Button
+            Obx(() {
+              final isLoading = controller.isLoading.value;
+              return Container(
+                width: double.infinity,
+                height: 52.h,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(30.r),
+                  gradient: const LinearGradient(
+                    colors: [
+                      Color(0xFF45C4D9),
+                      Color(0xFF6B7FEC),
+                      Color(0xFFB565D8),
+                    ],
+                  ),
+                ),
+                child: ElevatedButton(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          Navigator.pop(context);
+                          controller.markAsCompleted();
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30.r),
+                    ),
+                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : Text(
+                          "Mark As Completed",
+                          style: TextStyle(
+                            fontSize: 15.sp,
+                            fontFamily: "Outfit",
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                          ),
+                        ),
+                ),
+              );
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Reusable row
+  Widget _row(String title, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontFamily: "Outfit",
+            color: Colors.grey[700],
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 14.sp,
+            fontFamily: "Outfit",
+            fontWeight: FontWeight.w500,
+            color: Colors.black,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+
+class RideReviewBottomSheet extends StatefulWidget {
+  final TrackDriverScreenController controller;
+  final String otherUserId;
+
+  const RideReviewBottomSheet({
+    super.key,
+    required this.controller,
+    required this.otherUserId,
+  });
+
+  @override
+  State<RideReviewBottomSheet> createState() => _RideReviewBottomSheetState();
+}
+
+class _RideReviewBottomSheetState extends State<RideReviewBottomSheet> {
+  int _selectedStars = 1;
+  final TextEditingController _commentController = TextEditingController();
+  int _charCount = 0;
+  static const int _maxChars = 300;
+  bool _isSubmitting = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _commentController.addListener(() {
+      setState(() {
+        _charCount = _commentController.text.length;
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submitReview() async {
+    if (_isSubmitting) return;
+
+    setState(() {
+      _isSubmitting = true;
+    });
+
+    await widget.controller.submitReview(
+      userId: widget.otherUserId,
+      rating: _selectedStars,
+      comment: _commentController.text.trim(),
+    );
+
+    if (mounted) {
+      Navigator.pop(context);
+    }
+
+    setState(() {
+      _isSubmitting = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.15),
+            blurRadius: 30,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 28,
+          bottom: MediaQuery.of(context).viewInsets.bottom + 28,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+
+            // Title
+            const Text(
+              'How was your ride?',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1A1A2E),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Driver avatar placeholder
+            Obx(() {
+              final driverImage = widget.controller.profileImageUrl;
+              return Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.grey[200],
+                  image: driverImage.isNotEmpty
+                      ? DecorationImage(
+                          image: NetworkImage(driverImage),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
+                ),
+                child: driverImage.isEmpty
+                    ? Icon(
+                        Icons.person,
+                        size: 36,
+                        color: Colors.grey[400],
+                      )
+                    : null,
+              );
+            }),
+
+            const SizedBox(height: 10),
+
+            // Driver name
+            Obx(() {
+              final driverName = widget.controller.otherUserName.value;
+              return Text(
+                driverName.isNotEmpty ? driverName : 'Driver',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Color(0xFF1A1A2E),
+                ),
+              );
+            }),
+
+            const SizedBox(height: 16),
+
+            // Star Rating
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(5, (index) {
+                final starIndex = index + 1;
+                return GestureDetector(
+                  onTap: () => setState(() => _selectedStars = starIndex),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Icon(
+                      starIndex <= _selectedStars
+                          ? Icons.star_rounded
+                          : Icons.star_outline_rounded,
+                      size: 40,
+                      color: starIndex <= _selectedStars
+                          ? const Color(0xFFFFC107)
+                          : Colors.grey[350],
+                    ),
+                  ),
+                );
+              }),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Comment label + char count
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Write your comment',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF555555),
+                  ),
+                ),
+                Text(
+                  '$_charCount/$_maxChars',
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 10),
+
+            // Comment text field
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.grey[200]!),
+              ),
+              child: TextField(
+                controller: _commentController,
+                enabled: !_isSubmitting,
+                maxLines: 4,
+                maxLength: _maxChars,
+                decoration: InputDecoration(
+                  hintText: 'This ride was awesome!',
+                  hintStyle: TextStyle(color: Colors.grey[400], fontSize: 14),
+                  border: InputBorder.none,
+                  contentPadding: const EdgeInsets.all(14),
+                  counterText: '',
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Submit button
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [Color(0xFF00C6FF), Color(0xFF845EC2),Color(0xFF845EC2)],
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                  ),
+                  borderRadius: BorderRadius.circular(30),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0xFF845EC2).withOpacity(0.35),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: ElevatedButton(
+                  onPressed: _isSubmitting ? null : _submitReview,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.transparent,
+                    shadowColor: Colors.transparent,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: _isSubmitting
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                          ),
+                        )
+                      : const Text(
+                          'Submit Review',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.white,
+                            letterSpacing: 0.5,
+                          ),
+                        ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
