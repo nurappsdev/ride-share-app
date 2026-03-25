@@ -460,10 +460,12 @@ Widget _verificationCard(BuildContext context, ProviderRequestedRideModel ride) 
 
         /// Button
         CustomButtonCommon(title:  "View The Map", onpress: (){
-          Get.offAllNamed(
-            AppRoutes.driverTrackRidesScreen,
-            arguments: ride.jobId ?? '',
-          );
+          Get.toNamed(AppRoutes.trackDriversScreen, arguments: {'rideId': ride.jobId}, preventDuplicates: false);
+
+          // Get.offAllNamed(
+          //   AppRoutes.driverTrackRidesScreen,
+          //   arguments: ride.jobId ?? '',
+          // );
         },useGradient: true,),
       ],
     ),

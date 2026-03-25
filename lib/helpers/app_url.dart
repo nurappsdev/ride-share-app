@@ -6,10 +6,10 @@ class AppUrl {
   static const String baseUrl =
       'https://501wk9nr-8080.asse.devtunnels.ms/api/v1';
 
-  static const String socketUrl =
-      'https://501wk9nr-8080.asse.devtunnels.ms';
+  static const String socketUrl = 'https://501wk9nr-8080.asse.devtunnels.ms';
   static const String imageUploadUrl = '$baseUrl/upload';
-  static const String imageServeUrl = 'https://501wk9nr-8080.asse.devtunnels.ms/uploads';
+  static const String imageServeUrl =
+      'https://501wk9nr-8080.asse.devtunnels.ms/uploads';
 
   static String registerUser = '$baseUrl/auth/register';
   static String login = '$baseUrl/auth/login';
@@ -32,6 +32,8 @@ class AppUrl {
 
   static String getReviewUrl(String userId) => '/review/$userId';
 
+  static String getSingleUserUrl(String userId) => '/user/single/$userId';
+
   /// ===============>
   static String makePayment({required String id}) {
     return '$baseUrl/job/pay/$id';
@@ -41,11 +43,11 @@ class AppUrl {
   static String passengerOngoingRide = '$baseUrl/job/ongoing?limit=100000';
   static String notification = '$baseUrl/notification';
   static String report = '$baseUrl/report';
-  
+
   // Auth endpoints
   static String resetPassword = '$baseUrl/auth/reset-password';
   static String changePassword = '$baseUrl/auth/change-password';
-  
+
   // Settings endpoints
   static String privacyPolicy = '$baseUrl/setting/privacy-policy';
   static String termsAndConditions = '$baseUrl/setting/terms-conditions';

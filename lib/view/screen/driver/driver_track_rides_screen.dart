@@ -80,6 +80,7 @@ class _DriverTrackRidesScreenState extends State<DriverTrackRidesScreen> {
                     controller.isMapCreated.value = true;
                   },
                   markers: controller.markers,
+                  polylines: controller.polylines,
                   myLocationEnabled: true,
                   myLocationButtonEnabled: false,
                   zoomControlsEnabled: false,
@@ -465,98 +466,118 @@ class _DriverTrackRidesScreenState extends State<DriverTrackRidesScreen> {
       children: [
         // Chat Button with gradient
         Expanded(
-          child: Container(
-            height: 56.h,
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color(0xFF45C4D9),
-                  Color(0xFF6B7FEC),
-                  Color(0xFF5c58eb),
-                  Color(0xFFB565D8),
-                ],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
-              borderRadius: BorderRadius.circular(28.r),
-            ),
-            child: ElevatedButton(
-              onPressed: _showChatFeature,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28.r),
+          child: InkWell(
+            onTap: (){
+  Get.toNamed(
+    AppRoutes.driverChatingScreen,
+    arguments: {
+      'otherUserId': controller.otherUserId.value,
+      'driverName': controller.otherUserName.value,
+      'driverEmail': controller.otherUserEmail.value,
+      'driverPhone': controller.otherUserPhone.value,
+    },
+  );
+},
+            child: Container(
+              height: 56.h,
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF45C4D9),
+                    Color(0xFF6B7FEC),
+                    Color(0xFF5c58eb),
+                    Color(0xFFB565D8),
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
                 ),
+                borderRadius: BorderRadius.circular(28.r),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.chat_bubble_outline,
-                    color: Colors.white,
-                    size: 20.sp,
+              child: ElevatedButton(
+                onPressed: _showChatFeature,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(28.r),
                   ),
-                  SizedBox(width: 8.w),
-                  Text(
-                    'Chat',
-                    style: TextStyle(
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.chat_bubble_outline,
                       color: Colors.white,
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: "Outfit",
+                      size: 20.sp,
                     ),
-                  ),
-                ],
+                    SizedBox(width: 8.w),
+                    Text(
+                      'Chat',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16.sp,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: "Outfit",
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ),
         SizedBox(width: 12.w),
 
-        // Start Ride Button
+        // Start Ride / Picked Up / Review Button
         Expanded(
-          child: Container(
-            height: 56.h,
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(28.r),
-              border: Border.all(
-                color: const Color(0xFF8B5CF6),
-                width: 2.w,
-              ),
-            ),
-            child: ElevatedButton(
-              onPressed: _startRide,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.transparent,
-                shadowColor: Colors.transparent,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(28.r),
+          child: Obx(() {
+            // Only show button if actionState is not null
+            if (controller.actionState == null) {
+              return const SizedBox.shrink();
+            }
+
+            return Container(
+              height: 56.h,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(28.r),
+                border: Border.all(
+                  color: const Color(0xFF8B5CF6),
+                  width: 2.w,
                 ),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.check,
-                    color: const Color(0xFF8B5CF6),
-                    size: 16.sp,
+              child: ElevatedButton(
+                onPressed: _startRide,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(28.r),
                   ),
-                  SizedBox(width: 4.w),
-                  Text(
-                    'Start Ride',
-                    style: TextStyle(
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      controller.actionButtonIcon,
                       color: const Color(0xFF8B5CF6),
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w600,
-                      fontFamily: "Outfit",
+                      size: 16.sp,
                     ),
-                  ),
-                ],
+                    SizedBox(width: 4.w),
+                    Text(
+                      controller.actionButtonText,
+                      style: TextStyle(
+                        color: const Color(0xFF8B5CF6),
+                        fontSize: 12.sp,
+                        fontWeight: FontWeight.w600,
+                        fontFamily: "Outfit",
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
+            );
+          }),
         ),
         SizedBox(width: 12.w),
 

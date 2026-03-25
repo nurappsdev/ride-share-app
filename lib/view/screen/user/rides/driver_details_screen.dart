@@ -236,17 +236,17 @@ class DriverDetailsScreen extends StatelessWidget {
                                           ),
                                         ],
                                       ),
-                                      InkWell(
-                                        onTap: () {
-                                          Get.toNamed(AppRoutes.driverReviewScreen, preventDuplicates: false);
-                                        },
-                                        child: CustomText(
-                                          text: 'View All',
-                                          fontsize: 14,
-                                          fontWeight: FontWeight.w600,
-                                          color: const Color(0xFF7C3AED),
-                                        ),
-                                      ),
+                                      // InkWell(
+                                      //   onTap: () {
+                                      //     Get.toNamed(AppRoutes.driverReviewScreen, preventDuplicates: false);
+                                      //   },
+                                      //   child: CustomText(
+                                      //     text: 'View All',
+                                      //     fontsize: 14,
+                                      //     fontWeight: FontWeight.w600,
+                                      //     color: const Color(0xFF7C3AED),
+                                      //   ),
+                                      // ),
                                     ],
                                   ),
                                 );

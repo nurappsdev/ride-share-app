@@ -1,6 +1,8 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:split_ride/helpers/logger_util.dart';
+import 'package:split_ride/helpers/prefs_helper.dart';
 import 'package:split_ride/helpers/secured_storage.dart';
 import 'package:split_ride/utils/app_constant.dart';
 
@@ -48,12 +50,27 @@ class DriverTrackRidesController extends GetxController {
   // Map
   late GoogleMapController mapController;
   final RxSet<Marker> markers = <Marker>{}.obs;
+  final RxSet<Polyline> polylines = <Polyline>{}.obs;
   final RxBool isMapCreated = false.obs;
+
+  // User Role
+  final RxString userRole = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
+    _loadUserRole();
     // jobId will be set via setJobId method
+  }
+
+  /// Load user role from prefs
+  Future<void> _loadUserRole() async {
+    try {
+      userRole.value = await PrefsHelper.getString(AppConstants.role) ?? '';
+    } catch (e) {
+      LoggerUtils.error('Error loading user role: $e');
+      userRole.value = ''; // Default to empty if failed
+    }
   }
 
   void setJobId(String id) {
@@ -82,11 +99,20 @@ class DriverTrackRidesController extends GetxController {
 
       if (response.isSuccess && response.jsonResponse != null) {
         final responseData = response.jsonResponse!;
-        final data = responseData['data'];
-
+        // Handle both nested 'data' and flat response structures
+        Map<String, dynamic>? data = responseData['data'];
+        if (data == null && responseData['_id'] != null) {
+          // Flat structure - use response directly
+          data = responseData;
+        }
+        
         if (data != null) {
+          LoggerUtils.info('Parsed data status: ${data['status']}');
           _parseJobData(data);
           _updateMarkers();
+        } else {
+          LoggerUtils.error('Data is null in response');
+          Get.snackbar('Error', 'No job data found', snackPosition: SnackPosition.BOTTOM);
         }
       } else {
         final errorMessage = response.jsonResponse?['message'] ?? 'Failed to load job details';
@@ -163,6 +189,7 @@ class DriverTrackRidesController extends GetxController {
   /// Update map markers with from/to locations
   void _updateMarkers() {
     markers.clear();
+    polylines.clear();
 
     // Add pickup marker
     if (fromLat.value != 0.0 && fromLng.value != 0.0) {
@@ -181,6 +208,24 @@ class DriverTrackRidesController extends GetxController {
         position: LatLng(toLat.value, toLng.value),
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueRed),
         infoWindow: const InfoWindow(title: 'Dropoff Location'),
+      ));
+    }
+
+    // Add polyline between pickup and dropoff
+    if (fromLat.value != 0.0 && fromLng.value != 0.0 &&
+        toLat.value != 0.0 && toLng.value != 0.0) {
+      polylines.add(Polyline(
+        polylineId: const PolylineId('route'),
+        points: [
+          LatLng(fromLat.value, fromLng.value),
+          LatLng(toLat.value, toLng.value),
+        ],
+        color: const Color(0xFF7C3AED),
+        width: 5,
+        patterns: [
+          PatternItem.dash(20),
+          PatternItem.gap(10),
+        ],
       ));
     }
 
@@ -277,6 +322,56 @@ class DriverTrackRidesController extends GetxController {
       return '$hours hr $minutes mins';
     } else {
       return '$minutes mins';
+    }
+  }
+
+  /// Get action state based on user role and ride status (matches backend logic)
+  /// Returns: 'pickup', 'complete', 'review', or null
+  String? get actionState {
+    // Provider + accepted = Show "Picked Up"
+    if (userRole.value == 'provider' && status.value == 'accepted') {
+      return 'pickup';
+    }
+
+    // User + picked = Show "Complete"
+    if (userRole.value == 'user' && status.value == 'picked') {
+      return 'complete';
+    }
+
+    // Provider + completed = Show "Review"
+    if (userRole.value == 'provider' && status.value == 'completed') {
+      return 'review';
+    }
+
+    // Default: no action button
+    return null;
+  }
+
+  /// Get button text based on action state
+  String get actionButtonText {
+    switch (actionState) {
+      case 'pickup':
+        return 'Picked Up';
+      case 'complete':
+        return 'Complete';
+      case 'review':
+        return 'Review';
+      default:
+        return '';
+    }
+  }
+
+  /// Get button icon based on action state
+  IconData get actionButtonIcon {
+    switch (actionState) {
+      case 'pickup':
+        return Icons.check;
+      case 'complete':
+        return Icons.flag;
+      case 'review':
+        return Icons.rate_review;
+      default:
+        return Icons.check;
     }
   }
 }

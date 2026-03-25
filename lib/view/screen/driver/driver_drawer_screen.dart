@@ -8,6 +8,7 @@ import 'package:split_ride/controllers/driver_drawer_controller.dart';
 import '../../../controllers/passenger_drawer_controller.dart';
 import '../../../helpers/app_url.dart';
 import '../../../routes/app_routes.dart';
+import '../user/rides/my_ride_screen.dart';
 
 class DriverDrawerScreen extends StatefulWidget {
   const DriverDrawerScreen({super.key});
@@ -220,10 +221,11 @@ class _DriverDrawerScreenState extends State<DriverDrawerScreen> {
                 ),
                 InkWell(
                   onTap: () {
-                    Get.toNamed(
-                      AppRoutes.driverMyRideScreen,
-                      preventDuplicates: false,
-                    );
+                    // Get.toNamed(
+                    //   AppRoutes.driverMyRideScreen,
+                    //   preventDuplicates: false,
+                    // );
+                  Get.off(()=> const PassengerMyRidesScreen(), arguments: {'isProvider': true});
                   },
                   child: _menu(Icons.watch_later_outlined, "My Rides"),
                 ),
