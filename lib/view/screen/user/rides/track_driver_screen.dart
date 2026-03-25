@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
@@ -159,6 +160,7 @@ print("role role --- ${isProvider}");
                           child: Container(
                             width: 44.w,
                               height: 44.h,
+                              padding: EdgeInsets.all(8.r),
                               decoration: BoxDecoration(
                                 color: Colors.white,
                                 shape: BoxShape.circle,
@@ -169,10 +171,8 @@ print("role role --- ${isProvider}");
                                   ),
                                 ],
                               ),
-                              child: const Icon(
-                                Icons.notifications_outlined,
-                                color: Color(0xFF2D3748),
-                                size: 24,
+                              child: SvgPicture.asset(
+                                'assets/icons/NotificationIcon.svg',
                               ),
                             ),
                           ),
@@ -318,18 +318,19 @@ print("role role --- ${isProvider}");
                                     flex: 3,
                                     child: Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.start,
+                                          CrossAxisAlignment.start,
                                       children: [
                                         Container(
                                           width: 70.w,
                                           height: 70.h,
-                                          decoration: BoxDecoration(
+                                          // 1. The padding acts as your border width!
+                                          padding: EdgeInsets.all(3.w),
+                                          decoration: const BoxDecoration(
                                             shape: BoxShape.circle,
-                                            border: Border.all(
-                                              color: const Color(0xFF22D3EE),
-                                              width: 3.w,
-                                            ),
-                                            gradient: const LinearGradient(
+                                            // 2. The gradient goes on the OUTER container
+                                            gradient: LinearGradient(
+                                              begin: Alignment.topLeft,
+                                              end: Alignment.bottomRight,
                                               colors: [
                                                 Color(0xFF45C4D9),
                                                 Color(0xFF6B7FEC),
@@ -363,6 +364,7 @@ print("role role --- ${isProvider}");
                                               size: 11.sp,
                                               color: const Color(0xFF7C3AED),
                                             ),
+                                            // SvgPicture.asset('assets/icons/phone.svg'),
                                             SizedBox(width: 4.w),
                                             CustomText(
                                               text: otherUserEmail,
@@ -381,12 +383,17 @@ print("role role --- ${isProvider}");
                                     flex: 2,
                                     child: Column(
                                       crossAxisAlignment:
-                                      CrossAxisAlignment.end,
+                                          CrossAxisAlignment.end,
                                       children: [
-                                        Icon(
-                                          Icons.directions_car,
-                                          color: Colors.black87,
-                                          size: 40.sp,
+                                        // Icon(
+                                        //   Icons.directions_car,
+                                        //   color: Colors.black87,
+                                        //   size: 40.sp,
+                                        // ),
+                                        SvgPicture.asset(
+                                          'assets/icons/Car.svg',
+                                          height: 35.h,
+                                          width: 35.w,
                                         ),
                                         SizedBox(height: 4.h),
                                         Container(
@@ -573,7 +580,7 @@ print("role role --- ${isProvider}");
                                     ),
                                     child: Row(
                                       mainAxisAlignment:
-                                      MainAxisAlignment.center,
+                                          MainAxisAlignment.center,
                                       children: [
                                         Icon(
                                           Icons.message_outlined,
@@ -661,8 +668,12 @@ print("role role --- ${isProvider}");
                               SizedBox(width: 12.w),
                               GestureDetector(
                                 onTap: () async {
-                                  if (otherUserPhone.isNotEmpty && otherUserPhone != '--') {
-                                    final Uri launchUri = Uri(scheme: 'tel', path: otherUserPhone);
+                                  if (otherUserPhone.isNotEmpty &&
+                                      otherUserPhone != '--') {
+                                    final Uri launchUri = Uri(
+                                      scheme: 'tel',
+                                      path: otherUserPhone,
+                                    );
                                     if (await canLaunchUrl(launchUri)) {
                                       await launchUrl(launchUri);
                                     }
@@ -671,18 +682,20 @@ print("role role --- ${isProvider}");
                                 child: Container(
                                   width: 56.w,
                                   height: 56.h,
+                                  padding: EdgeInsets.all(16.r),
                                   decoration: BoxDecoration(
-                                    gradient: const LinearGradient(
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                      colors: [
-                                        Color(0xFF45C4D9),
-                                        Color(0xFF6B7FEC),
-                                        Color(0xFFB565D8),
-                                      ],
-                                    ),
+                                    // gradient: const LinearGradient(
+                                    //   begin: Alignment.topLeft,
+                                    //   end: Alignment.bottomRight,
+                                    //   colors: [
+                                    //     Color(0xFF45C4D9),
+                                    //     Color(0xFF6B7FEC),
+                                    //     Color(0xFFB565D8),
+                                    //   ],
+                                    // ),
                                     shape: BoxShape.circle,
-                                    boxShadow: [
+                                    color: Color(0xFFE6F3FF),
+                                    /*  boxShadow: [
                                       BoxShadow(
                                         color: const Color(
                                           0xFF3B82F6,
@@ -690,12 +703,15 @@ print("role role --- ${isProvider}");
                                         blurRadius: 12.r,
                                         offset: Offset(0, 4.h),
                                       ),
-                                    ],
+                                    ],*/
                                   ),
-                                  child: Icon(
-                                    Icons.phone,
-                                    color: Colors.white,
-                                    size: 24.sp,
+                                  // child: Icon(
+                                  //   Icons.phone,
+                                  //   color: Colors.white,
+                                  //   size: 24.sp,
+                                  // ),
+                                  child: SvgPicture.asset(
+                                    'assets/icons/phone.svg',
                                   ),
                                 ),
                               ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 
 class AddressCard extends StatelessWidget {
   const AddressCard({
@@ -32,19 +33,21 @@ class AddressCard extends StatelessWidget {
         children: [
           Column(
             children: [
-              Icon(
-                Icons.play_arrow_rounded,
-                size: 22.sp,
-                color: Colors.black87,
-              ),
+              // Icon(
+              //   Icons.play_arrow_rounded,
+              //   size: 22.sp,
+              //   color: Colors.black87,
+              // ),
+              SvgPicture.asset('assets/icons/startLocation.svg'),
               SizedBox(height: 4.h),
               DashedLine(height: 28.h, color: Colors.grey.shade400),
               SizedBox(height: 4.h),
-              Icon(
-                Icons.location_on_outlined,
-                size: 22.sp,
-                color: Colors.black87,
-              ),
+              // Icon(
+              //   Icons.location_on_outlined,
+              //   size: 22.sp,
+              //   color: Colors.black87,
+              // ),
+              SvgPicture.asset('assets/icons/stopLocation.svg'),
             ],
           ),
           SizedBox(width: 12.w),
