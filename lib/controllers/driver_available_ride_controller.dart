@@ -96,6 +96,11 @@ class DriverAvailableRidesController extends GetxController {
     fetchRequestedRides(isRefresh: false);
   }
 
+  /// Refresh the ride list (pull-to-refresh)
+  Future<void> refresh() async {
+    await fetchRequestedRides(isRefresh: true);
+  }
+
 
 // ===========================================================================
   // ACCEPT & DECLINE RIDE FUNCTIONS

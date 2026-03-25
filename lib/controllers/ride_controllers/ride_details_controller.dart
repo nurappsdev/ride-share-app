@@ -51,11 +51,12 @@ class RideDetailsController extends GetxController {
       if (response.isSuccess && response.jsonResponse != null) {
 
         final dynamic data = response.jsonResponse!['data'];
-
+        LoggerUtils.info("Ride details fetched successfully! ${data}");
         // Parse the JSON into your RideData model
         if (data != null) {
           rideDetails = RideData.fromJson(data);
           LoggerUtils.info("Ride details fetched successfully!");
+
         }
 
       } else {
