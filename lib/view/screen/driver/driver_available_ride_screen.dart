@@ -199,11 +199,30 @@ class DriverAvailableRideScreen extends StatelessWidget {
                   }
 
                   if (controller.requestedRides.isEmpty) {
-                    return Center(
-                      child: Text(
-                        'No requested rides available.',
-                        style: TextStyle(fontSize: 16.sp, color: Colors.grey),
-                      ),
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Center(
+                          child: Text(
+                            'No requested rides available.',
+                            style: TextStyle(fontSize: 16.sp, color: Colors.grey),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            controller.refresh();
+                          },
+                          child: Text(
+                            "Retry",
+                            style: TextStyle(
+                              fontSize: 14.sp,
+                              fontFamily: "Outfit",
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF6B7FEC), // তোমার primary color
+                            ),
+                          ),
+                        )                      ],
                     );
                   }
 

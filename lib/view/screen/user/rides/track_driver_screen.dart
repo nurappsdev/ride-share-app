@@ -266,13 +266,21 @@ print("role role --- ${isProvider}");
                       ),
                     ],
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.all(20.w),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Arrival Info Card
-                        Row(
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      await controller.fetchRideDetails();
+                    },
+                    color: const Color(0xFF7C3AED),
+                    backgroundColor: Colors.white,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Padding(
+                        padding: EdgeInsets.all(20.w),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Arrival Info Card
+                            Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
@@ -752,7 +760,9 @@ print("role role --- ${isProvider}");
                     ),
                   ),
                 ),
-              ],
+              ),
+            ),
+          ],
             );
           }),
         ),
