@@ -1,13 +1,18 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:split_ride/helpers/helpers.dart';
 import 'package:split_ride/helpers/logger_util.dart';
 import 'package:split_ride/helpers/secured_storage.dart';
 import 'package:split_ride/utils/app_constant.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 import '../helpers/app_url.dart';
 import '../services/network/network_caller.dart';
+import '../services/socket_services.dart';
 
 class TrackDriverScreenController extends GetxController {
   final RxBool isLoading = false.obs;
@@ -58,8 +63,14 @@ class TrackDriverScreenController extends GetxController {
   // User Role
   final RxString userRole = 'provider'.obs;
 
+  // Real-time tracking
+  Timer? _pollingTimer;
+
   // Ride Status getter (alias for status)
   RxString get rideStatus => status;
+  
+  // User Role getter
+  bool get isProvider => userRole.value == 'provider';
 
   @override
   void onInit() {
@@ -73,10 +84,31 @@ class TrackDriverScreenController extends GetxController {
     }
   }
 
+  @override
+  void onReady() {
+    super.onReady();
+    // Start listening to socket events for real-time tracking
+    _setupSocketListeners();
+    
+    // Start polling as fallback (for passengers only)
+    if (!isProvider) {
+      // Wait a bit for socket to connect, then start polling
+      Future.delayed(const Duration(seconds: 2), () {
+        startLocationPolling();
+      });
+    }
+  }
+
+  @override
+  void onClose() {
+    _pollingTimer?.cancel();
+    super.onClose();
+  }
+
   Future<void> _loadUserRole() async {
     try {
       final savedRole = await PrefsHelper.getString(AppConstants.role);
-      if (savedRole != null && savedRole.isNotEmpty) {
+      if (savedRole.isNotEmpty) {
         userRole.value = savedRole;
       } else {
         userRole.value = 'provider'; // Fallback default
@@ -217,27 +249,306 @@ class TrackDriverScreenController extends GetxController {
       ));
     }
 
-    // Add polyline between pickup and dropoff
-    if (fromLat.value != 0.0 && fromLng.value != 0.0 &&
-        toLat.value != 0.0 && toLng.value != 0.0) {
-      polylines.add(Polyline(
-        polylineId: const PolylineId('route'),
-        points: [
-          LatLng(fromLat.value, fromLng.value),
-          LatLng(toLat.value, toLng.value),
-        ],
-        color: const Color(0xFF7C3AED),
-        width: 5,
-        patterns: [
-          PatternItem.dash(20),
-          PatternItem.gap(10),
-        ],
+    // Add driver marker (if passenger viewing)
+    if (!isProvider && fromLat.value != 0.0 && fromLng.value != 0.0) {
+      markers.add(Marker(
+        markerId: const MarkerId('driver'),
+        position: LatLng(fromLat.value, fromLng.value),
+        icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+        infoWindow: InfoWindow(title: otherUserName.value),
       ));
     }
 
     // Animate camera to show both markers
     if (markers.isNotEmpty) {
       _animateCameraToFitMarkers();
+    }
+    
+    // Draw route polyline after markers are set
+    if (fromLat.value != 0.0 && fromLng.value != 0.0 &&
+        toLat.value != 0.0 && toLng.value != 0.0) {
+      _drawRoutePolyline();
+    }
+  }
+
+  /// Draw route polyline using Google Directions API
+  Future<void> _drawRoutePolyline() async {
+    try {
+      if (fromLat.value == 0.0 || fromLng.value == 0.0 ||
+          toLat.value == 0.0 || toLng.value == 0.0) {
+        LoggerUtils.error('❌ Cannot draw route: Missing coordinates (From: ${fromLat.value},${fromLng.value} To: ${toLat.value},${toLng.value})');
+        return;
+      }
+
+      // Google Directions API expects: origin=lat,lng
+      final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/directions/json'
+        '?origin=${fromLat.value},${fromLng.value}'
+        '&destination=${toLat.value},${toLng.value}'
+        '&mode=driving'
+        '&key=${AppConstants.googleMapKey}',
+      );
+
+      LoggerUtils.info('🗺️ Fetching road-wise route from: ${fromLat.value},${fromLng.value} to ${toLat.value},${toLng.value}');
+
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        
+        if (data['status'] == 'OK' && data['routes'].isNotEmpty) {
+          final points = data['routes'][0]['overview_polyline']['points'];
+          final decodedPoints = _decodePolyline(points);
+          
+          LoggerUtils.info('✅ Successfully decoded ${decodedPoints.length} road-wise points');
+
+          final routePolyline = Polyline(
+            polylineId: const PolylineId('route_polyline'),
+            points: decodedPoints,
+            color: const Color(0xFF7C3AED), // Using theme color
+            width: 5,
+            jointType: JointType.round,
+            startCap: Cap.roundCap,
+            endCap: Cap.roundCap,
+          );
+          
+          polylines.assign(routePolyline);
+          polylines.refresh();
+          
+          // Update distance from API
+          if (data['routes'][0]['legs'] != null && data['routes'][0]['legs'].isNotEmpty) {
+            final leg = data['routes'][0]['legs'][0];
+            final distanceInMeters = leg['distance']['value'];
+            distance.value = (distanceInMeters / 1000).toDouble();
+            LoggerUtils.info('📏 Updated road distance: ${distance.value} km');
+          }
+        } else {
+          LoggerUtils.error('❌ Google Directions API Error: ${data['status']} - ${data['error_message'] ?? 'No message'}');
+          _addStraightLinePolyline();
+        }
+      } else {
+        LoggerUtils.error('❌ Directions API Request Failed with status: ${response.statusCode}');
+        _addStraightLinePolyline();
+      }
+    } catch (e) {
+      LoggerUtils.error('❌ Exception in _drawRoutePolyline: $e');
+      _addStraightLinePolyline();
+    }
+  }
+
+  /// Fallback: Add straight line polyline if Directions API fails
+  void _addStraightLinePolyline() {
+    LoggerUtils.warning('⚠️ Falling back to straight-line polyline');
+    final directPolyline = Polyline(
+      polylineId: const PolylineId('direct_polyline'),
+      points: [
+        LatLng(fromLat.value, fromLng.value),
+        LatLng(toLat.value, toLng.value),
+      ],
+      color: const Color(0xFF7C3AED).withOpacity(0.5),
+      width: 4,
+      patterns: [PatternItem.dash(20), PatternItem.gap(10)], // Dash to indicate it's not the real route
+    );
+    polylines.assign(directPolyline);
+    polylines.refresh();
+  }
+
+  /// Decode encoded polyline
+  List<LatLng> _decodePolyline(String encoded) {
+    List<LatLng> points = [];
+    int index = 0, len = encoded.length;
+    int lat = 0, lng = 0;
+
+    while (index < len) {
+      int b, shift = 0, result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lng += dlng;
+
+      final latLng = LatLng(lat / 1E5, lng / 1E5);
+      points.add(latLng);
+      
+      // Log first few points for debugging
+      if (points.length <= 3) {
+        LoggerUtils.info('Point ${points.length}: $latLng');
+      }
+    }
+
+    LoggerUtils.info('Total decoded points: ${points.length}');
+    return points;
+  }
+
+  /// Setup socket listeners for real-time tracking
+  void _setupSocketListeners() {
+    // Only passengers need to track driver
+    if (isProvider) return;
+
+    try {
+      // Listen for driver location updates
+      SocketClient.to.on('driver-location-update', (data) {
+        LoggerUtils.info('Driver location update: $data');
+        _updateDriverLocation(data);
+      });
+    } catch (e) {
+      LoggerUtils.error('Error setting up socket listeners: $e');
+    }
+  }
+
+  /// Update driver location from socket data
+  void _updateDriverLocation(Map<String, dynamic> data) {
+    try {
+      final rideIdFromData = data['rideId'] ?? '';
+      if (rideIdFromData != rideId.value) return;
+
+      final location = data['location'];
+      if (location == null) return;
+
+      final lat = location['lat'] ?? location['latitude'];
+      final lng = location['lng'] ?? location['longitude'];
+
+      if (lat != null && lng != null) {
+        final newLatLng = LatLng(lat.toDouble(), lng.toDouble());
+
+        // Update driver marker position
+        _updateDriverMarker(newLatLng);
+
+        // Update route polyline with new driver position
+        _updateRoutePolyline(newLatLng);
+      }
+    } catch (e) {
+      LoggerUtils.error('Error updating driver location: $e');
+    }
+  }
+
+  /// Update driver marker position
+  void _updateDriverMarker(LatLng newPosition) {
+    // Remove old driver marker
+    markers.removeWhere((marker) => marker.markerId.value == 'driver');
+
+    // Add new driver marker
+    markers.add(Marker(
+      markerId: const MarkerId('driver'),
+      position: newPosition,
+      icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueBlue),
+      infoWindow: InfoWindow(title: otherUserName.value),
+    ));
+
+    // Animate camera to driver
+    mapController.animateCamera(
+      CameraUpdate.newLatLng(newPosition),
+    );
+  }
+
+  /// Update route polyline with new driver position
+  Future<void> _updateRoutePolyline(LatLng driverPosition) async {
+    try {
+      // NOTE: User requested polyline from fromLocation to toLocation.
+      // If we want to show driver's progress, we can use driverPosition.
+      // But for now, ensuring the base route is visible.
+      if (fromLat.value == 0.0 || fromLng.value == 0.0 ||
+          toLat.value == 0.0 || toLng.value == 0.0) return;
+
+      final url = Uri.parse(
+        'https://maps.googleapis.com/maps/api/directions/json'
+        '?origin=${fromLat.value},${fromLng.value}'
+        '&destination=${toLat.value},${toLng.value}'
+        '&mode=driving'
+        '&key=${AppConstants.googleMapKey}',
+      );
+
+      final response = await http.get(url);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+
+        if (data['status'] == 'OK' && data['routes'].isNotEmpty) {
+          final points = data['routes'][0]['overview_polyline']['points'];
+          final decodedPoints = _decodePolyline(points);
+
+          final newPolyline = Polyline(
+            polylineId: const PolylineId('route'),
+            points: decodedPoints,
+            color: const Color(0xFF4285F4),
+            width: 6,
+          );
+          
+          polylines.assign(newPolyline);
+
+          // Update distance (optional, might want to keep original ride distance)
+          // final distanceInMeters = data['routes'][0]['legs'][0]['distance']['value'];
+          // distance.value = (distanceInMeters / 1000).toDouble();
+        }
+      }
+    } catch (e) {
+      LoggerUtils.error('Error updating route polyline: $e');
+    }
+  }
+
+  /// Poll driver location (fallback if socket not working)
+  Future<void> _pollDriverLocation() async {
+    if (rideId.value.isEmpty || isProvider) return;
+
+    try {
+      final String token = await SecureStorageService().read(AppConstants.accessToken) ?? '';
+
+      final response = await NetworkCaller().getRequest(
+        '${AppUrl.baseUrl}/job/${rideId.value}/driver-location',
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      if (response.isSuccess && response.jsonResponse != null) {
+        final data = response.jsonResponse!['data'];
+        if (data != null) {
+          _updateDriverLocation(data);
+        }
+      }
+    } catch (e) {
+      LoggerUtils.error('Error polling driver location: $e');
+    }
+  }
+
+  /// Start polling for driver location
+  void startLocationPolling() {
+    if (isProvider) return;
+    
+    _pollingTimer = Timer.periodic(const Duration(seconds: 5), (_) {
+      _pollDriverLocation();
+    });
+  }
+
+  /// Stop polling for driver location
+  void stopLocationPolling() {
+    _pollingTimer?.cancel();
+    _pollingTimer = null;
+  }
+
+  /// Center map on user's current location
+  Future<void> centerOnCurrentUserLocation() async {
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      final userLatLng = LatLng(position.latitude, position.longitude);
+      
+      mapController.animateCamera(
+        CameraUpdate.newLatLngZoom(userLatLng, 15),
+      );
+    } catch (e) {
+      LoggerUtils.error('Error getting current location: $e');
     }
   }
 
@@ -371,10 +682,11 @@ class TrackDriverScreenController extends GetxController {
   }
 
   /// Mark ride as completed
-  Future<void> markAsCompleted() async {
+  /// Returns true if successful, false otherwise
+  Future<bool> markAsCompleted() async {
     if (rideId.value.isEmpty) {
       LoggerUtils.error('Ride ID is empty');
-      return;
+      return false;
     }
 
     isLoading.value = true;
@@ -400,6 +712,7 @@ class TrackDriverScreenController extends GetxController {
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
+        return true;
       } else {
         final errorMessage = response.jsonResponse?['message'] ?? 'Failed to complete ride';
         LoggerUtils.error('Failed to complete ride: $errorMessage');
@@ -410,6 +723,7 @@ class TrackDriverScreenController extends GetxController {
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
+        return false;
       }
     } catch (e) {
       LoggerUtils.error('Error marking completed: $e');
@@ -420,13 +734,15 @@ class TrackDriverScreenController extends GetxController {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
+      return false;
     } finally {
       isLoading.value = false;
     }
   }
 
   /// Submit review for a ride
-  Future<void> submitReview({
+  /// Returns true if successful, false otherwise
+  Future<bool> submitReview({
     required String userId,
     required int rating,
     required String comment,
@@ -440,7 +756,7 @@ class TrackDriverScreenController extends GetxController {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
-      return;
+      return false;
     }
 
     isLoading.value = true;
@@ -451,6 +767,7 @@ class TrackDriverScreenController extends GetxController {
       final response = await NetworkCaller().postRequest(
         '${AppUrl.baseUrl}/review',
         body: {
+          'rideId': rideId.value,
           'userId': userId,
           'rating': rating,
           'comment': comment,
@@ -468,6 +785,7 @@ class TrackDriverScreenController extends GetxController {
           backgroundColor: Colors.green,
           colorText: Colors.white,
         );
+        return true;
       } else {
         final errorMessage = response.jsonResponse?['message'] ?? 'Failed to submit review';
         LoggerUtils.error('Failed to submit review: $errorMessage');
@@ -478,6 +796,7 @@ class TrackDriverScreenController extends GetxController {
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
+        return false;
       }
     } catch (e) {
       LoggerUtils.error('Error submitting review: $e');
@@ -488,6 +807,7 @@ class TrackDriverScreenController extends GetxController {
         backgroundColor: Colors.red,
         colorText: Colors.white,
       );
+      return false;
     } finally {
       isLoading.value = false;
     }

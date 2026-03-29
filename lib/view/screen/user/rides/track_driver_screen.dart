@@ -63,13 +63,6 @@ class _TrackDriverScreenState extends State<TrackDriverScreen> {
 
     return DateFormat('hh:mm a').format(localTime); // 08:30 PM
   }
-  String _estimateArrivalTime(double? distanceInKm) {
-    if (distanceInKm == null || distanceInKm <= 0) return '--:--';
-    double timeInHours = distanceInKm / 30.0;
-    int timeInMinutes = (timeInHours * 60).round();
-    DateTime arrivalTime = DateTime.now().add(Duration(minutes: timeInMinutes));
-    return DateFormat('hh:mm a').format(arrivalTime);
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -189,30 +182,36 @@ print("role role --- ${isProvider}");
               Positioned(
                 top: 300.h,
                 right: 20.w,
-                child: Container(
-                  width: 48.w,
-                  height: 48.h,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF45C4D9),
-                        Color(0xFF6B7FEC),
-                        Color(0xFFB565D8),
+                child: GestureDetector(
+                  onTap: () {
+                    // Center map on current location
+                    controller.centerOnCurrentUserLocation();
+                  },
+                  child: Container(
+                    width: 48.w,
+                    height: 48.h,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          Color(0xFF45C4D9),
+                          Color(0xFF6B7FEC),
+                          Color(0xFFB565D8),
+                        ],
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF6B7FEC).withOpacity(0.3),
+                          blurRadius: 15,
+                          offset: const Offset(0, 4),
+                        ),
                       ],
                     ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF6B7FEC).withOpacity(0.3),
-                        blurRadius: 15,
-                        offset: const Offset(0, 4),
+                    child: const Icon(
+                      Icons.my_location,
+                        color: Colors.white,
+                        size: 24,
                       ),
-                    ],
-                  ),
-                  child: const Icon(
-                    Icons.my_location,
-                      color: Colors.white,
-                      size: 24,
                     ),
                   ),
                 ),
@@ -220,28 +219,43 @@ print("role role --- ${isProvider}");
               Positioned(
                 top: 380.h,
                 right: 20.w,
-                child: Container(
-                  width: 56.w,
-                  height: 56.h,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)],
-                    ),
-                    shape: BoxShape.circle,
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0xFF7C3AED).withOpacity(0.4),
-                        blurRadius: 12.r,
-                        offset: Offset(0, 4.h),
+                child: GestureDetector(
+                  onTap: () async {
+                    // Open navigation in Google Maps
+                    final lat = controller.toLat.value;
+                    final lng = controller.toLng.value;
+                    if (lat != 0.0 && lng != 0.0) {
+                      final Uri gmmUri = Uri.parse(
+                        'https://www.google.com/maps/dir/?api=1&destination=$lat,$lng&travelmode=driving',
+                      );
+                      if (await canLaunchUrl(gmmUri)) {
+                        await launchUrl(gmmUri, mode: LaunchMode.externalApplication);
+                      }
+                    }
+                  },
+                  child: Container(
+                    width: 56.w,
+                    height: 56.h,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF3B82F6), Color(0xFF7C3AED)],
                       ),
-                    ],
-                  ),
-                  child: Icon(
-                    Icons.navigation,
-                    color: Colors.white,
-                    size: 24.sp,
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF7C3AED).withOpacity(0.4),
+                          blurRadius: 12.r,
+                          offset: Offset(0, 4.h),
+                        ),
+                      ],
+                    ),
+                    child: Icon(
+                      Icons.navigation,
+                      color: Colors.white,
+                      size: 24.sp,
+                    ),
                   ),
                 ),
               ),
@@ -266,13 +280,21 @@ print("role role --- ${isProvider}");
                       ),
                     ],
                   ),
-                  child: Padding(
-                    padding: EdgeInsets.all(20.w),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        // Arrival Info Card
-                        Row(
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      await controller.fetchRideDetails();
+                    },
+                    color: const Color(0xFF7C3AED),
+                    backgroundColor: Colors.white,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Padding(
+                        padding: EdgeInsets.all(20.w),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            // Arrival Info Card
+                            Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Row(
@@ -752,7 +774,9 @@ print("role role --- ${isProvider}");
                     ),
                   ),
                 ),
-              ],
+              ),
+            ),
+          ],
             );
           }),
         ),
@@ -868,9 +892,21 @@ class FareBreakdownDialog extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: isLoading
                       ? null
-                      : () {
-                          Navigator.pop(context);
-                          controller.markAsCompleted();
+                      : () async {
+                          final success = await controller.markAsCompleted();
+                          if (success && context.mounted) {
+                            Navigator.pop(context); // Close fare breakdown dialog
+                            // Show review bottom sheet after successful completion
+                            showModalBottomSheet(
+                              context: context,
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                              builder: (context) => RideReviewBottomSheet(
+                                controller: controller,
+                                otherUserId: controller.otherUserId.value,
+                              ),
+                            );
+                          }
                         },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.transparent,
@@ -978,14 +1014,21 @@ class _RideReviewBottomSheetState extends State<RideReviewBottomSheet> {
       _isSubmitting = true;
     });
 
-    await widget.controller.submitReview(
+    final success = await widget.controller.submitReview(
       userId: widget.otherUserId,
       rating: _selectedStars,
       comment: _commentController.text.trim(),
     );
 
-    if (mounted) {
-      Navigator.pop(context);
+    if (success && mounted) {
+      Navigator.pop(context); // Close bottom sheet
+      // Navigate based on user role
+      final isProvider = widget.controller.userRole.value == 'provider';
+      if (isProvider) {
+        Get.offAllNamed(AppRoutes.driverAvailableScreen);
+      } else {
+        Get.offAllNamed(AppRoutes.allBottomBar);
+      }
     }
 
     setState(() {
