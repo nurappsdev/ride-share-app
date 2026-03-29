@@ -71,6 +71,7 @@ dependencies:
   permission_handler: ^11.3.0
   #for the places Suggestion :
   google_places_flutter: ^2.1.1
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:
