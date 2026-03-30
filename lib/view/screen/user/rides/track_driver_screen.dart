@@ -1051,7 +1051,8 @@ class _RideReviewBottomSheetState extends State<RideReviewBottomSheet> {
           ),
         ],
       ),
-      child: Padding(
+      child: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         padding: EdgeInsets.only(
           left: 24,
           right: 24,
