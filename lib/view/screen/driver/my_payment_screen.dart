@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 import 'package:split_ride/routes/app_routes.dart';
 import 'package:split_ride/utils/app_colors.dart';
@@ -150,9 +151,30 @@ class _MyPaymentScreenState extends State<MyPaymentScreen> {
           ),
         ),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () => Get.toNamed(AppRoutes.notificationScreen),
+          InkWell(
+            onTap: () => Get.toNamed(AppRoutes.notificationScreen),
+            child: Container(
+              width: 44.w,
+              height: 44.h,
+              padding: EdgeInsets.all(8.r),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(30.r),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.06),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              // child: const Icon(
+              //   Icons.notifications_outlined,
+              //   color: Color(0xFF2D3748),
+              //   size: 24,
+              // ),
+              child: SvgPicture.asset('assets/icons/NotificationIcon.svg',),
+            ),
           ),
         ],
       ),
