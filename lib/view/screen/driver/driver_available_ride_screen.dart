@@ -115,9 +115,10 @@ class DriverAvailableRideScreen extends StatelessWidget {
                       child: Container(
                         width: 44.w,
                         height: 44.h,
+                        padding: EdgeInsets.all(8.r),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(34.r),
+                          borderRadius: BorderRadius.circular(30.r),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.06),
@@ -126,11 +127,12 @@ class DriverAvailableRideScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        child: Icon(
-                          Icons.notifications_outlined,
-                          color: const Color(0xFF2D3748),
-                          size: 24.r,
-                        ),
+                        // child: const Icon(
+                        //   Icons.notifications_outlined,
+                        //   color: Color(0xFF2D3748),
+                        //   size: 24,
+                        // ),
+                        child: SvgPicture.asset('assets/icons/NotificationIcon.svg'),
                       ),
                     ),
                   ],
